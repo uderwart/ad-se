@@ -81,8 +81,6 @@ html, body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 17px;  /* Größere Basis für bessere Lesbarkeit */
-  line-height: 1.5;
 }
 
 body {
@@ -194,7 +192,7 @@ body {
 h1 {
   font-family: 'EB Garamond', serif;
   font-weight: 500;
-  font-size: 2.1rem;
+  font-size: 1.9rem;
   color: var(--ink);
   letter-spacing: -0.01em;
   margin-bottom: 4px;
@@ -202,7 +200,7 @@ h1 {
 h2 {
   font-family: 'EB Garamond', serif;
   font-weight: 500;
-  font-size: 1.45rem;
+  font-size: 1.3rem;
   color: var(--ink);
   margin-bottom: 10px;
   letter-spacing: -0.005em;
@@ -210,7 +208,7 @@ h2 {
 h3 {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--muted);
@@ -226,7 +224,7 @@ h3 {
 }
 
 .muted-note {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   color: var(--muted);
   line-height: 1.55;
 }
@@ -236,9 +234,9 @@ h3 {
   padding: 4px 2px 20px;
 }
 .greeting-sub {
-  font-size: 0.98rem;
+  font-size: 0.86rem;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* Identitäts-Satz */
@@ -253,7 +251,7 @@ h3 {
 }
 .identity-card:active { transform: scale(0.99); }
 .identity-label {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--accent-deep);
   text-transform: uppercase;
@@ -262,7 +260,7 @@ h3 {
 }
 .identity-text {
   font-family: 'EB Garamond', serif;
-  font-size: 1.18rem;
+  font-size: 1.05rem;
   font-style: italic;
   color: var(--ink);
   line-height: 1.4;
@@ -271,7 +269,7 @@ h3 {
   font-style: normal;
   color: var(--muted);
   font-family: 'Inter', sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 /* Partner-Karte */
@@ -283,7 +281,7 @@ h3 {
   padding: 14px 18px;
   margin-bottom: 16px;
   font-family: 'EB Garamond', serif;
-  font-size: 1.18rem;
+  font-size: 1.05rem;
   font-style: italic;
   color: var(--ink);
   line-height: 1.4;
@@ -299,7 +297,7 @@ h3 {
    ===================================================== */
 .matrix-card h2 { margin-bottom: 6px; }
 .matrix-sub {
-  font-size: 0.98rem;
+  font-size: 0.85rem;
   color: var(--muted);
   line-height: 1.5;
   margin-bottom: 14px;
@@ -310,13 +308,13 @@ h3 {
   margin-bottom: 14px;
 }
 .chip {
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 18px;
   border: 1.5px solid var(--border);
   background: var(--card);
   color: var(--muted);
   font-family: 'Inter', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -346,7 +344,7 @@ h3 {
 .fm-quadrant[data-q="ur"] { background: var(--q-ur-bg); }
 .fm-quadrant[data-q="ar"] { background: var(--q-ar-bg); }
 .fm-q-title {
-  font-size: 0.74rem;
+  font-size: 0.66rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 8px;
@@ -363,9 +361,9 @@ h3 {
   justify-content: center;
 }
 .fm-word {
-  padding: 5px 10px;
+  padding: 4px 9px;
   border-radius: 14px;
-  font-size: 0.86rem;
+  font-size: 0.76rem;
   font-weight: 400;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
@@ -373,7 +371,7 @@ h3 {
   line-height: 1.2;
   border: 1.5px solid transparent;
 }
-.fm-word.gfk { font-size: 0.8rem; }
+.fm-word.gfk { font-size: 0.7rem; }
 .fm-word.selected {
   font-weight: 600;
   transform: scale(1.05);
@@ -387,7 +385,7 @@ h3 {
 .fm-axis-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--ink);
   margin-top: 6px;
   padding: 0 4px;
@@ -396,7 +394,7 @@ h3 {
 .fm-axis-sub {
   display: flex;
   justify-content: space-between;
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   color: var(--muted);
   margin-top: 2px;
   padding: 0 4px;
@@ -412,7 +410,7 @@ h3 {
 }
 .fm-selection.visible { display: block; }
 .fm-selection-label {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: var(--muted);
   margin-bottom: 6px;
 }
@@ -426,16 +424,16 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 14px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: white;
 }
 .fm-tag .remove {
   cursor: pointer;
   opacity: 0.7;
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin-left: 2px;
 }
 .fm-context {
@@ -444,7 +442,7 @@ h3 {
   border: 1.5px solid var(--border);
   border-radius: 10px;
   font-family: 'Inter', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   resize: none;
   background: var(--card);
   color: var(--ink);
@@ -462,21 +460,21 @@ h3 {
 .fm-needs.visible { display: block; }
 .fm-needs-title {
   font-family: 'EB Garamond', serif;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   color: var(--accent-deep);
   margin-bottom: 6px;
 }
 .fm-needs-sub {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   color: var(--muted);
   margin-bottom: 12px;
   line-height: 1.4;
 }
 .fm-need-chip {
   display: inline-block;
-  padding: 6px 13px;
+  padding: 5px 11px;
   border-radius: 14px;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   cursor: pointer;
   border: 1.5px solid var(--accent);
   background: transparent;
@@ -509,13 +507,13 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 20px;
+  padding: 10px 18px;
   border-radius: 12px;
   border: none;
   background: var(--accent);
   color: white;
   font-family: 'Inter', sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -531,7 +529,7 @@ h3 {
   color: var(--accent-deep);
 }
 .btn.full { width: 100%; }
-.btn.small { padding: 8px 16px; font-size: 0.92rem; }
+.btn.small { padding: 7px 14px; font-size: 0.82rem; }
 
 /* Schnell-Eintrag Buttons */
 .quick-btn {
@@ -554,12 +552,12 @@ h3 {
   background: var(--card);
 }
 .qb-icon {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: var(--accent);
   line-height: 1;
 }
 .qb-label {
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: var(--ink);
 }
@@ -569,11 +567,11 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: 16px;
   background: var(--accent-soft);
   color: var(--accent-deep);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s;
@@ -588,24 +586,24 @@ h3 {
   opacity: 0.7;
 }
 .today-chip .chip-check {
-  font-size: 1rem;
+  font-size: 0.9rem;
   opacity: 0.7;
 }
 .today-chip .chip-delete {
   margin-left: 4px;
   opacity: 0.5;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 .today-chip .chip-delete:hover { opacity: 1; }
 
 .today-suggestion {
   display: inline-block;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 14px;
   background: transparent;
   border: 1px dashed var(--border);
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -649,7 +647,7 @@ h3 {
   gap: 6px;
 }
 .body-col-label {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -881,7 +879,7 @@ h3 {
 }
 .weekly-label {
   font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -890,7 +888,7 @@ h3 {
 }
 .weekly-title {
   font-family: 'EB Garamond', serif;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 500;
   line-height: 1.3;
   margin-bottom: 4px;
@@ -898,19 +896,19 @@ h3 {
 .weekly-sub {
   font-family: 'EB Garamond', serif;
   font-style: italic;
-  font-size: 1.08rem;
+  font-size: 0.95rem;
   opacity: 0.9;
   margin-bottom: 14px;
   line-height: 1.4;
 }
 .weekly-btn {
-  padding: 11px 24px;
+  padding: 10px 22px;
   border-radius: 22px;
   border: 1.5px solid rgba(255,255,255,0.7);
   background: rgba(255,255,255,0.15);
   color: white;
   font-family: 'Inter', sans-serif;
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -926,7 +924,7 @@ h3 {
   box-shadow: var(--shadow);
 }
 .weekly-progress-chapter {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--accent-deep);
   text-transform: uppercase;
@@ -946,7 +944,7 @@ h3 {
   transition: width 0.3s;
 }
 .weekly-progress-q {
-  font-size: 0.85rem;
+  font-size: 0.74rem;
   color: var(--muted);
 }
 
@@ -961,7 +959,7 @@ h3 {
 }
 .weekly-finish-label {
   font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -971,13 +969,13 @@ h3 {
 .weekly-finish-quote {
   font-family: 'EB Garamond', serif;
   font-style: italic;
-  font-size: 1.45rem;
+  font-size: 1.3rem;
   line-height: 1.55;
   margin-bottom: 14px;
 }
 .weekly-finish-source {
   font-family: 'Inter', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   opacity: 0.85;
   font-weight: 500;
 }
@@ -990,7 +988,7 @@ h3 {
   border-left: 3px solid var(--accent);
 }
 .weekly-data-title {
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -998,14 +996,14 @@ h3 {
   margin-bottom: 6px;
 }
 .weekly-data-item {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--ink);
   line-height: 1.5;
   padding: 3px 0;
 }
 .weekly-data-item .data-time {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   margin-right: 6px;
 }
 
@@ -1022,16 +1020,16 @@ h3 {
 .archive-entry-date {
   font-family: 'EB Garamond', serif;
   font-style: italic;
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--accent-deep);
   margin-bottom: 3px;
 }
 .archive-entry-meta {
-  font-size: 0.85rem;
+  font-size: 0.76rem;
   color: var(--muted);
 }
 .archive-entry-preview {
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   color: var(--ink);
   margin-top: 4px;
   line-height: 1.45;
@@ -1053,7 +1051,7 @@ h3 {
 }
 #bottom-nav button {
   flex: 1;
-  padding: 12px 4px 10px;
+  padding: 10px 4px 8px;
   border: none;
   background: transparent;
   color: var(--muted);
@@ -1061,25 +1059,25 @@ h3 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
   font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.66rem;
   transition: color 0.15s;
 }
 #bottom-nav button.active { color: var(--accent); }
-.nav-icon { font-size: 1.6rem; line-height: 1; }
+.nav-icon { font-size: 1.35rem; line-height: 1; }
 
 /* Toast */
 #toast {
   position: fixed;
-  bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%) translateY(30px);
   background: var(--ink);
   color: white;
-  padding: 12px 22px;
+  padding: 10px 20px;
   border-radius: 22px;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   opacity: 0;
   transition: all 0.3s;
   pointer-events: none;
@@ -1105,15 +1103,15 @@ h3 {
   position: relative;
 }
 .log-entry-time {
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   color: var(--muted);
   white-space: nowrap;
-  min-width: 100px;
+  min-width: 95px;
   padding-top: 2px;
 }
 .log-entry-body {
   flex: 1;
-  font-size: 0.98rem;
+  font-size: 0.88rem;
   line-height: 1.5;
   color: var(--ink);
 }
@@ -1123,8 +1121,8 @@ h3 {
   color: var(--muted);
   opacity: 0.4;
   cursor: pointer;
-  font-size: 1.1rem;
-  padding: 4px 8px;
+  font-size: 0.95rem;
+  padding: 4px 6px;
   line-height: 1;
   transition: all 0.15s;
   flex-shrink: 0;
@@ -1332,8 +1330,8 @@ textarea, input {
       </p>
 
       <div id="weekly-last-hint" style="display:none;background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
-        <div style="font-size:0.88rem;color:var(--accent-deep);font-weight:600;margin-bottom:4px;letter-spacing:0.08em;">Letzte Sitzung</div>
-        <div id="weekly-last-text" style="font-size:0.88rem;color:var(--ink);line-height:1.5;"></div>
+        <div style="font-size:0.78rem;color:var(--accent-deep);font-weight:600;margin-bottom:4px;letter-spacing:0.08em;">Letzte Sitzung</div>
+        <div id="weekly-last-text" style="font-size:0.78rem;color:var(--ink);line-height:1.5;"></div>
       </div>
 
       <button class="btn full" onclick="startWeekly()">Neu beginnen</button>
@@ -1351,7 +1349,7 @@ textarea, input {
       </div>
       <input type="file" id="import-sessions-file" accept=".json,.txt,application/json"
         style="display:none;" onchange="handleImportSessions(event)">
-      <p class="muted-note" style="margin-top:10px;font-size:0.88rem;">
+      <p class="muted-note" style="margin-top:10px;font-size:0.78rem;">
         Als JSON-Datei. Ihr könnt Sitzungen teilen — z.B. mit Sabine —
         oder wiederherstellen.
       </p>
@@ -1362,7 +1360,7 @@ textarea, input {
   <div id="weekly-resume" style="display:none;">
     <div class="card">
       <h2>Ihr seid mittendrin</h2>
-      <div id="weekly-resume-info" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.88rem;line-height:1.5;"></div>
+      <div id="weekly-resume-info" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.78rem;line-height:1.5;"></div>
       <div style="display:flex;gap:8px;">
         <button class="btn" style="flex:1;" onclick="resumeWeekly()">Weitermachen</button>
         <button class="btn secondary" style="flex:1;" onclick="confirmRestartWeekly()">Neu beginnen</button>
@@ -1487,7 +1485,7 @@ textarea, input {
 
     <button class="btn secondary full" onclick="openBodyGeneralEntry()" style="display:flex;flex-direction:column;gap:2px;padding:14px;">
       <span style="font-weight:600;">Allgemeine Empfindung</span>
-      <span style="font-size:0.88rem;font-weight:400;opacity:0.8;">Kopfschmerzen, Fieber, Übelkeit, Erschöpfung …</span>
+      <span style="font-size:0.78rem;font-weight:400;opacity:0.8;">Kopfschmerzen, Fieber, Übelkeit, Erschöpfung …</span>
     </button>
   </div>
 
@@ -1512,7 +1510,7 @@ textarea, input {
     <h2>Letzte 90 Tage</h2>
     <p class="muted-note" style="margin-bottom:6px;">Jedes Feld = ein Tag. Hellere Felder = wenige Einträge, dunklere = mehr.</p>
     <div class="heatmap" id="heatmap"></div>
-    <div style="display:flex;justify-content:space-between;font-size:0.88rem;color:var(--muted);">
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--muted);">
       <span>früher</span>
       <span>heute</span>
     </div>
@@ -1571,10 +1569,10 @@ textarea, input {
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
       <input type="number" id="activity-min" placeholder="Minuten" min="1"
         style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
-      <span style="color:var(--muted);font-size:0.95rem;">min</span>
+      <span style="color:var(--muted);font-size:0.85rem;">min</span>
     </div>
     <textarea id="activity-note" placeholder="Notiz (optional)" rows="2"
-      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;" onclick="closeEntry('activity')">Abbrechen</button>
       <button class="btn" style="flex:1;" onclick="logActivity()">Notieren</button>
@@ -1605,21 +1603,21 @@ textarea, input {
     </p>
 
     <div style="margin-bottom:12px;">
-      <div style="font-size:0.88rem;color:var(--muted);margin-bottom:6px;">Art (mehrere möglich)</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Art (mehrere möglich)</div>
       <div id="body-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
       <input type="text" id="body-type-custom" placeholder="Eigene Beschreibung… (optional)"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
     </div>
 
     <div style="margin-bottom:14px;">
-      <div style="font-size:0.88rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="body-intensity-val">5</span>/10</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="body-intensity-val">5</span>/10</div>
       <input type="range" id="body-intensity" min="1" max="10" value="5"
         style="width:100%;"
         oninput="document.getElementById('body-intensity-val').textContent=this.value">
     </div>
 
     <textarea id="body-note" placeholder="Notiz (optional)" rows="2"
-      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
 
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;" onclick="closeEntry('body')">Abbrechen</button>
@@ -1635,7 +1633,7 @@ textarea, input {
       <h2 id="archive-detail-title" style="margin:0;">Sitzung</h2>
       <button onclick="closeArchiveDetail()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
     </div>
-    <div id="archive-detail-meta" style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;"></div>
+    <div id="archive-detail-meta" style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;"></div>
     <div id="archive-detail-content" style="font-family:'EB Garamond',serif;font-size:1rem;line-height:1.6;color:var(--ink);margin-bottom:16px;"></div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
@@ -1658,7 +1656,7 @@ textarea, input {
     <h2>Dein Name</h2>
     <p class="muted-note" style="margin-bottom:12px;">Taucht in der Begrüßung auf.</p>
     <input type="text" id="settings-name" placeholder="Dein Name"
-      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.85rem;background:var(--bg);color:var(--ink);outline:none;"
       onchange="saveName()">
   </div>
 
@@ -1670,7 +1668,7 @@ textarea, input {
       Es findet keine Datenübertragung statt; die App bleibt lokal auf deinem Gerät.
     </p>
     <input type="text" id="settings-partner-name" placeholder="z. B. Sabine"
-      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.85rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;"
       onchange="savePartner()">
     <button class="btn secondary full" onclick="clearPartner()" id="clear-partner-btn" style="display:none;">Partner entfernen</button>
   </div>
@@ -1685,7 +1683,7 @@ textarea, input {
     <button class="btn secondary full" style="margin-top:8px;" onclick="triggerImportAllData()">Daten importieren</button>
     <input type="file" id="import-all-file" accept=".json,application/json"
       style="display:none;" onchange="handleImportAllData(event)">
-    <p class="muted-note" style="margin-top:12px;font-size:0.88rem;line-height:1.5;">
+    <p class="muted-note" style="margin-top:12px;font-size:0.78rem;line-height:1.5;">
       Die Datei enthält <em>alles</em> — Gefühle, Körper, Aktivitäten, Wasser, Dankbarkeit,
       Heute-Items, Wochengespräche, Identität und Partner.
     </p>
@@ -1694,7 +1692,7 @@ textarea, input {
       <button class="btn secondary full" style="color:#b04848;border-color:#e0c0c0;" onclick="confirmResetAll()">
         Alle Daten löschen
       </button>
-      <p class="muted-note" style="margin-top:8px;font-size:0.88rem;opacity:0.8;">
+      <p class="muted-note" style="margin-top:8px;font-size:0.78rem;opacity:0.8;">
         Setzt Ad se zurück auf den Anfang. Nichts kann danach wiederhergestellt werden.
       </p>
     </div>
@@ -1722,10 +1720,10 @@ textarea, input {
 
   <!-- Stille Signatur -->
   <div style="text-align:center;padding:30px 20px 10px;">
-    <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;color:var(--muted);opacity:0.75;letter-spacing:0.02em;margin-bottom:10px;">
+    <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--muted);opacity:0.7;letter-spacing:0.02em;margin-bottom:10px;">
       Mit Liebe gebaut, für das stille Beobachten.
     </p>
-    <p onclick="openVersionHistory()" style="font-family:'Inter',sans-serif;font-size:0.95rem;color:var(--muted);opacity:0.6;cursor:pointer;letter-spacing:0.02em;">
+    <p onclick="openVersionHistory()" style="font-family:'Inter',sans-serif;font-size:0.72rem;color:var(--muted);opacity:0.6;cursor:pointer;letter-spacing:0.02em;">
       Ad se · Version 1 · April 2026
     </p>
   </div>
@@ -1741,7 +1739,7 @@ textarea, input {
     </div>
     <p class="muted-note" style="margin-bottom:18px;">Eine kleine Geschichte von Ad se.</p>
 
-    <div style="font-family:'Inter',sans-serif;font-size:0.95rem;line-height:1.6;color:var(--ink);">
+    <div style="font-family:'Inter',sans-serif;font-size:0.85rem;line-height:1.6;color:var(--ink);">
 
       <div style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);">
         <div style="font-family:'EB Garamond',serif;font-size:1.15rem;color:var(--accent-deep);margin-bottom:6px;">
@@ -2247,8 +2245,8 @@ function showNeedsReflection(entry, logIndex) {
     const needs = FEELING_NEEDS[f.label] || [];
     html += `<div style="margin-bottom:10px;">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-        <span style="padding:3px 10px;border-radius:10px;font-size:0.88rem;font-weight:600;background:var(--q-${f.quadrant}-sel);color:white;">${f.label}</span>
-        <span style="font-size:0.88rem;color:var(--muted);">→</span>
+        <span style="padding:3px 10px;border-radius:10px;font-size:0.78rem;font-weight:600;background:var(--q-${f.quadrant}-sel);color:white;">${f.label}</span>
+        <span style="font-size:0.78rem;color:var(--muted);">→</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px;">
         ${needs.map(n => `<span class="fm-need-chip" data-need="${n}" onclick="toggleNeedChip(this)">${n}</span>`).join('')}
@@ -2256,7 +2254,7 @@ function showNeedsReflection(entry, logIndex) {
     </div>`;
   });
   html += `<textarea id="fm-needs-note" placeholder="Eigener Gedanke... (optional)" rows="1"
-    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.92rem;resize:none;background:var(--card);color:var(--ink);margin-bottom:10px;outline:none;"></textarea>
+    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.82rem;resize:none;background:var(--card);color:var(--ink);margin-bottom:10px;outline:none;"></textarea>
     <div style="display:flex;gap:8px;">
       <button class="btn" style="flex:1;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
       <button class="btn secondary" style="flex:1;" onclick="skipNeedsReflection()">Überspringen</button>
@@ -2560,7 +2558,7 @@ function renderBodyToday() {
       <div class="log-entry-time">${t}</div>
       <div class="log-entry-body">
         <strong>${escapeHtml(e.zone)}</strong> — ${escapeHtml(typesText)} (${e.intensity}/10)
-        ${e.note ? `<div style="margin-top:3px;color:var(--muted);font-size:0.92rem;">${escapeHtml(e.note)}</div>` : ''}
+        ${e.note ? `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(e.note)}</div>` : ''}
       </div>
       <button class="log-entry-delete" title="Eintrag löschen">✕</button>
     `;
@@ -2668,21 +2666,21 @@ function makeVerlaufEntry(e) {
   if (e.type === 'feeling') {
     const labels = (dat.feelings || []).map(f => escapeHtml(f.label)).join(', ');
     body = `<strong>Gefühl:</strong> ${labels}`;
-    if (dat.context) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.92rem;">„${escapeHtml(dat.context)}"</div>`;
-    if (dat.needs && dat.needs.length) body += `<div style="margin-top:3px;color:var(--accent-deep);font-size:0.88rem;"><em>Bedürfnis:</em> ${dat.needs.map(escapeHtml).join(', ')}</div>`;
-    if (dat.needsNote) body += `<div style="margin-top:2px;color:var(--muted);font-size:0.88rem;">${escapeHtml(dat.needsNote)}</div>`;
+    if (dat.context) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">„${escapeHtml(dat.context)}"</div>`;
+    if (dat.needs && dat.needs.length) body += `<div style="margin-top:3px;color:var(--accent-deep);font-size:0.78rem;"><em>Bedürfnis:</em> ${dat.needs.map(escapeHtml).join(', ')}</div>`;
+    if (dat.needsNote) body += `<div style="margin-top:2px;color:var(--muted);font-size:0.78rem;">${escapeHtml(dat.needsNote)}</div>`;
   } else if (e.type === 'body') {
     const typesText = Array.isArray(dat.types) ? dat.types.join(', ') : (dat.type || '');
     body = `<strong>Körper:</strong> ${escapeHtml(dat.zone)} — ${escapeHtml(typesText)} (${dat.intensity}/10)`;
-    if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.92rem;">${escapeHtml(dat.note)}</div>`;
+    if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
   } else if (e.type === 'activity') {
     body = `<strong>Aktivität:</strong> ${escapeHtml(dat.name)}`;
     if (dat.min) body += ` — ${dat.min} min`;
-    if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.92rem;">${escapeHtml(dat.note)}</div>`;
+    if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
   } else if (e.type === 'water') {
     body = `<strong>Wasser:</strong> ${dat.ml} ml`;
   } else if (e.type === 'gratitude') {
-    body = `<strong>Dankbarkeit:</strong><div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.text)}"</div>`;
+    body = `<strong>Dankbarkeit:</strong><div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.85rem;">„${escapeHtml(dat.text)}"</div>`;
   } else if (e.type === 'today') {
     const done = dat.done ? '✓' : '○';
     body = `<strong>Heute-Item ${done}</strong> ${escapeHtml(dat.text)}`;
@@ -2692,7 +2690,7 @@ function makeVerlaufEntry(e) {
     (dat.answers || []).forEach((a, i) => {
       if (a && a.trim()) {
         body += `<div style="margin-top:4px;font-size:0.9rem;">
-          <span style="color:var(--muted);font-size:0.8rem;">${steps[i]}:</span>
+          <span style="color:var(--muted);font-size:0.72rem;">${steps[i]}:</span>
           <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;margin-top:1px;">„${escapeHtml(a)}"</div>
         </div>`;
       }
@@ -2917,7 +2915,7 @@ function renderWeeklyStart() {
     const last3 = lastCompleted.answers.slice(-3).filter(a => a && a.trim());
     if (last3.length) {
       hint.style.display = '';
-      hintText.innerHTML = `Vor ${daysAgo} Tagen habt ihr geschrieben:<br><em style="font-family:'EB Garamond',serif;font-size:0.95rem;">„${escapeHtml(last3[last3.length-1].slice(0, 140))}${last3[last3.length-1].length > 140 ? '…' : ''}"</em>`;
+      hintText.innerHTML = `Vor ${daysAgo} Tagen habt ihr geschrieben:<br><em style="font-family:'EB Garamond',serif;font-size:0.85rem;">„${escapeHtml(last3[last3.length-1].slice(0, 140))}${last3[last3.length-1].length > 140 ? '…' : ''}"</em>`;
     } else {
       hint.style.display = 'none';
     }
@@ -2938,7 +2936,7 @@ function renderWeeklyResume() {
     Ihr seid bei <strong>Kapitel ${q.chapter}: ${escapeHtml(q.chapterLabel)}</strong>,
     Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}.<br>
     ${answered} Notiz${answered === 1 ? '' : 'en'} schon hinterlegt.<br>
-    <span style="color:var(--muted);font-size:0.92rem;">
+    <span style="color:var(--muted);font-size:0.82rem;">
       Pausiert vor ${daysAgo === 0 ? 'weniger als einem Tag' : daysAgo + ' Tag' + (daysAgo === 1 ? '' : 'en')}.
     </span>
   `;
@@ -3246,14 +3244,14 @@ function openArchiveSession(i) {
     if (!q) return;
     if (q.chapter !== currentChapter) {
       currentChapter = q.chapter;
-      html += `<div style="font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.1em;margin-top:16px;margin-bottom:8px;">Kapitel ${q.chapter} · ${escapeHtml(q.chapterLabel)}</div>`;
+      html += `<div style="font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.1em;margin-top:16px;margin-bottom:8px;">Kapitel ${q.chapter} · ${escapeHtml(q.chapterLabel)}</div>`;
     }
     html += `<div style="margin-bottom:14px;">
-      <div style="font-family:'Inter',sans-serif;font-size:0.92rem;color:var(--muted);margin-bottom:4px;">${escapeHtml(q.title)}</div>`;
+      <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);margin-bottom:4px;">${escapeHtml(q.title)}</div>`;
     if (a && a.trim()) {
       html += `<div style="font-style:italic;color:var(--ink);padding-left:12px;border-left:2px solid var(--accent-soft);">„${escapeHtml(a)}"</div>`;
     } else {
-      html += `<div style="color:var(--muted);font-size:0.95rem;font-style:italic;padding-left:12px;opacity:0.6;">(nicht beantwortet)</div>`;
+      html += `<div style="color:var(--muted);font-size:0.85rem;font-style:italic;padding-left:12px;opacity:0.6;">(nicht beantwortet)</div>`;
     }
     html += '</div>';
   });
