@@ -1,0 +1,3329 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ad se">
+<meta name="theme-color" content="#c76a4a">
+<title>Ad se – Zu dir</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+/* =====================================================
+   FARBTHEMEN — vorbelegt Terrakotta, später umschaltbar
+   ===================================================== */
+:root {
+  --bg: #faf4ee;
+  --card: #ffffff;
+  --ink: #2a2320;
+  --muted: #8a7e74;
+  --accent: #c76a4a;
+  --accent-soft: #e9d0c0;
+  --accent-deep: #a04e30;
+  --border: #ece2d5;
+  --gold: #c9a84c;
+  --shadow: 0 2px 14px rgba(88,52,28,0.06);
+
+  /* Matrix-Quadranten (Russell Circumplex) */
+  --q-ua-bg: #f0997b;   /* unangenehm + aktiviert */
+  --q-ua-sel: #d85a30;
+  --q-ua-gfk: #f5c4b3;
+  --q-ua-text: #4a1b0c;
+  --q-aa-bg: #85b7eb;   /* angenehm + aktiviert */
+  --q-aa-sel: #378add;
+  --q-aa-gfk: #b5d4f4;
+  --q-aa-text: #042c53;
+  --q-ur-bg: #afa9ec;   /* unangenehm + ruhig */
+  --q-ur-sel: #7f77dd;
+  --q-ur-gfk: #cecbf6;
+  --q-ur-text: #26215c;
+  --q-ar-bg: #5dcaa5;   /* angenehm + ruhig */
+  --q-ar-sel: #1d9e75;
+  --q-ar-gfk: #9fe1cb;
+  --q-ar-text: #04342c;
+}
+
+/* Sandbeige */
+[data-theme="sand"] {
+  --bg: #f5ecdc;
+  --card: #ffffff;
+  --accent: #b8956a;
+  --accent-soft: #e9dcc4;
+  --accent-deep: #8c6b44;
+  --border: #e8ddc6;
+}
+/* Salbei */
+[data-theme="sage"] {
+  --bg: #eef1e9;
+  --card: #ffffff;
+  --accent: #7c9070;
+  --accent-soft: #cfd9c4;
+  --accent-deep: #5a6d50;
+  --border: #dbe0d2;
+}
+/* Nebelblau */
+[data-theme="mist"] {
+  --bg: #eef0f2;
+  --card: #ffffff;
+  --accent: #6b8193;
+  --accent-soft: #c8d2da;
+  --accent-deep: #4d5f6f;
+  --border: #d6dde2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+}
+
+/* =====================================================
+   ERÖFFNUNGS-KARTE (Zitat beim App-Start)
+   ===================================================== */
+#opening-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 32px;
+  z-index: 5000;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+#opening-overlay.closing {
+  opacity: 0;
+  pointer-events: none;
+}
+.opening-inner {
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+}
+.opening-label {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+  margin-bottom: 40px;
+  font-weight: 400;
+}
+#opening-quote {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.4rem;
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: 24px;
+  color: white;
+}
+#opening-source {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  opacity: 0.8;
+  margin-bottom: 40px;
+  font-weight: 500;
+}
+.opening-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+.opening-btn {
+  padding: 10px 22px;
+  border-radius: 24px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.opening-btn:hover, .opening-btn:active {
+  background: rgba(255,255,255,0.2);
+}
+.opening-btn.primary {
+  background: rgba(255,255,255,0.95);
+  color: var(--accent-deep);
+  border-color: rgba(255,255,255,0.95);
+}
+.opening-heart {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+.opening-heart:hover { color: white; transform: scale(1.1); }
+.opening-heart.active { color: white; }
+
+/* =====================================================
+   HAUPT-LAYOUT
+   ===================================================== */
+.section {
+  display: none;
+  padding: 24px 20px 20px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.section.visible { display: block; }
+
+h1 {
+  font-family: 'EB Garamond', serif;
+  font-weight: 500;
+  font-size: 1.9rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+h2 {
+  font-family: 'EB Garamond', serif;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-bottom: 10px;
+  letter-spacing: -0.005em;
+}
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 18px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.muted-note {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* Begrüßung */
+.greeting-block {
+  padding: 4px 2px 20px;
+}
+.greeting-sub {
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Identitäts-Satz */
+.identity-card {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.identity-card:active { transform: scale(0.99); }
+.identity-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+}
+.identity-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.identity-card.empty .identity-text {
+  font-style: normal;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}
+
+/* Partner-Karte */
+.partner-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.partner-card strong {
+  font-weight: 500;
+  font-style: normal;
+  color: var(--accent-deep);
+}
+
+/* =====================================================
+   GEFÜHLS-MATRIX (Circumplex + GFK)
+   ===================================================== */
+.matrix-card h2 { margin-bottom: 6px; }
+.matrix-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.matrix-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.chip {
+  padding: 6px 14px;
+  border-radius: 18px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.feeling-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+  margin-bottom: 6px;
+}
+.fm-quadrant {
+  padding: 10px 8px;
+  min-height: 130px;
+}
+.fm-quadrant[data-q="ua"] { background: var(--q-ua-bg); }
+.fm-quadrant[data-q="aa"] { background: var(--q-aa-bg); }
+.fm-quadrant[data-q="ur"] { background: var(--q-ur-bg); }
+.fm-quadrant[data-q="ar"] { background: var(--q-ar-bg); }
+.fm-q-title {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.fm-quadrant[data-q="ua"] .fm-q-title { color: var(--q-ua-text); }
+.fm-quadrant[data-q="aa"] .fm-q-title { color: var(--q-aa-text); }
+.fm-quadrant[data-q="ur"] .fm-q-title { color: var(--q-ur-text); }
+.fm-quadrant[data-q="ar"] .fm-q-title { color: var(--q-ar-text); }
+.fm-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+.fm-word {
+  padding: 4px 9px;
+  border-radius: 14px;
+  font-size: 0.76rem;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1.2;
+  border: 1.5px solid transparent;
+}
+.fm-word.gfk { font-size: 0.7rem; }
+.fm-word.selected {
+  font-weight: 600;
+  transform: scale(1.05);
+}
+.fm-axes-h, .fm-axes-v {
+  position: absolute;
+  pointer-events: none;
+}
+.fm-axes-h { top: 50%; left: 0; right: 0; height: 0; border-top: 1.5px solid rgba(0,0,0,0.15); }
+.fm-axes-v { left: 50%; top: 0; bottom: 0; width: 0; border-left: 1.5px solid rgba(0,0,0,0.15); }
+.fm-axis-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--ink);
+  margin-top: 6px;
+  padding: 0 4px;
+  font-weight: 500;
+}
+.fm-axis-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+  padding: 0 4px;
+}
+
+.fm-selection {
+  display: none;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 12px;
+  border: 2px solid var(--accent);
+}
+.fm-selection.visible { display: block; }
+.fm-selection-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.fm-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.fm-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: white;
+}
+.fm-tag .remove {
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 0.9rem;
+  margin-left: 2px;
+}
+.fm-context {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  resize: none;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+}
+.fm-context:focus { border-color: var(--accent); }
+
+.fm-needs {
+  display: none;
+  margin-top: 14px;
+  padding: 14px;
+  background: var(--accent-soft);
+  border-radius: 12px;
+}
+.fm-needs.visible { display: block; }
+.fm-needs-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  color: var(--accent-deep);
+  margin-bottom: 6px;
+}
+.fm-needs-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.fm-need-chip {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 14px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent-deep);
+  font-family: 'Inter', sans-serif;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  transition: all 0.15s;
+}
+.fm-need-chip.active {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+.fm-hint {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  color: #856404;
+  display: none;
+}
+.fm-hint.visible { display: block; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover, .btn:active { background: var(--accent-deep); }
+.btn.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+.btn.secondary:hover, .btn.secondary:active {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.btn.full { width: 100%; }
+.btn.small { padding: 7px 14px; font-size: 0.82rem; }
+
+/* Schnell-Eintrag Buttons */
+.quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px 10px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.quick-btn:hover, .quick-btn:active {
+  border-color: var(--accent);
+  background: var(--card);
+}
+.qb-icon {
+  font-size: 1.4rem;
+  color: var(--accent);
+  line-height: 1;
+}
+.qb-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Heute-Chips */
+.today-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid transparent;
+}
+.today-chip:hover { background: var(--accent); color: white; }
+.today-chip.done {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.today-chip .chip-check {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+.today-chip .chip-delete {
+  margin-left: 4px;
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+.today-chip .chip-delete:hover { opacity: 1; }
+
+.today-suggestion {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.today-suggestion:hover {
+  border-style: solid;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Heatmap */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+  gap: 3px;
+  margin: 8px 0 14px;
+}
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--border);
+  min-width: 12px;
+}
+.heatmap-cell.l1 { background: var(--accent-soft); }
+.heatmap-cell.l2 { background: var(--accent); opacity: 0.55; }
+.heatmap-cell.l3 { background: var(--accent); opacity: 0.8; }
+.heatmap-cell.l4 { background: var(--accent-deep); }
+.heatmap-cell.future { background: transparent; border: 1px dashed var(--border); }
+
+/* Körperkarte */
+.body-wrap {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 10px 0 14px;
+}
+.body-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.body-col-label {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.sym-zone {
+  fill: var(--q-ar-gfk);
+  cursor: pointer;
+  transition: fill 0.15s;
+}
+.sym-zone:hover { fill: var(--q-ar-sel); }
+.sym-zone.has-entry { fill: var(--q-ua-bg); }
+
+/* Eintragungs-Dialog (Overlay) */
+.entry-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 2500;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+}
+.entry-overlay.visible {
+  display: flex;
+}
+.entry-modal {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 22px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* Wochenstunde – Home-Karte */
+.weekly-card {
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+  color: white;
+  border-radius: 14px;
+  padding: 20px 20px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.weekly-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+.weekly-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.weekly-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.weekly-btn {
+  padding: 10px 22px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.weekly-btn:hover, .weekly-btn:active { background: rgba(255,255,255,0.28); }
+
+/* Wochenstunde – Fortschritt */
+.weekly-progress {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.weekly-progress-chapter {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+.weekly-progress-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.weekly-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+.weekly-progress-q {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+/* Wochenstunde – Abschluss-Karte */
+.weekly-finish-card {
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: white;
+  border-radius: 14px;
+  padding: 30px 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.weekly-finish-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.75;
+  margin-bottom: 20px;
+}
+.weekly-finish-quote {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.3rem;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.weekly-finish-source {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+/* Wochenstunde – Daten-Erinnerungen */
+.weekly-data-box {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+}
+.weekly-data-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.weekly-data-item {
+  font-size: 0.85rem;
+  color: var(--ink);
+  line-height: 1.5;
+  padding: 3px 0;
+}
+.weekly-data-item .data-time {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-right: 6px;
+}
+
+/* Archiv-Einträge */
+.archive-entry {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.archive-entry:hover { border-color: var(--accent); }
+.archive-entry-date {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--accent-deep);
+  margin-bottom: 3px;
+}
+.archive-entry-meta {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.archive-entry-preview {
+  font-size: 0.82rem;
+  color: var(--ink);
+  margin-top: 4px;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
+/* =====================================================
+   BOTTOM NAV
+   ===================================================== */
+#bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+}
+#bottom-nav button {
+  flex: 1;
+  padding: 10px 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  transition: color 0.15s;
+}
+#bottom-nav button.active { color: var(--accent); }
+.nav-icon { font-size: 1.35rem; line-height: 1; }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  background: var(--ink);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 22px;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 3000;
+  max-width: 90%;
+  text-align: center;
+}
+#toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Verlaufs-Einträge */
+.log-entry {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--card);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  align-items: flex-start;
+  border-left: 3px solid var(--border);
+  position: relative;
+}
+.log-entry-time {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 95px;
+  padding-top: 2px;
+}
+.log-entry-body {
+  flex: 1;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.log-entry-delete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  opacity: 0.4;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 4px 6px;
+  line-height: 1;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.log-entry-delete:hover {
+  opacity: 1;
+  color: #b04848;
+}
+.log-entry-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* Allgemein */
+textarea, input {
+  font-family: 'Inter', sans-serif;
+}
+</style>
+</head>
+<body>
+
+<!-- ====== ERÖFFNUNGS-KARTE ====== -->
+<div id="opening-overlay">
+  <div class="opening-inner">
+    <div class="opening-label">Ad se</div>
+    <div id="opening-quote">&nbsp;</div>
+    <div id="opening-source">&nbsp;</div>
+    <div class="opening-actions">
+      <button class="opening-heart" id="opening-heart-btn" onclick="toggleOpeningFavorite()" title="Zu Favoriten">♡</button>
+      <button class="opening-btn primary" onclick="closeOpening()">Eintreten</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== HOME ====== -->
+<div id="section-home" class="section visible">
+
+  <div class="greeting-block">
+    <h1 id="home-greeting">Willkommen</h1>
+    <div class="greeting-sub" id="home-date"></div>
+  </div>
+
+  <!-- Identität -->
+  <div class="identity-card" id="identity-card" onclick="openIdentityEditor()">
+    <div class="identity-label">Ich bin</div>
+    <div class="identity-text" id="identity-text">Noch kein Satz gesetzt — tippe, um einen zu notieren.</div>
+  </div>
+
+  <!-- Partner -->
+  <div class="partner-card" id="partner-card" style="display:none;">
+    <div id="partner-text"></div>
+  </div>
+
+  <!-- Gefühls-Matrix -->
+  <div class="card matrix-card">
+    <h2>Wie fühlst du dich?</h2>
+    <p class="matrix-sub">Bis zu fünf Gefühle. Gemischte Gefühle sind normal.</p>
+
+    <div class="matrix-tabs">
+      <button class="chip active" id="fm-tab-kern" onclick="setFeelingMatrixMode('kern')">Kernwörter</button>
+      <button class="chip" id="fm-tab-erweitert" onclick="setFeelingMatrixMode('erweitert')">Erweitert (GFK)</button>
+    </div>
+
+    <div class="feeling-matrix" id="feeling-matrix">
+      <div class="fm-quadrant" data-q="ua">
+        <div class="fm-q-title">UNANGENEHM + AKTIVIERT</div>
+        <div class="fm-words" id="fm-q-ua"></div>
+      </div>
+      <div class="fm-quadrant" data-q="aa">
+        <div class="fm-q-title">ANGENEHM + AKTIVIERT</div>
+        <div class="fm-words" id="fm-q-aa"></div>
+      </div>
+      <div class="fm-quadrant" data-q="ur">
+        <div class="fm-q-title">UNANGENEHM + RUHIG</div>
+        <div class="fm-words" id="fm-q-ur"></div>
+      </div>
+      <div class="fm-quadrant" data-q="ar">
+        <div class="fm-q-title">ANGENEHM + RUHIG</div>
+        <div class="fm-words" id="fm-q-ar"></div>
+      </div>
+      <div class="fm-axes-h"></div>
+      <div class="fm-axes-v"></div>
+    </div>
+    <div class="fm-axis-labels">
+      <span>← unangenehm</span><span>angenehm →</span>
+    </div>
+    <div class="fm-axis-sub">
+      <span>↑ aktiviert</span><span>↓ ruhig</span>
+    </div>
+
+    <div class="fm-selection" id="fm-selection">
+      <div class="fm-selection-label">Ausgewählt (<span id="fm-count">0</span>/5):</div>
+      <div class="fm-selected-tags" id="fm-selected-tags"></div>
+      <textarea class="fm-context" id="fm-context" placeholder="Was hat das ausgelöst? (optional)" rows="2"></textarea>
+      <button class="btn full" style="margin-top:10px;" onclick="saveFeelingMatrix()">Gefühl notieren</button>
+    </div>
+
+    <div class="fm-needs" id="fm-needs"></div>
+
+    <div class="fm-hint" id="fm-hint">Maximal 5 Gefühle – tippe auf ein markiertes Wort, um es abzuwählen.</div>
+  </div>
+
+  <!-- Heute-Notiz: formlose Tages-Items -->
+  <div class="card">
+    <h2>Heute</h2>
+    <p class="muted-note" style="margin-bottom:12px;">Was nimmst du dir vor? Tippe Items ein oder wähle aus der Liste. Alles freiwillig.</p>
+
+    <div id="today-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="today-input" placeholder="z.B. Meditation, Gitarre, Rad zur Arbeit…"
+        style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+        onkeydown="if(event.key==='Enter'){addTodayItem();}">
+      <button class="btn small" onclick="addTodayItem()">+</button>
+    </div>
+
+    <div id="today-suggestions" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;"></div>
+  </div>
+
+  <!-- Schnell-Eintrag -->
+  <div class="card">
+    <h2>Kurz notieren</h2>
+    <p class="muted-note" style="margin-bottom:12px;">Wasser, eine Aktivität, Dankbarkeit, oder etwas zum Körper.</p>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+      <button class="quick-btn" onclick="openQuickEntry('water')">
+        <span class="qb-icon">◯</span>
+        <span class="qb-label">Wasser</span>
+      </button>
+      <button class="quick-btn" onclick="openQuickEntry('activity')">
+        <span class="qb-icon">◭</span>
+        <span class="qb-label">Aktivität</span>
+      </button>
+      <button class="quick-btn" onclick="openQuickEntry('gratitude')">
+        <span class="qb-icon">☆</span>
+        <span class="qb-label">Dankbarkeit</span>
+      </button>
+      <button class="quick-btn" onclick="showSection('body')">
+        <span class="qb-icon">◉</span>
+        <span class="qb-label">Körper</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Wochenstunde (Ritual-Karte) -->
+  <div class="weekly-card" id="weekly-home-card">
+    <div class="weekly-label">Eine Stunde zu zweit</div>
+    <div class="weekly-title" id="weekly-home-title">Wochenreflexion</div>
+    <div class="weekly-sub" id="weekly-home-sub">Wenn ihr Zeit findet — ein Rückblick.</div>
+    <button class="weekly-btn" id="weekly-home-btn" onclick="openWeekly()">Beginnen</button>
+  </div>
+
+</div>
+
+<!-- ====== WOCHENSTUNDE ====== -->
+<div id="section-weekly" class="section">
+  <div class="greeting-block">
+    <h1 id="weekly-heading">Eine Stunde zu zweit</h1>
+    <div class="greeting-sub" id="weekly-subheading">Ein Rückblick auf die vergangenen Tage — gemeinsam.</div>
+  </div>
+
+  <!-- START-Ansicht: wenn keine Session aktiv -->
+  <div id="weekly-start" style="display:none;">
+    <div class="card">
+      <h2>Bereit für einen Rückblick?</h2>
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Drei Kapitel, etwa 30–45 Minuten — oder wie lange ihr braucht. Ihr könnt jederzeit pausieren und später weitermachen.
+      </p>
+
+      <div id="weekly-last-hint" style="display:none;background:var(--accent-soft);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:0.75rem;color:var(--accent-deep);font-weight:600;margin-bottom:4px;letter-spacing:0.08em;">Letzte Sitzung</div>
+        <div id="weekly-last-text" style="font-size:0.88rem;color:var(--ink);line-height:1.5;"></div>
+      </div>
+
+      <button class="btn full" onclick="startWeekly()">Neu beginnen</button>
+    </div>
+
+    <div class="card" id="weekly-archive-card">
+      <h2>Unser Buch</h2>
+      <p class="muted-note" style="margin-bottom:10px;">Vergangene Sitzungen.</p>
+      <div id="weekly-archive-list"></div>
+      <p class="muted-note" id="weekly-archive-empty" style="display:none;">Noch nichts archiviert.</p>
+
+      <div style="display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <button class="btn secondary" style="flex:1;" onclick="exportAllSessions()">Alle sichern</button>
+        <button class="btn secondary" style="flex:1;" onclick="triggerImportSessions()">Importieren</button>
+      </div>
+      <input type="file" id="import-sessions-file" accept=".json,.txt,application/json"
+        style="display:none;" onchange="handleImportSessions(event)">
+      <p class="muted-note" style="margin-top:10px;font-size:0.75rem;">
+        Als JSON-Datei. Ihr könnt Sitzungen teilen — z.B. mit Sabine —
+        oder wiederherstellen.
+      </p>
+    </div>
+  </div>
+
+  <!-- RESUME-Ansicht: Session pausiert -->
+  <div id="weekly-resume" style="display:none;">
+    <div class="card">
+      <h2>Ihr seid mittendrin</h2>
+      <div id="weekly-resume-info" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px;font-size:0.88rem;line-height:1.5;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1;" onclick="resumeWeekly()">Weitermachen</button>
+        <button class="btn secondary" style="flex:1;" onclick="confirmRestartWeekly()">Neu beginnen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE-Ansicht: laufende Session -->
+  <div id="weekly-active" style="display:none;">
+    <!-- Fortschritt -->
+    <div class="weekly-progress">
+      <div class="weekly-progress-chapter" id="weekly-chapter-label"></div>
+      <div class="weekly-progress-bar">
+        <div class="weekly-progress-fill" id="weekly-progress-fill"></div>
+      </div>
+      <div class="weekly-progress-q" id="weekly-progress-q"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="weekly-q-title" style="font-family:'EB Garamond',serif;font-size:1.4rem;line-height:1.4;font-weight:500;color:var(--accent-deep);margin-bottom:10px;"></h2>
+      <p class="muted-note" id="weekly-q-sub" style="margin-bottom:14px;line-height:1.55;"></p>
+
+      <!-- Datenanzeige (Erinnerung aus der Woche) -->
+      <div id="weekly-q-data" style="display:none;margin-bottom:14px;"></div>
+
+      <!-- Notizfeld -->
+      <textarea id="weekly-q-note" placeholder="Euer Gedanke… (optional)" rows="4"
+        style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;font-style:italic;resize:vertical;background:var(--bg);color:var(--ink);outline:none;line-height:1.55;"></textarea>
+
+      <!-- Navigation -->
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn secondary" id="weekly-back-btn" onclick="weeklyBack()">Zurück</button>
+        <button class="btn" style="flex:1;" id="weekly-next-btn" onclick="weeklyNext()">Weiter</button>
+      </div>
+    </div>
+
+    <!-- Pausieren / Beenden -->
+    <div class="card" style="text-align:center;padding:12px;">
+      <button class="btn secondary" onclick="pauseWeekly()" style="margin-right:6px;">Pausieren</button>
+      <button class="btn secondary" onclick="endWeeklyEarly()">Hier beenden</button>
+    </div>
+  </div>
+
+  <!-- FINISH-Ansicht: nach Abschluss -->
+  <div id="weekly-finish" style="display:none;">
+    <div class="weekly-finish-card">
+      <div class="weekly-finish-label">Mit einem Gedanken hinausgehen</div>
+      <div class="weekly-finish-quote" id="weekly-finish-quote"></div>
+      <div class="weekly-finish-source" id="weekly-finish-source"></div>
+      <button class="btn full" style="margin-top:20px;" onclick="closeWeeklyFinish()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== KÖRPER ====== -->
+<div id="section-body" class="section">
+
+  <div class="greeting-block">
+    <h1>Körper</h1>
+    <div class="greeting-sub">Tippe eine Stelle an, um eine Empfindung zu notieren.</div>
+  </div>
+
+  <div class="card">
+    <p class="muted-note" style="margin-bottom:6px;">
+      Geist und Körper sind eins. Was du hier einträgst, ist keine Diagnose — nur Wahrnehmung.
+    </p>
+    <div class="body-wrap">
+      <div class="body-col">
+        <div class="body-col-label">VORNE</div>
+        <svg id="sym-front" width="110" height="270" viewBox="0 0 110 270" xmlns="http://www.w3.org/2000/svg">
+          <ellipse class="sym-zone" data-zone="Kopf" cx="55" cy="24" rx="20" ry="22"/>
+          <ellipse class="sym-zone" data-zone="Kiefer/Mund" cx="55" cy="42" rx="12" ry="6"/>
+          <rect class="sym-zone" data-zone="Hals" x="47" y="48" width="16" height="10" rx="3"/>
+          <ellipse class="sym-zone" data-zone="Linke Schulter" cx="22" cy="70" rx="15" ry="10"/>
+          <ellipse class="sym-zone" data-zone="Rechte Schulter" cx="88" cy="70" rx="15" ry="10"/>
+          <rect class="sym-zone" data-zone="Brust" x="36" y="58" width="38" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Linker Oberarm" x="6" y="76" width="14" height="36" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Oberarm" x="90" y="76" width="14" height="36" rx="5"/>
+          <rect class="sym-zone" data-zone="Bauch" x="36" y="90" width="38" height="40" rx="5"/>
+          <rect class="sym-zone" data-zone="Linker Unterarm" x="5" y="115" width="13" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Unterarm" x="93" y="115" width="13" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Hüfte" x="32" y="130" width="46" height="20" rx="5"/>
+          <ellipse class="sym-zone" data-zone="Linke Hand" cx="9" cy="154" rx="9" ry="6"/>
+          <ellipse class="sym-zone" data-zone="Rechte Hand" cx="101" cy="154" rx="9" ry="6"/>
+          <rect class="sym-zone" data-zone="Linker Oberschenkel" x="32" y="152" width="20" height="40" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Oberschenkel" x="58" y="152" width="20" height="40" rx="5"/>
+          <ellipse class="sym-zone" data-zone="Linkes Knie" cx="42" cy="197" rx="10" ry="7"/>
+          <ellipse class="sym-zone" data-zone="Rechtes Knie" cx="68" cy="197" rx="10" ry="7"/>
+          <rect class="sym-zone" data-zone="Linker Unterschenkel" x="34" y="205" width="16" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Unterschenkel" x="60" y="205" width="16" height="32" rx="5"/>
+          <ellipse class="sym-zone" data-zone="Linker Fuß" cx="40" cy="242" rx="13" ry="7"/>
+          <ellipse class="sym-zone" data-zone="Rechter Fuß" cx="70" cy="242" rx="13" ry="7"/>
+        </svg>
+      </div>
+      <div class="body-col">
+        <div class="body-col-label">HINTEN</div>
+        <svg id="sym-back" width="110" height="270" viewBox="0 0 110 270" xmlns="http://www.w3.org/2000/svg">
+          <ellipse class="sym-zone" data-zone="Hinterkopf" cx="55" cy="24" rx="20" ry="22"/>
+          <rect class="sym-zone" data-zone="Nacken" x="47" y="46" width="16" height="12" rx="3"/>
+          <ellipse class="sym-zone" data-zone="Linke Schulter hinten" cx="22" cy="70" rx="15" ry="10"/>
+          <ellipse class="sym-zone" data-zone="Rechte Schulter hinten" cx="88" cy="70" rx="15" ry="10"/>
+          <rect class="sym-zone" data-zone="Oberer Rücken" x="36" y="58" width="38" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Linker Oberarm hinten" x="6" y="76" width="14" height="36" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Oberarm hinten" x="90" y="76" width="14" height="36" rx="5"/>
+          <rect class="sym-zone" data-zone="Unterer Rücken" x="36" y="90" width="38" height="40" rx="5"/>
+          <rect class="sym-zone" data-zone="Linker Unterarm hinten" x="5" y="115" width="13" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Unterarm hinten" x="93" y="115" width="13" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Gesäß" x="32" y="130" width="46" height="20" rx="5"/>
+          <ellipse class="sym-zone" data-zone="Linke Hand hinten" cx="9" cy="154" rx="9" ry="6"/>
+          <ellipse class="sym-zone" data-zone="Rechte Hand hinten" cx="101" cy="154" rx="9" ry="6"/>
+          <rect class="sym-zone" data-zone="Linke Wade" x="32" y="152" width="20" height="40" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechte Wade" x="58" y="152" width="20" height="40" rx="5"/>
+          <ellipse class="sym-zone" data-zone="Linkes Knie hinten" cx="42" cy="197" rx="10" ry="7"/>
+          <ellipse class="sym-zone" data-zone="Rechtes Knie hinten" cx="68" cy="197" rx="10" ry="7"/>
+          <rect class="sym-zone" data-zone="Linker Unterschenkel hinten" x="34" y="205" width="16" height="32" rx="5"/>
+          <rect class="sym-zone" data-zone="Rechter Unterschenkel hinten" x="60" y="205" width="16" height="32" rx="5"/>
+          <ellipse class="sym-zone" data-zone="Linke Ferse" cx="40" cy="242" rx="13" ry="7"/>
+          <ellipse class="sym-zone" data-zone="Rechte Ferse" cx="70" cy="242" rx="13" ry="7"/>
+        </svg>
+      </div>
+    </div>
+
+    <button class="btn secondary full" onclick="openBodyGeneralEntry()" style="display:flex;flex-direction:column;gap:2px;padding:14px;">
+      <span style="font-weight:600;">Allgemeine Empfindung</span>
+      <span style="font-size:0.75rem;font-weight:400;opacity:0.8;">Kopfschmerzen, Fieber, Übelkeit, Erschöpfung …</span>
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>Heute wahrgenommen</h2>
+    <div id="body-today-list"></div>
+    <p class="muted-note" id="body-today-empty" style="display:none;">Heute noch nichts notiert.</p>
+  </div>
+
+</div>
+
+<!-- ====== VERLAUF ====== -->
+<div id="section-verlauf" class="section">
+
+  <div class="greeting-block">
+    <h1>Verlauf</h1>
+    <div class="greeting-sub">Was du in den letzten Tagen wahrgenommen hast.</div>
+  </div>
+
+  <!-- Heatmap -->
+  <div class="card">
+    <h2>Letzte 90 Tage</h2>
+    <p class="muted-note" style="margin-bottom:6px;">Jedes Feld = ein Tag. Hellere Felder = wenige Einträge, dunklere = mehr.</p>
+    <div class="heatmap" id="heatmap"></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted);">
+      <span>früher</span>
+      <span>heute</span>
+    </div>
+  </div>
+
+  <!-- Chronologische Einträge -->
+  <div class="card">
+    <h2>Alle Einträge</h2>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="chip active" id="vf-all" onclick="setVerlaufFilter('all')">Alle</button>
+      <button class="chip" id="vf-feeling" onclick="setVerlaufFilter('feeling')">Gefühle</button>
+      <button class="chip" id="vf-body" onclick="setVerlaufFilter('body')">Körper</button>
+      <button class="chip" id="vf-activity" onclick="setVerlaufFilter('activity')">Aktivität</button>
+      <button class="chip" id="vf-water" onclick="setVerlaufFilter('water')">Wasser</button>
+      <button class="chip" id="vf-gratitude" onclick="setVerlaufFilter('gratitude')">Dankbarkeit</button>
+      <button class="chip" id="vf-today" onclick="setVerlaufFilter('today')">Heute-Items</button>
+    </div>
+    <div id="verlauf-list"></div>
+    <p class="muted-note" id="verlauf-empty" style="display:none;text-align:center;padding:20px 0;">
+      Noch keine Einträge. Alles, was du notierst, erscheint hier mit Datum und Uhrzeit.
+    </p>
+  </div>
+
+</div>
+
+<!-- ====== ENTRY OVERLAYS ====== -->
+
+<!-- Wasser -->
+<div class="entry-overlay" id="entry-water">
+  <div class="entry-modal">
+    <h2>Wasser notieren</h2>
+    <p class="muted-note" style="margin-bottom:14px;">Wie viel hast du getrunken?</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+      <button class="btn secondary" onclick="logWater(100)">100 ml</button>
+      <button class="btn secondary" onclick="logWater(250)">250 ml</button>
+      <button class="btn secondary" onclick="logWater(500)">500 ml</button>
+      <button class="btn secondary" onclick="logWater(750)">750 ml</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <input type="number" id="water-custom" placeholder="andere Menge (ml)" min="1"
+        style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      <button class="btn" onclick="logWaterCustom()">OK</button>
+    </div>
+    <button class="btn secondary full" onclick="closeEntry('water')">Schließen</button>
+  </div>
+</div>
+
+<!-- Aktivität -->
+<div class="entry-overlay" id="entry-activity">
+  <div class="entry-modal">
+    <h2>Aktivität notieren</h2>
+    <p class="muted-note" style="margin-bottom:14px;">Was hast du gemacht? Wie lange?</p>
+    <input type="text" id="activity-name" placeholder="z. B. Radfahren, Gehen, Krafttraining…"
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
+      <input type="number" id="activity-min" placeholder="Minuten" min="1"
+        style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      <span style="color:var(--muted);font-size:0.85rem;">min</span>
+    </div>
+    <textarea id="activity-note" placeholder="Notiz (optional)" rows="2"
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;" onclick="closeEntry('activity')">Abbrechen</button>
+      <button class="btn" style="flex:1;" onclick="logActivity()">Notieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dankbarkeit -->
+<div class="entry-overlay" id="entry-gratitude">
+  <div class="entry-modal">
+    <h2>Dankbarkeit</h2>
+    <p class="muted-note" style="margin-bottom:14px;">Wofür bist du gerade dankbar?</p>
+    <textarea id="gratitude-text" placeholder="Was auch immer es ist — klein oder groß." rows="4"
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;font-style:italic;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;line-height:1.5;"></textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;" onclick="closeEntry('gratitude')">Abbrechen</button>
+      <button class="btn" style="flex:1;" onclick="logGratitude()">Notieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- Körper-Eintrag -->
+<div class="entry-overlay" id="entry-body">
+  <div class="entry-modal">
+    <h2 id="body-entry-title">Körper</h2>
+    <p class="muted-note" style="margin-bottom:14px;">
+      Wie fühlt sich das an? Du kannst mehrere Arten gleichzeitig wählen.
+    </p>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Art (mehrere möglich)</div>
+      <div id="body-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+      <input type="text" id="body-type-custom" placeholder="Eigene Beschreibung… (optional)"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="body-intensity-val">5</span>/10</div>
+      <input type="range" id="body-intensity" min="1" max="10" value="5"
+        style="width:100%;"
+        oninput="document.getElementById('body-intensity-val').textContent=this.value">
+    </div>
+
+    <textarea id="body-note" placeholder="Notiz (optional)" rows="2"
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;" onclick="closeEntry('body')">Abbrechen</button>
+      <button class="btn" style="flex:1;" onclick="saveBodyEntry()">Notieren</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ARCHIV-DETAIL OVERLAY ====== -->
+<div class="entry-overlay" id="archive-detail-overlay">
+  <div class="entry-modal" style="max-width:560px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <h2 id="archive-detail-title" style="margin:0;">Sitzung</h2>
+      <button onclick="closeArchiveDetail()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div id="archive-detail-meta" style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;"></div>
+    <div id="archive-detail-content" style="font-family:'EB Garamond',serif;font-size:1rem;line-height:1.6;color:var(--ink);margin-bottom:16px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <button class="btn secondary" onclick="exportSessionAsText()">Als Text teilen</button>
+      <button class="btn secondary" onclick="exportSessionAsJson()">Als Datei</button>
+    </div>
+    <button class="btn secondary full" style="margin-top:8px;color:#b04848;border-color:#e0c0c0;" onclick="confirmDeleteSession()">Sitzung löschen</button>
+  </div>
+</div>
+
+<!-- ====== MEHR / EINSTELLUNGEN (minimal für Runde 1) ====== -->
+<div id="section-settings" class="section">
+
+  <div class="greeting-block">
+    <h1>Mehr</h1>
+    <div class="greeting-sub">Einstellungen kommen vollständig in Runde 3.</div>
+  </div>
+
+  <div class="card">
+    <h2>Dein Name</h2>
+    <p class="muted-note" style="margin-bottom:12px;">Taucht in der Begrüßung auf.</p>
+    <input type="text" id="settings-name" placeholder="Dein Name"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;"
+      onchange="saveName()">
+  </div>
+
+  <div class="card">
+    <h2>Partner</h2>
+    <p class="muted-note" style="margin-bottom:12px;">
+      Wenn du den Weg gemeinsam mit jemandem gehst (z.&nbsp;B. deiner Partnerin), kannst du den Namen hier hinterlegen.
+      Er erscheint dann auf dem Home-Screen als stiller Anker — ein Erinnern daran, dass du nicht allein bist.
+      Es findet keine Datenübertragung statt; die App bleibt lokal auf deinem Gerät.
+    </p>
+    <input type="text" id="settings-partner-name" placeholder="z. B. Sabine"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;"
+      onchange="savePartner()">
+    <button class="btn secondary full" onclick="clearPartner()" id="clear-partner-btn" style="display:none;">Partner entfernen</button>
+  </div>
+
+  <div class="card">
+    <h2>Datensicherung</h2>
+    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+      Alles, was du in Ad se einträgst, bleibt auf deinem Gerät. Nichts wird versendet.
+      Wenn du das Gerät wechselst oder eine Sicherung willst, lade alle Daten als Datei herunter.
+    </p>
+    <button class="btn full" onclick="exportAllData()">Alle Daten sichern</button>
+    <button class="btn secondary full" style="margin-top:8px;" onclick="triggerImportAllData()">Daten importieren</button>
+    <input type="file" id="import-all-file" accept=".json,application/json"
+      style="display:none;" onchange="handleImportAllData(event)">
+    <p class="muted-note" style="margin-top:12px;font-size:0.75rem;line-height:1.5;">
+      Die Datei enthält <em>alles</em> — Gefühle, Körper, Aktivitäten, Wasser, Dankbarkeit,
+      Heute-Items, Wochengespräche, Identität und Partner.
+    </p>
+
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
+      <button class="btn secondary full" style="color:#b04848;border-color:#e0c0c0;" onclick="confirmResetAll()">
+        Alle Daten löschen
+      </button>
+      <p class="muted-note" style="margin-top:8px;font-size:0.75rem;opacity:0.8;">
+        Setzt Ad se zurück auf den Anfang. Nichts kann danach wiederhergestellt werden.
+      </p>
+    </div>
+  </div>
+
+  <!-- Über Ad se -->
+  <div class="card" style="background:var(--accent-soft);border:none;">
+    <h2 style="color:var(--accent-deep);">Über Ad se</h2>
+    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;">
+      <em>Ad se ipsum</em> — zu sich selbst. So hat Mark Aurel seine Selbstbetrachtungen genannt.
+    </p>
+    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;">
+      Diese App ist kein Trainer und kein Coach. Sie misst nicht, sie belohnt nicht, sie drängt nicht.
+    </p>
+    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;">
+      Sie ist ein Ort, an dem du bei dir sein kannst. Mehr nicht.
+    </p>
+    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;font-style:italic;">
+      Bewusstsein schlägt Kontrolle. Kontinuität schlägt Perfektion.
+    </p>
+    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);">
+      Wenn du etwas einträgst, ist es für dich. Wenn du nichts einträgst, ist das auch richtig.
+    </p>
+  </div>
+
+  <!-- Stille Signatur -->
+  <div style="text-align:center;padding:30px 20px 10px;">
+    <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.78rem;color:var(--muted);opacity:0.7;letter-spacing:0.02em;">
+      Mit Liebe gebaut, für das stille Beobachten.
+    </p>
+  </div>
+
+</div>
+
+<!-- ====== BOTTOM NAV ====== -->
+<div id="bottom-nav">
+  <button class="active" id="nav-home" onclick="showSection('home')">
+    <span class="nav-icon">◦</span>
+    <span>Heute</span>
+  </button>
+  <button id="nav-body" onclick="showSection('body')">
+    <span class="nav-icon">◉</span>
+    <span>Körper</span>
+  </button>
+  <button id="nav-verlauf" onclick="showSection('verlauf')">
+    <span class="nav-icon">∴</span>
+    <span>Verlauf</span>
+  </button>
+  <button id="nav-settings" onclick="showSection('settings')">
+    <span class="nav-icon">⋯</span>
+    <span>Mehr</span>
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<!-- ====== CONFIRM DIALOG ====== -->
+<div class="entry-overlay" id="confirm-overlay">
+  <div class="entry-modal" style="max-width:360px;">
+    <h2 id="confirm-title" style="margin-bottom:8px;">Bestätigen</h2>
+    <p class="muted-note" id="confirm-msg" style="margin-bottom:18px;line-height:1.55;"></p>
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;" onclick="confirmNo()">Abbrechen</button>
+      <button class="btn" style="flex:1;background:#b04848;" id="confirm-yes-btn" onclick="confirmYes()">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== IDENTITY EDITOR ====== -->
+<div id="identity-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:2000;padding:20px;align-items:center;justify-content:center;">
+  <div style="background:var(--card);border-radius:14px;padding:22px;max-width:380px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+    <h2 style="margin-bottom:4px;">Wer bist du?</h2>
+    <p class="muted-note" style="margin-bottom:14px;">
+      Nicht was du erreichen willst – wer du bist. Ein Satz, der heute für dich wahr sein soll.
+    </p>
+    <textarea id="identity-input" placeholder="Ich bin jemand, der..."
+      style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:12px;font-family:'EB Garamond',serif;font-size:1.05rem;font-style:italic;resize:none;height:90px;background:var(--bg);color:var(--ink);outline:none;line-height:1.5;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn secondary" style="flex:1;" onclick="closeIdentityEditor()">Abbrechen</button>
+      <button class="btn" style="flex:1;" onclick="saveIdentity()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================
+   AD SE – JavaScript Grundgerüst (Runde 1)
+   ===================================================== */
+
+/* ===== OPENING QUOTES ===== */
+const OPENING_QUOTES = [
+  { text: "Was die Seele anzieht, das wird sie.", source: "Marcus Aurelius, Selbstbetrachtungen" },
+  { text: "Du hast Macht über deinen Geist – nicht über die äußeren Ereignisse. Erkenne das, und du wirst Stärke finden.", source: "Marcus Aurelius" },
+  { text: "Die Ruhe der Seele liegt in der Ordnung der Gedanken.", source: "Marcus Aurelius" },
+  { text: "Es sind nicht die Dinge, die uns beunruhigen, sondern unsere Urteile über die Dinge.", source: "Epiktet, Handbüchlein" },
+  { text: "Wir können nicht wählen, was uns geschieht – aber wie wir darauf antworten.", source: "Epiktet" },
+  { text: "Zwischen Reiz und Reaktion liegt ein Raum. In diesem Raum liegt unsere Macht zu wählen.", source: "Viktor Frankl" },
+  { text: "Wer ein Warum zum Leben hat, erträgt fast jedes Wie.", source: "Viktor Frankl, …trotzdem Ja zum Leben sagen" },
+  { text: "Leben heißt nicht, sich den Umständen zu fügen, sondern ihnen einen Sinn zu geben.", source: "Viktor Frankl" },
+  { text: "Hinter jedem Gefühl steht ein Bedürfnis. Hinter jeder Kritik eine unerfüllte Sehnsucht.", source: "Marshall Rosenberg, Gewaltfreie Kommunikation" },
+  { text: "Nie war ich mir sicherer, als wenn ich zuhörte – ohne zu urteilen.", source: "Marshall Rosenberg" },
+  { text: "Beobachten ohne zu bewerten ist die höchste Form menschlicher Intelligenz.", source: "J. Krishnamurti" },
+  { text: "Der merkwürdige Widerspruch: Wenn ich mich annehme, wie ich bin, kann ich mich verändern.", source: "Carl Rogers" },
+  { text: "Was am persönlichsten ist, ist am allgemeinsten.", source: "Carl Rogers, On Becoming a Person" },
+  { text: "Du kannst die Wellen nicht anhalten. Aber du kannst lernen zu surfen.", source: "Jon Kabat-Zinn" },
+  { text: "Überall, wo du hingehst – da bist du.", source: "Jon Kabat-Zinn" },
+  { text: "Achtsamkeit ist nicht, an nichts zu denken. Sondern zu bemerken, was man gerade denkt.", source: "Jon Kabat-Zinn" },
+  { text: "Das Wunder ist nicht, auf Wasser zu gehen. Das Wunder ist, auf der Erde zu gehen und zu wissen, dass du es tust.", source: "Thich Nhat Hanh" },
+  { text: "Ruhe ist nicht die Abwesenheit von Bewegung. Sondern ihre bewusste Wahrnehmung.", source: "Thich Nhat Hanh" },
+  { text: "Es ist nicht, dass wir wenig Zeit haben – sondern dass wir viel davon verlieren.", source: "Seneca, Über die Kürze des Lebens" },
+  { text: "Jeder Tag sollte geführt werden, als wäre er ein ganzes Leben.", source: "Seneca" },
+  { text: "In jedem Moment haben wir die Wahl: einen Schritt vorwärts ins Wachstum – oder einen Schritt zurück in die Sicherheit.", source: "Abraham Maslow" },
+  { text: "Wer nach außen schaut, träumt. Wer nach innen schaut, erwacht.", source: "C. G. Jung" },
+  { text: "Ich bin nicht, was mir geschehen ist. Ich bin, was ich zu werden wähle.", source: "C. G. Jung" },
+  { text: "Habe Geduld mit allem Ungelösten in deinem Herzen. Versuche, die Fragen selbst zu lieben.", source: "Rainer Maria Rilke" },
+  { text: "Die Welt kennen lernen heißt wenig – sich selbst kennen lernen ist alles.", source: "Michel de Montaigne" },
+  { text: "Nicht die Aktivität zerstört uns, sondern die Unfähigkeit, innezuhalten.", source: "Byung-Chul Han" },
+];
+
+/* ===== FEELING MATRIX DATA ===== */
+const FEELING_MATRIX = {
+  kern: {
+    ua: [{label:'wütend',desc:'Ärger, der sich aufbaut'},{label:'ängstlich',desc:'Sorge, innere Anspannung'},{label:'gestresst',desc:'Überlastet, unter Druck'},{label:'frustriert',desc:'Klappt nicht wie gewollt'},{label:'genervt',desc:'Gereizt durch Kleinigkeiten'},{label:'panisch',desc:'Starke Angst, Kontrollverlust'}],
+    aa: [{label:'begeistert',desc:'Voller Vorfreude und Energie'},{label:'fröhlich',desc:'Gute Laune, beschwingt'},{label:'energiegeladen',desc:'Tatendrang, wach und bereit'},{label:'inspiriert',desc:'Kreative Ideen, Motivation'},{label:'aufgeregt',desc:'Positive Spannung, Erwartung'},{label:'stolz',desc:'Zufrieden mit einer Leistung'}],
+    ur: [{label:'traurig',desc:'Niedergeschlagen, bedrückt'},{label:'erschöpft',desc:'Ausgelaugt, keine Energie'},{label:'einsam',desc:'Mangel an Verbundenheit'},{label:'lustlos',desc:'Kein Antrieb, gleichgültig'},{label:'hoffnungslos',desc:'Sehe keinen Ausweg'},{label:'gelangweilt',desc:'Nichts reizt mich gerade'}],
+    ar: [{label:'zufrieden',desc:'Im Reinen mit mir und der Welt'},{label:'gelassen',desc:'Nichts bringt mich aus der Fassung'},{label:'dankbar',desc:'Wertschätzung für das, was ist'},{label:'entspannt',desc:'Körper und Geist lassen los'},{label:'geborgen',desc:'Sicher und aufgehoben'},{label:'friedlich',desc:'Innerer Frieden, Harmonie'}]
+  },
+  erweitert: {
+    ua: [{label:'wütend',desc:'Ärger, der sich aufbaut'},{label:'ängstlich',desc:'Sorge, innere Anspannung'},{label:'gestresst',desc:'Überlastet, unter Druck'},{label:'frustriert',desc:'Klappt nicht wie gewollt'},{label:'genervt',desc:'Gereizt durch Kleinigkeiten'},{label:'panisch',desc:'Starke Angst, Kontrollverlust'},
+      {label:'zornig',desc:'Intensiver, gerichteter Ärger',gfk:true},{label:'erbost',desc:'Aufgebracht über Ungerechtigkeit',gfk:true},{label:'aufgewühlt',desc:'Innerlich durcheinander',gfk:true},{label:'fassungslos',desc:'Kann nicht glauben, was passiert',gfk:true},{label:'angespannt',desc:'Unter Spannung',gfk:true},{label:'unruhig',desc:'Innerlich getrieben',gfk:true},{label:'verunsichert',desc:'Boden verloren',gfk:true},{label:'besorgt',desc:'Gedanken kreisen',gfk:true},{label:'erschrocken',desc:'Plötzlicher Schock',gfk:true},{label:'widerwillig',desc:'Innerer Widerstand',gfk:true},{label:'enttäuscht',desc:'Erwartung nicht erfüllt',gfk:true},{label:'verzweifelt',desc:'Tiefe Not',gfk:true}],
+    aa: [{label:'begeistert',desc:'Voller Vorfreude und Energie'},{label:'fröhlich',desc:'Gute Laune, beschwingt'},{label:'energiegeladen',desc:'Tatendrang, wach und bereit'},{label:'inspiriert',desc:'Kreative Ideen, Motivation'},{label:'aufgeregt',desc:'Positive Spannung, Erwartung'},{label:'stolz',desc:'Zufrieden mit einer Leistung'},
+      {label:'leidenschaftlich',desc:'Brennt für etwas',gfk:true},{label:'überschwänglich',desc:'Freude schwappt über',gfk:true},{label:'entzückt',desc:'Positiv überrascht',gfk:true},{label:'mutig',desc:'Bereit, etwas zu wagen',gfk:true},{label:'neugierig',desc:'Will entdecken',gfk:true},{label:'erwartungsvoll',desc:'Gespannt',gfk:true},{label:'erstaunt',desc:'Positiv überrascht',gfk:true},{label:'bewegt',desc:'Innerlich berührt',gfk:true},{label:'lebendig',desc:'Das Leben intensiv',gfk:true},{label:'heiter',desc:'Unbeschwert und leicht',gfk:true}],
+    ur: [{label:'traurig',desc:'Niedergeschlagen, bedrückt'},{label:'erschöpft',desc:'Ausgelaugt'},{label:'einsam',desc:'Mangel an Verbundenheit'},{label:'lustlos',desc:'Kein Antrieb'},{label:'hoffnungslos',desc:'Sehe keinen Ausweg'},{label:'gelangweilt',desc:'Nichts reizt mich'},
+      {label:'melancholisch',desc:'Stille Schwere',gfk:true},{label:'niedergeschlagen',desc:'Gedrückte Stimmung',gfk:true},{label:'entmutigt',desc:'Glaube nicht an Erfolg',gfk:true},{label:'hilflos',desc:'Weiss nicht weiter',gfk:true},{label:'müde',desc:'Körperlich erschlafft',gfk:true},{label:'apathisch',desc:'Fühle gar nichts',gfk:true},{label:'beschämt',desc:'Möchte mich verstecken',gfk:true},{label:'verletzt',desc:'Seelischer Schmerz',gfk:true},{label:'isoliert',desc:'Abgeschnitten',gfk:true},{label:'schwermütig',desc:'Anhaltende Schwere',gfk:true}],
+    ar: [{label:'zufrieden',desc:'Im Reinen'},{label:'gelassen',desc:'Nichts bringt mich aus der Fassung'},{label:'dankbar',desc:'Wertschätzung'},{label:'entspannt',desc:'Körper und Geist lassen los'},{label:'geborgen',desc:'Sicher und aufgehoben'},{label:'friedlich',desc:'Innerer Frieden'},
+      {label:'erleichtert',desc:'Last fällt ab',gfk:true},{label:'ausgeglichen',desc:'In der Mitte',gfk:true},{label:'beruhigt',desc:'Aufregung hat sich gelegt',gfk:true},{label:'sicher',desc:'Vertrauen in mich',gfk:true},{label:'liebevoll',desc:'Zuneigung und Wärme',gfk:true},{label:'mitfühlend',desc:'Anteilnahme',gfk:true},{label:'offen',desc:'Bereit für Neues',gfk:true},{label:'erfüllt',desc:'Tiefe Sättigung',gfk:true},{label:'vertrauensvoll',desc:'Es wird gut',gfk:true},{label:'sanft',desc:'Weich, achtsam mit mir',gfk:true}]
+  }
+};
+
+const FEELING_NEEDS = {
+  'wütend':['Respekt','Gerechtigkeit','Autonomie'], 'ängstlich':['Sicherheit','Vertrauen','Orientierung'],
+  'gestresst':['Ruhe','Entlastung','Raum'], 'frustriert':['Wirksamkeit','Anerkennung','Fortschritt'],
+  'genervt':['Raum','Ruhe','Klarheit'], 'panisch':['Sicherheit','Halt','Schutz'],
+  'zornig':['Gerechtigkeit','Respekt','Grenzen'], 'erbost':['Fairness','Würde'],
+  'aufgewühlt':['Ruhe','Verständnis','Klarheit'], 'fassungslos':['Orientierung','Verständnis'],
+  'angespannt':['Entspannung','Sicherheit'], 'unruhig':['Ruhe','Klarheit'],
+  'verunsichert':['Sicherheit','Orientierung','Vertrauen'], 'besorgt':['Sicherheit','Klarheit'],
+  'erschrocken':['Sicherheit','Schutz'], 'widerwillig':['Autonomie','Respekt'],
+  'enttäuscht':['Vertrauen','Verlässlichkeit','Wertschätzung'], 'verzweifelt':['Hoffnung','Hilfe','Verbindung'],
+  'begeistert':['Freude','Sinn','Entfaltung'], 'fröhlich':['Leichtigkeit','Verbundenheit'],
+  'energiegeladen':['Entfaltung','Ausdruck'], 'inspiriert':['Kreativität','Sinn'],
+  'aufgeregt':['Neues','Entwicklung'], 'stolz':['Anerkennung','Wirksamkeit','Selbstwert'],
+  'leidenschaftlich':['Sinn','Ausdruck','Entfaltung'], 'überschwänglich':['Freude','Ausdruck'],
+  'entzückt':['Schönheit','Staunen'], 'mutig':['Autonomie','Selbstvertrauen'],
+  'neugierig':['Entdeckung','Lernen'], 'erwartungsvoll':['Entwicklung','Hoffnung'],
+  'erstaunt':['Staunen','Neues'], 'bewegt':['Verbundenheit','Schönheit'],
+  'lebendig':['Ausdruck','Präsenz'], 'heiter':['Leichtigkeit','Freude'],
+  'traurig':['Trost','Verbindung','Verständnis'], 'erschöpft':['Ruhe','Erholung','Schlaf'],
+  'einsam':['Verbundenheit','Nähe','Zugehörigkeit'], 'lustlos':['Sinn','Inspiration','Anerkennung'],
+  'hoffnungslos':['Hoffnung','Unterstützung','Sinn'], 'gelangweilt':['Sinn','Anregung','Entfaltung'],
+  'melancholisch':['Trost','Tiefe','Verstehen'], 'niedergeschlagen':['Trost','Ermutigung'],
+  'entmutigt':['Ermutigung','Anerkennung'], 'hilflos':['Unterstützung','Orientierung'],
+  'müde':['Ruhe','Schlaf','Erholung'], 'apathisch':['Lebendigkeit','Sinn'],
+  'beschämt':['Annahme','Selbstmitgefühl','Verständnis'], 'verletzt':['Trost','Verständnis','Heilung'],
+  'isoliert':['Verbindung','Zugehörigkeit','Nähe'], 'schwermütig':['Trost','Verstehen'],
+  'zufrieden':['Frieden','Genügsamkeit'], 'gelassen':['Frieden','Sicherheit','Vertrauen'],
+  'dankbar':['Fülle','Wertschätzung'], 'entspannt':['Ruhe','Wohlbefinden'],
+  'geborgen':['Sicherheit','Zugehörigkeit','Nähe'], 'friedlich':['Harmonie','Frieden'],
+  'erleichtert':['Freiheit','Entlastung'], 'ausgeglichen':['Harmonie','Balance'],
+  'beruhigt':['Sicherheit','Stabilität'], 'sicher':['Vertrauen','Stabilität'],
+  'liebevoll':['Nähe','Verbindung'], 'mitfühlend':['Empathie','Verbindung'],
+  'offen':['Freiheit','Neugier'], 'erfüllt':['Sinn','Ganzheit'],
+  'vertrauensvoll':['Vertrauen','Sicherheit'], 'sanft':['Selbstfürsorge','Mitgefühl']
+};
+
+/* ===== STATE ===== */
+function loadState() {
+  const raw = localStorage.getItem('adse_state');
+  const defaults = {
+    profile: { name: '', identity: '' },
+    partner: null,
+    feelingLog: [],
+    bodyLog: [],
+    activityLog: [],
+    waterLog: [],
+    gratitudeLog: [],
+    todayItems: {},
+    todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
+    favoriteQuotes: [],
+    weeklySession: null,      // laufende/pausierte Session
+    weeklyArchive: [],        // abgeschlossene + abgebrochene Sitzungen
+    theme: 'terracotta',
+    lastOpenedDate: null
+  };
+  if (!raw) return defaults;
+  try {
+    const saved = { ...defaults, ...JSON.parse(raw) };
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','favoriteQuotes','todaySuggestions','weeklyArchive'].forEach(k => {
+      if (!Array.isArray(saved[k])) saved[k] = defaults[k];
+    });
+    if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
+    return saved;
+  } catch(e) { return defaults; }
+}
+
+function saveState() {
+  localStorage.setItem('adse_state', JSON.stringify(state));
+}
+
+let state = loadState();
+
+/* ===== OPENING QUOTE ===== */
+let currentOpeningIndex = 0;
+
+function showOpening() {
+  currentOpeningIndex = Math.floor(Math.random() * OPENING_QUOTES.length);
+  const q = OPENING_QUOTES[currentOpeningIndex];
+  document.getElementById('opening-quote').textContent = '„' + q.text + '"';
+  document.getElementById('opening-source').textContent = '— ' + q.source;
+  updateOpeningHeart();
+  document.getElementById('opening-overlay').classList.remove('closing');
+  document.getElementById('opening-overlay').style.display = 'flex';
+}
+
+function updateOpeningHeart() {
+  const btn = document.getElementById('opening-heart-btn');
+  if (!btn) return;
+  const isFav = state.favoriteQuotes.includes(currentOpeningIndex);
+  btn.textContent = isFav ? '♥' : '♡';
+  btn.classList.toggle('active', isFav);
+}
+
+function toggleOpeningFavorite() {
+  const idx = currentOpeningIndex;
+  const pos = state.favoriteQuotes.indexOf(idx);
+  if (pos >= 0) { state.favoriteQuotes.splice(pos, 1); }
+  else { state.favoriteQuotes.push(idx); }
+  saveState();
+  updateOpeningHeart();
+}
+
+function closeOpening() {
+  const ov = document.getElementById('opening-overlay');
+  ov.classList.add('closing');
+  setTimeout(() => { ov.style.display = 'none'; }, 600);
+  state.lastOpenedDate = new Date().toISOString();
+  saveState();
+}
+
+/* ===== SECTIONS / NAV ===== */
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  const target = document.getElementById('section-' + id);
+  if (target) target.classList.add('visible');
+  document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.remove('active'));
+  const navBtn = document.getElementById('nav-' + id);
+  if (navBtn) navBtn.classList.add('active');
+  if (id === 'settings') renderSettings();
+  if (id === 'home') renderHome();
+  if (id === 'body') renderBody();
+  if (id === 'verlauf') { renderHeatmap(); renderVerlaufList(); }
+  if (id === 'weekly') renderWeekly();
+  window.scrollTo(0, 0);
+}
+
+/* ===== CUSTOM CONFIRM ===== */
+let _confirmCallback = null;
+
+function askConfirm(msg, onYes, opts = {}) {
+  const ov = document.getElementById('confirm-overlay');
+  const titleEl = document.getElementById('confirm-title');
+  const msgEl = document.getElementById('confirm-msg');
+  const yesBtn = document.getElementById('confirm-yes-btn');
+  if (titleEl) titleEl.textContent = opts.title || 'Wirklich löschen?';
+  if (msgEl) msgEl.textContent = msg;
+  if (yesBtn) yesBtn.textContent = opts.yesText || 'Löschen';
+  _confirmCallback = onYes;
+  ov.classList.add('visible');
+}
+
+function confirmYes() {
+  document.getElementById('confirm-overlay').classList.remove('visible');
+  const cb = _confirmCallback;
+  _confirmCallback = null;
+  if (cb) cb();
+}
+
+function confirmNo() {
+  document.getElementById('confirm-overlay').classList.remove('visible');
+  _confirmCallback = null;
+}
+
+/* ===== TOAST ===== */
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('visible');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), 2500);
+}
+
+/* ===== HOME RENDER ===== */
+function renderHome() {
+  const now = new Date();
+  const hour = now.getHours();
+  const name = state.profile?.name ? ', ' + state.profile.name : '';
+  const greeting = hour < 12 ? 'Guten Morgen' + name
+                  : hour < 18 ? 'Guten Tag' + name
+                  : 'Guten Abend' + name;
+  document.getElementById('home-greeting').textContent = greeting;
+  document.getElementById('home-date').textContent = now.toLocaleDateString('de-DE', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  // Identität
+  const idCard = document.getElementById('identity-card');
+  const idText = document.getElementById('identity-text');
+  if (state.profile?.identity) {
+    idText.textContent = state.profile.identity;
+    idCard.classList.remove('empty');
+  } else {
+    idText.textContent = 'Noch kein Satz gesetzt — tippe, um einen zu notieren.';
+    idCard.classList.add('empty');
+  }
+
+  // Partner
+  const pCard = document.getElementById('partner-card');
+  const pText = document.getElementById('partner-text');
+  if (state.partner?.name) {
+    pText.innerHTML = 'Mit <strong>' + escapeHtml(state.partner.name) + '</strong> auf dem Weg';
+    pCard.style.display = '';
+  } else {
+    pCard.style.display = 'none';
+  }
+
+  renderTodayItems();
+  renderWeeklyHomeCard();
+}
+
+function renderWeeklyHomeCard() {
+  const card = document.getElementById('weekly-home-card');
+  const title = document.getElementById('weekly-home-title');
+  const sub = document.getElementById('weekly-home-sub');
+  const btn = document.getElementById('weekly-home-btn');
+  if (!card) return;
+
+  const session = state.weeklySession;
+  if (session && session.paused) {
+    title.textContent = 'Ihr seid mittendrin';
+    const answered = session.answers.filter(a => a && a.trim()).length;
+    sub.textContent = `${answered} Notiz${answered === 1 ? '' : 'en'} bereits hinterlegt.`;
+    btn.textContent = 'Weitermachen';
+  } else if (session && !session.paused) {
+    title.textContent = 'Laufende Sitzung';
+    sub.textContent = 'Ihr wart zuletzt hier.';
+    btn.textContent = 'Öffnen';
+  } else {
+    const day = new Date().getDay();
+    const isWeekend = day === 0 || day === 6;
+    title.textContent = 'Wochenreflexion';
+    sub.textContent = isWeekend
+      ? 'Wenn ihr heute Zeit findet — ein Rückblick zu zweit.'
+      : 'Ein Rückblick auf die vergangenen Tage.';
+    btn.textContent = 'Beginnen';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ===== IDENTITY EDITOR ===== */
+function openIdentityEditor() {
+  const ov = document.getElementById('identity-overlay');
+  const input = document.getElementById('identity-input');
+  input.value = state.profile?.identity || '';
+  ov.style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+}
+
+function closeIdentityEditor() {
+  document.getElementById('identity-overlay').style.display = 'none';
+}
+
+function saveIdentity() {
+  const val = document.getElementById('identity-input').value.trim();
+  if (!state.profile) state.profile = {};
+  state.profile.identity = val;
+  saveState();
+  closeIdentityEditor();
+  renderHome();
+  if (val) showToast('Notiert.');
+}
+
+/* ===== FEELING MATRIX ===== */
+let fmMode = 'kern';
+let fmSelected = [];
+
+function setFeelingMatrixMode(mode) {
+  fmMode = mode;
+  document.getElementById('fm-tab-kern').classList.toggle('active', mode === 'kern');
+  document.getElementById('fm-tab-erweitert').classList.toggle('active', mode === 'erweitert');
+  renderFeelingMatrix();
+}
+
+function renderFeelingMatrix() {
+  const data = FEELING_MATRIX[fmMode] || FEELING_MATRIX.kern;
+  ['ua','aa','ur','ar'].forEach(q => {
+    const el = document.getElementById('fm-q-' + q);
+    if (!el) return;
+    el.innerHTML = '';
+    data[q].forEach(f => el.appendChild(makeFeelingChip(f, q)));
+  });
+  updateFeelingSelection();
+}
+
+function makeFeelingChip(f, quadrant) {
+  const isSelected = fmSelected.some(s => s.label === f.label);
+  const btn = document.createElement('button');
+  btn.className = 'fm-word' + (f.gfk ? ' gfk' : '') + (isSelected ? ' selected' : '');
+  btn.textContent = f.label;
+
+  const colors = {
+    ua: { bg: 'var(--q-ua-bg)', sel: 'var(--q-ua-sel)', gfk: 'var(--q-ua-gfk)', text: 'var(--q-ua-text)' },
+    aa: { bg: 'var(--q-aa-bg)', sel: 'var(--q-aa-sel)', gfk: 'var(--q-aa-gfk)', text: 'var(--q-aa-text)' },
+    ur: { bg: 'var(--q-ur-bg)', sel: 'var(--q-ur-sel)', gfk: 'var(--q-ur-gfk)', text: 'var(--q-ur-text)' },
+    ar: { bg: 'var(--q-ar-bg)', sel: 'var(--q-ar-sel)', gfk: 'var(--q-ar-gfk)', text: 'var(--q-ar-text)' }
+  };
+  const c = colors[quadrant];
+
+  if (isSelected) {
+    btn.style.background = c.sel;
+    btn.style.color = 'white';
+    btn.style.borderColor = c.sel;
+  } else {
+    btn.style.background = f.gfk ? c.gfk : c.bg;
+    btn.style.color = c.text;
+  }
+  btn.onclick = () => toggleFeelingWord(f, quadrant);
+  return btn;
+}
+
+function toggleFeelingWord(f, quadrant) {
+  const idx = fmSelected.findIndex(s => s.label === f.label);
+  if (idx >= 0) {
+    fmSelected.splice(idx, 1);
+  } else {
+    if (fmSelected.length >= 5) {
+      const hint = document.getElementById('fm-hint');
+      hint.classList.add('visible');
+      setTimeout(() => hint.classList.remove('visible'), 3000);
+      return;
+    }
+    fmSelected.push({ label: f.label, quadrant, desc: f.desc, gfk: !!f.gfk });
+  }
+  renderFeelingMatrix();
+}
+
+function updateFeelingSelection() {
+  const sel = document.getElementById('fm-selection');
+  const tags = document.getElementById('fm-selected-tags');
+  const count = document.getElementById('fm-count');
+  if (!fmSelected.length) {
+    sel.classList.remove('visible');
+    return;
+  }
+  sel.classList.add('visible');
+  count.textContent = fmSelected.length;
+  tags.innerHTML = '';
+  fmSelected.forEach((s, i) => {
+    const colors = { ua:'var(--q-ua-sel)', aa:'var(--q-aa-sel)', ur:'var(--q-ur-sel)', ar:'var(--q-ar-sel)' };
+    const tag = document.createElement('div');
+    tag.className = 'fm-tag';
+    tag.style.background = colors[s.quadrant];
+    tag.innerHTML = `<span>${s.label}</span><span class="remove" onclick="removeFeelingWord(${i})">✕</span>`;
+    tags.appendChild(tag);
+  });
+}
+
+function removeFeelingWord(i) {
+  fmSelected.splice(i, 1);
+  renderFeelingMatrix();
+}
+
+function saveFeelingMatrix() {
+  if (!fmSelected.length) { showToast('Bitte mindestens ein Gefühl wählen.'); return; }
+  const context = document.getElementById('fm-context').value.trim();
+  const entry = {
+    ts: new Date().toISOString(),
+    feelings: fmSelected.map(s => ({ label: s.label, quadrant: s.quadrant })),
+    context: context || null,
+    needs: null
+  };
+  state.feelingLog.unshift(entry);
+  if (state.feelingLog.length > 500) state.feelingLog.pop();
+  saveState();
+  showNeedsReflection(entry, 0);
+}
+
+function showNeedsReflection(entry, logIndex) {
+  const isAllPositive = entry.feelings.every(f => f.quadrant === 'aa' || f.quadrant === 'ar');
+  const subtitle = isAllPositive
+    ? 'Welche Bedürfnisse sind gerade genährt?'
+    : 'Was könnte dahinterstecken?';
+  document.getElementById('fm-selection').classList.remove('visible');
+  const needsDiv = document.getElementById('fm-needs');
+  needsDiv.classList.add('visible');
+  let html = `<div class="fm-needs-title">Was steckt dahinter?</div>
+              <div class="fm-needs-sub">${subtitle}</div>`;
+  entry.feelings.forEach(f => {
+    const needs = FEELING_NEEDS[f.label] || [];
+    html += `<div style="margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="padding:3px 10px;border-radius:10px;font-size:0.78rem;font-weight:600;background:var(--q-${f.quadrant}-sel);color:white;">${f.label}</span>
+        <span style="font-size:0.75rem;color:var(--muted);">→</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px;">
+        ${needs.map(n => `<span class="fm-need-chip" data-need="${n}" onclick="toggleNeedChip(this)">${n}</span>`).join('')}
+      </div>
+    </div>`;
+  });
+  html += `<textarea id="fm-needs-note" placeholder="Eigener Gedanke... (optional)" rows="1"
+    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.82rem;resize:none;background:var(--card);color:var(--ink);margin-bottom:10px;outline:none;"></textarea>
+    <div style="display:flex;gap:8px;">
+      <button class="btn" style="flex:1;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
+      <button class="btn secondary" style="flex:1;" onclick="skipNeedsReflection()">Überspringen</button>
+    </div>`;
+  needsDiv.innerHTML = html;
+}
+
+function toggleNeedChip(el) {
+  el.classList.toggle('active');
+}
+
+function saveNeedsReflection(logIndex) {
+  const chips = document.querySelectorAll('#fm-needs .fm-need-chip');
+  const selected = [];
+  chips.forEach(c => { if (c.classList.contains('active')) selected.push(c.dataset.need); });
+  const note = (document.getElementById('fm-needs-note')?.value || '').trim();
+  if (selected.length || note) {
+    const entry = state.feelingLog[logIndex];
+    if (entry) {
+      entry.needs = selected.length ? [...new Set(selected)] : null;
+      if (note) entry.needsNote = note;
+      saveState();
+    }
+  }
+  finishNeedsReflection();
+  const unique = [...new Set(selected)];
+  showToast(unique.length ? 'Notiert: ' + unique.join(', ') : 'Notiert.');
+}
+
+function skipNeedsReflection() {
+  finishNeedsReflection();
+  showToast('Notiert.');
+}
+
+function finishNeedsReflection() {
+  document.getElementById('fm-needs').classList.remove('visible');
+  fmSelected = [];
+  document.getElementById('fm-context').value = '';
+  renderFeelingMatrix();
+}
+
+/* ===== TODAY-ITEMS ===== */
+function dayKey(d) {
+  d = d || new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+
+function getTodayItems() {
+  const k = dayKey();
+  if (!state.todayItems[k]) state.todayItems[k] = [];
+  return state.todayItems[k];
+}
+
+function renderTodayItems() {
+  const container = document.getElementById('today-chips');
+  if (!container) return;
+  const items = getTodayItems();
+  container.innerHTML = '';
+  items.forEach((it, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'today-chip' + (it.done ? ' done' : '');
+    chip.innerHTML = `
+      <span class="chip-check">${it.done ? '✓' : '○'}</span>
+      <span>${escapeHtml(it.text)}</span>
+      <span class="chip-delete" onclick="event.stopPropagation();deleteTodayItem(${i})">✕</span>
+    `;
+    chip.onclick = () => toggleTodayItem(i);
+    container.appendChild(chip);
+  });
+
+  // Vorschläge (nur solche, die noch nicht in heutiger Liste sind)
+  const sugg = document.getElementById('today-suggestions');
+  if (sugg) {
+    sugg.innerHTML = '';
+    const existing = new Set(items.map(i => i.text.toLowerCase()));
+    state.todaySuggestions.forEach(s => {
+      if (existing.has(s.toLowerCase())) return;
+      const btn = document.createElement('button');
+      btn.className = 'today-suggestion';
+      btn.textContent = '+ ' + s;
+      btn.onclick = () => addTodayItemText(s);
+      sugg.appendChild(btn);
+    });
+  }
+}
+
+function addTodayItem() {
+  const input = document.getElementById('today-input');
+  const text = (input.value || '').trim();
+  if (!text) return;
+  addTodayItemText(text);
+  input.value = '';
+}
+
+function addTodayItemText(text) {
+  const items = getTodayItems();
+  items.push({ text, done: false, ts: new Date().toISOString() });
+  // merken für Vorschläge (wenn neu)
+  if (!state.todaySuggestions.some(s => s.toLowerCase() === text.toLowerCase())) {
+    state.todaySuggestions.unshift(text);
+    if (state.todaySuggestions.length > 20) state.todaySuggestions.pop();
+  }
+  saveState();
+  renderTodayItems();
+}
+
+function toggleTodayItem(i) {
+  const items = getTodayItems();
+  if (items[i]) {
+    items[i].done = !items[i].done;
+    items[i].doneTs = items[i].done ? new Date().toISOString() : null;
+    saveState();
+    renderTodayItems();
+    if (items[i].done) showToast('✓');
+  }
+}
+
+function deleteTodayItem(i) {
+  const items = getTodayItems();
+  items.splice(i, 1);
+  saveState();
+  renderTodayItems();
+}
+
+/* ===== QUICK ENTRIES ===== */
+function openQuickEntry(type) {
+  const ov = document.getElementById('entry-' + type);
+  if (ov) ov.classList.add('visible');
+  // Felder leeren
+  if (type === 'activity') {
+    document.getElementById('activity-name').value = '';
+    document.getElementById('activity-min').value = '';
+    document.getElementById('activity-note').value = '';
+  }
+  if (type === 'gratitude') {
+    document.getElementById('gratitude-text').value = '';
+  }
+}
+
+function closeEntry(type) {
+  const ov = document.getElementById('entry-' + type);
+  if (ov) ov.classList.remove('visible');
+}
+
+function logWater(ml) {
+  state.waterLog.unshift({ ts: new Date().toISOString(), ml });
+  if (state.waterLog.length > 500) state.waterLog.pop();
+  saveState();
+  closeEntry('water');
+  showToast(ml + ' ml notiert.');
+}
+
+function logWaterCustom() {
+  const v = parseInt(document.getElementById('water-custom').value);
+  if (!v || v < 1) { showToast('Bitte Menge eingeben.'); return; }
+  logWater(v);
+  document.getElementById('water-custom').value = '';
+}
+
+function logActivity() {
+  const name = (document.getElementById('activity-name').value || '').trim();
+  const min = parseInt(document.getElementById('activity-min').value) || null;
+  const note = (document.getElementById('activity-note').value || '').trim();
+  if (!name) { showToast('Bitte Aktivität eingeben.'); return; }
+  state.activityLog.unshift({ ts: new Date().toISOString(), name, min, note: note || null });
+  if (state.activityLog.length > 500) state.activityLog.pop();
+  saveState();
+  closeEntry('activity');
+  showToast('Notiert.');
+}
+
+function logGratitude() {
+  const text = (document.getElementById('gratitude-text').value || '').trim();
+  if (!text) { showToast('Bitte etwas eintragen.'); return; }
+  state.gratitudeLog.unshift({ ts: new Date().toISOString(), text });
+  if (state.gratitudeLog.length > 500) state.gratitudeLog.pop();
+  saveState();
+  closeEntry('gratitude');
+  showToast('Notiert.');
+}
+
+/* ===== KÖRPER ===== */
+// Typen für lokale Körperstellen (wenn Zone angeklickt)
+const BODY_TYPES_LOCAL = ['Schmerz','Verspannung','Druck','Kribbeln','Wärme','Kälte','Schweregefühl','Wohlgefühl','Taubheit','Juckreiz'];
+// Typen für Allgemein-Zustand (systemisch)
+const BODY_TYPES_GENERAL = ['Kopfschmerzen','Migräne','Fieber','Erkältung','Übelkeit','Schwindel','Erschöpfung','Schlafmangel','Herzrasen','Atemnot','Unwohlsein','Wohlbefinden'];
+
+let bodyActiveZone = null;
+let bodyActiveTypes = [];
+
+function openBodyEntry(zone) {
+  bodyActiveZone = zone;
+  bodyActiveTypes = [];
+  document.getElementById('body-entry-title').textContent = zone;
+  document.getElementById('body-intensity').value = 5;
+  document.getElementById('body-intensity-val').textContent = '5';
+  document.getElementById('body-note').value = '';
+  const custom = document.getElementById('body-type-custom');
+  if (custom) custom.value = '';
+  renderBodyTypeChips();
+  document.getElementById('entry-body').classList.add('visible');
+}
+
+function openBodyGeneralEntry() {
+  openBodyEntry('Allgemein');
+}
+
+function renderBodyTypeChips() {
+  const c = document.getElementById('body-type-chips');
+  c.innerHTML = '';
+  const types = bodyActiveZone === 'Allgemein' ? BODY_TYPES_GENERAL : BODY_TYPES_LOCAL;
+  types.forEach(t => {
+    const btn = document.createElement('button');
+    const isActive = bodyActiveTypes.includes(t);
+    btn.className = 'chip' + (isActive ? ' active' : '');
+    btn.textContent = t;
+    btn.onclick = () => {
+      const i = bodyActiveTypes.indexOf(t);
+      if (i >= 0) bodyActiveTypes.splice(i, 1);
+      else bodyActiveTypes.push(t);
+      renderBodyTypeChips();
+    };
+    c.appendChild(btn);
+  });
+}
+
+function saveBodyEntry() {
+  if (!bodyActiveZone) return;
+  const customText = (document.getElementById('body-type-custom')?.value || '').trim();
+  let allTypes = [...bodyActiveTypes];
+  if (customText) allTypes.push(customText);
+
+  if (!allTypes.length) {
+    showToast('Bitte mindestens eine Art wählen oder eintragen.');
+    return;
+  }
+
+  const intensity = parseInt(document.getElementById('body-intensity').value) || 5;
+  const note = (document.getElementById('body-note').value || '').trim();
+  state.bodyLog.unshift({
+    ts: new Date().toISOString(),
+    zone: bodyActiveZone,
+    types: allTypes,
+    intensity,
+    note: note || null
+  });
+  if (state.bodyLog.length > 500) state.bodyLog.pop();
+  saveState();
+  bodyActiveZone = null;
+  bodyActiveTypes = [];
+  closeEntry('body');
+  renderBodyToday();
+  renderBodyZones();
+  showToast('Notiert.');
+}
+
+function renderBody() {
+  renderBodyZones();
+  renderBodyToday();
+  // Click-Handler auf SVG-Zonen
+  document.querySelectorAll('.sym-zone').forEach(el => {
+    el.onclick = () => openBodyEntry(el.getAttribute('data-zone'));
+  });
+}
+
+function renderBodyZones() {
+  const todayStr = dayKey();
+  const zonesWithEntry = new Set(
+    state.bodyLog
+      .filter(e => dayKey(new Date(e.ts)) === todayStr)
+      .map(e => e.zone)
+  );
+  document.querySelectorAll('.sym-zone').forEach(el => {
+    const z = el.getAttribute('data-zone');
+    el.classList.toggle('has-entry', zonesWithEntry.has(z));
+  });
+}
+
+function renderBodyToday() {
+  const list = document.getElementById('body-today-list');
+  const empty = document.getElementById('body-today-empty');
+  if (!list) return;
+  const todayStr = dayKey();
+  const entries = state.bodyLog.filter(e => dayKey(new Date(e.ts)) === todayStr);
+  list.innerHTML = '';
+  if (!entries.length) {
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  entries.forEach((e, i) => {
+    const d = new Date(e.ts);
+    const t = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const typesText = Array.isArray(e.types) ? e.types.join(', ') : (e.type || '');
+    const item = document.createElement('div');
+    item.className = 'log-entry';
+    item.innerHTML = `
+      <div class="log-entry-time">${t}</div>
+      <div class="log-entry-body">
+        <strong>${escapeHtml(e.zone)}</strong> — ${escapeHtml(typesText)} (${e.intensity}/10)
+        ${e.note ? `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(e.note)}</div>` : ''}
+      </div>
+      <button class="log-entry-delete" title="Eintrag löschen">✕</button>
+    `;
+    const delBtn = item.querySelector('.log-entry-delete');
+    if (delBtn) {
+      delBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        askConfirm('Diesen Eintrag wirklich löschen?', () => {
+          const idx = state.bodyLog.findIndex(x => x.ts === e.ts);
+          if (idx >= 0) {
+            state.bodyLog.splice(idx, 1);
+            saveState();
+            renderBodyToday();
+            renderBodyZones();
+            showToast('Gelöscht.');
+          }
+        });
+      };
+    }
+    list.appendChild(item);
+  });
+}
+
+/* ===== VERLAUF ===== */
+let verlaufFilter = 'all';
+
+function setVerlaufFilter(f) {
+  verlaufFilter = f;
+  document.querySelectorAll('#section-verlauf .chip').forEach(c => c.classList.remove('active'));
+  const active = document.getElementById('vf-' + f);
+  if (active) active.classList.add('active');
+  renderVerlaufList();
+}
+
+function getAllEntries() {
+  const out = [];
+  state.feelingLog.forEach(e => out.push({ type: 'feeling', ts: e.ts, data: e }));
+  state.bodyLog.forEach(e => out.push({ type: 'body', ts: e.ts, data: e }));
+  state.activityLog.forEach(e => out.push({ type: 'activity', ts: e.ts, data: e }));
+  state.waterLog.forEach(e => out.push({ type: 'water', ts: e.ts, data: e }));
+  state.gratitudeLog.forEach(e => out.push({ type: 'gratitude', ts: e.ts, data: e }));
+  // Today-Items (abgehakt und offen)
+  Object.keys(state.todayItems).forEach(dk => {
+    (state.todayItems[dk] || []).forEach(it => {
+      out.push({ type: 'today', ts: it.doneTs || it.ts, data: it, dayKey: dk });
+    });
+  });
+  out.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  return out;
+}
+
+function renderVerlaufList() {
+  const list = document.getElementById('verlauf-list');
+  const empty = document.getElementById('verlauf-empty');
+  if (!list) return;
+  let entries = getAllEntries();
+  if (verlaufFilter !== 'all') entries = entries.filter(e => e.type === verlaufFilter);
+
+  list.innerHTML = '';
+  if (!entries.length) {
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Nach Datum gruppieren
+  const groups = {};
+  entries.forEach(e => {
+    const d = new Date(e.ts);
+    const dk = dayKey(d);
+    if (!groups[dk]) groups[dk] = { date: d, entries: [] };
+    groups[dk].entries.push(e);
+  });
+
+  Object.keys(groups).sort((a, b) => b.localeCompare(a)).forEach(dk => {
+    const g = groups[dk];
+    const dateHeader = document.createElement('div');
+    dateHeader.style.cssText = 'font-family:"EB Garamond",serif;font-size:1.05rem;font-style:italic;color:var(--muted);margin:14px 0 8px;padding-left:4px;';
+    dateHeader.textContent = g.date.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    list.appendChild(dateHeader);
+    g.entries.forEach(e => list.appendChild(makeVerlaufEntry(e)));
+  });
+}
+
+function makeVerlaufEntry(e) {
+  const d = new Date(e.ts);
+  const t = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+
+  const colors = {
+    feeling: 'var(--q-aa-sel)',
+    body: 'var(--q-ua-sel)',
+    activity: 'var(--q-ar-sel)',
+    water: 'var(--q-aa-sel)',
+    gratitude: 'var(--gold)',
+    today: 'var(--accent)'
+  };
+  div.style.borderLeftColor = colors[e.type] || 'var(--border)';
+
+  let body = '';
+  const dat = e.data;
+  if (e.type === 'feeling') {
+    const labels = (dat.feelings || []).map(f => escapeHtml(f.label)).join(', ');
+    body = `<strong>Gefühl:</strong> ${labels}`;
+    if (dat.context) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">„${escapeHtml(dat.context)}"</div>`;
+    if (dat.needs && dat.needs.length) body += `<div style="margin-top:3px;color:var(--accent-deep);font-size:0.78rem;"><em>Bedürfnis:</em> ${dat.needs.map(escapeHtml).join(', ')}</div>`;
+    if (dat.needsNote) body += `<div style="margin-top:2px;color:var(--muted);font-size:0.78rem;">${escapeHtml(dat.needsNote)}</div>`;
+  } else if (e.type === 'body') {
+    const typesText = Array.isArray(dat.types) ? dat.types.join(', ') : (dat.type || '');
+    body = `<strong>Körper:</strong> ${escapeHtml(dat.zone)} — ${escapeHtml(typesText)} (${dat.intensity}/10)`;
+    if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
+  } else if (e.type === 'activity') {
+    body = `<strong>Aktivität:</strong> ${escapeHtml(dat.name)}`;
+    if (dat.min) body += ` — ${dat.min} min`;
+    if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
+  } else if (e.type === 'water') {
+    body = `<strong>Wasser:</strong> ${dat.ml} ml`;
+  } else if (e.type === 'gratitude') {
+    body = `<strong>Dankbarkeit:</strong><div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.text)}"</div>`;
+  } else if (e.type === 'today') {
+    const done = dat.done ? '✓' : '○';
+    body = `<strong>Heute-Item ${done}</strong> ${escapeHtml(dat.text)}`;
+  }
+
+  // Lösch-Button (dezent, rechts)
+  const deleteData = e.type === 'today'
+    ? `data-type="today" data-daykey="${e.dayKey}" data-ts="${e.ts}"`
+    : `data-type="${e.type}" data-ts="${e.ts}"`;
+
+  div.innerHTML = `
+    <div class="log-entry-time">${t}</div>
+    <div class="log-entry-body">${body}</div>
+    <button class="log-entry-delete" ${deleteData} title="Eintrag löschen">✕</button>
+  `;
+
+  // Handler
+  const delBtn = div.querySelector('.log-entry-delete');
+  if (delBtn) {
+    delBtn.onclick = (ev) => {
+      ev.stopPropagation();
+      confirmDeleteVerlaufEntry(e);
+    };
+  }
+
+  return div;
+}
+
+function confirmDeleteVerlaufEntry(e) {
+  askConfirm('Diesen Eintrag wirklich löschen?', () => {
+    deleteVerlaufEntry(e);
+    renderVerlaufList();
+    renderHeatmap();
+    showToast('Gelöscht.');
+  });
+}
+
+function deleteVerlaufEntry(e) {
+  if (e.type === 'feeling') {
+    const i = state.feelingLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.feelingLog.splice(i, 1);
+  } else if (e.type === 'body') {
+    const i = state.bodyLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.bodyLog.splice(i, 1);
+  } else if (e.type === 'activity') {
+    const i = state.activityLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.activityLog.splice(i, 1);
+  } else if (e.type === 'water') {
+    const i = state.waterLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.waterLog.splice(i, 1);
+  } else if (e.type === 'gratitude') {
+    const i = state.gratitudeLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.gratitudeLog.splice(i, 1);
+  } else if (e.type === 'today') {
+    const dk = e.dayKey;
+    if (state.todayItems[dk]) {
+      const i = state.todayItems[dk].findIndex(it =>
+        (it.doneTs === e.ts) || (it.ts === e.ts)
+      );
+      if (i >= 0) state.todayItems[dk].splice(i, 1);
+    }
+  }
+  saveState();
+}
+
+/* ===== HEATMAP ===== */
+function renderHeatmap() {
+  const container = document.getElementById('heatmap');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Zähle Einträge pro Tag (letzte 90)
+  const counts = {};
+  const all = [
+    ...state.feelingLog, ...state.bodyLog, ...state.activityLog,
+    ...state.waterLog, ...state.gratitudeLog
+  ];
+  all.forEach(e => {
+    const dk = dayKey(new Date(e.ts));
+    counts[dk] = (counts[dk] || 0) + 1;
+  });
+  Object.keys(state.todayItems).forEach(dk => {
+    const items = state.todayItems[dk] || [];
+    items.forEach(it => { counts[dk] = (counts[dk] || 0) + (it.done ? 1 : 0); });
+  });
+
+  const today = new Date();
+  const days = 90;
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dk = dayKey(d);
+    const c = counts[dk] || 0;
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell';
+    if (c >= 1 && c < 3) cell.classList.add('l1');
+    else if (c < 5) cell.classList.add('l2');
+    else if (c < 8) cell.classList.add('l3');
+    else if (c >= 8) cell.classList.add('l4');
+    cell.title = d.toLocaleDateString('de-DE') + ' — ' + c + ' Einträge';
+    container.appendChild(cell);
+  }
+}
+
+/* ===== WOCHENSTUNDE ===== */
+
+// Fragen-Struktur: 3 Kapitel mit Fragen, teils mit Datenanzeige
+const WEEKLY_QUESTIONS = [
+  // Kapitel 1 — Rückblick
+  { chapter: 1, chapterLabel: 'Rückblick', title: 'Was ist euch diese Woche besonders geblieben?',
+    sub: 'Ein Moment, eine Begegnung, ein Gedanke. Ihr könnt nacheinander sprechen.',
+    dataKey: 'gratitude' },
+  { chapter: 1, chapterLabel: 'Rückblick', title: 'Was war schwer?',
+    sub: 'Was hat euch gefordert, was hat weh getan? Auch körperlich.',
+    dataKey: 'hard' },
+  { chapter: 1, chapterLabel: 'Rückblick', title: 'Was war leicht, gut, belebend?',
+    sub: 'Wo war Freude, Energie, Ruhe?',
+    dataKey: 'easy' },
+
+  // Kapitel 2 — Gefühle und Bedürfnisse
+  { chapter: 2, chapterLabel: 'Gefühle & Bedürfnisse', title: 'Welche Gefühle waren diese Woche stark?',
+    sub: 'Schaut auf das, was die App gespeichert hat — und was nicht dort steht.',
+    dataKey: 'feelings' },
+  { chapter: 2, chapterLabel: 'Gefühle & Bedürfnisse', title: 'Welche Bedürfnisse sind zu kurz gekommen?',
+    sub: 'Ruhe, Nähe, Sinn, Bewegung, Verstanden-werden — was fehlte?',
+    dataKey: 'needs' },
+  { chapter: 2, chapterLabel: 'Gefühle & Bedürfnisse', title: 'Wo habt ihr euch gesehen gefühlt — voneinander?',
+    sub: 'Ein konkreter Moment. Oder die Frage ehrlich: hat es gefehlt?',
+    dataKey: null },
+
+  // Kapitel 3 — Blick nach vorn
+  { chapter: 3, chapterLabel: 'Blick nach vorn', title: 'Was nehmt ihr euch für nächste Woche vor — jede*r für sich?',
+    sub: 'Nichts Großes. Etwas Kleines, das ihr euch wünscht.',
+    dataKey: null },
+  { chapter: 3, chapterLabel: 'Blick nach vorn', title: 'Was für euch beide?',
+    sub: 'Eine gemeinsame Absicht. Kann auch nur ein Wort sein.',
+    dataKey: null },
+  { chapter: 3, chapterLabel: 'Blick nach vorn', title: 'Was nehmt ihr aus diesem Gespräch mit?',
+    sub: 'Der Satz, mit dem ihr hinausgeht. Ein Gedanke pro Person, oder zusammen.',
+    dataKey: null },
+];
+
+function weekStart() {
+  // Eine Woche = letzte 7 Tage ab jetzt
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  return d;
+}
+
+function openWeekly() {
+  // Wenn wir eine laufende Session haben, behandle sie als pausiert beim Wiedereintritt
+  if (state.weeklySession && !state.weeklySession.paused) {
+    // Session war nicht formal pausiert (App geschlossen oder Navigation). Setze als pausiert.
+    state.weeklySession.paused = true;
+    state.weeklySession.pausedAt = state.weeklySession.pausedAt || new Date().toISOString();
+    saveState();
+  }
+  showSection('weekly');
+}
+
+function renderWeekly() {
+  // Entscheide welche Ansicht: start / resume / active / finish
+  const start = document.getElementById('weekly-start');
+  const resume = document.getElementById('weekly-resume');
+  const active = document.getElementById('weekly-active');
+  const finish = document.getElementById('weekly-finish');
+  [start, resume, active, finish].forEach(el => el.style.display = 'none');
+
+  const session = state.weeklySession;
+
+  if (!session) {
+    start.style.display = '';
+    renderWeeklyStart();
+  } else if (session.paused) {
+    resume.style.display = '';
+    renderWeeklyResume();
+  } else {
+    active.style.display = '';
+    renderWeeklyQuestion();
+  }
+}
+
+function renderWeeklyStart() {
+  // Archiv-Liste
+  const list = document.getElementById('weekly-archive-list');
+  const empty = document.getElementById('weekly-archive-empty');
+  list.innerHTML = '';
+  if (!state.weeklyArchive.length) {
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    state.weeklyArchive.slice(0, 20).forEach((s, i) => {
+      const d = new Date(s.startedAt);
+      const dateStr = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+      const meta = s.completed ? 'vollständig' : `abgebrochen bei Frage ${s.stoppedAt}`;
+      const firstNote = (s.answers || []).find(a => a && a.trim());
+      const preview = firstNote ? `„${firstNote.slice(0, 100)}${firstNote.length > 100 ? '…' : ''}"` : '';
+      const entry = document.createElement('div');
+      entry.className = 'archive-entry';
+      entry.innerHTML = `
+        <div class="archive-entry-date">${dateStr}</div>
+        <div class="archive-entry-meta">${meta} · ${s.answers.filter(a=>a&&a.trim()).length} Notizen</div>
+        ${preview ? `<div class="archive-entry-preview">${escapeHtml(preview)}</div>` : ''}
+      `;
+      entry.onclick = () => openArchiveSession(i);
+      list.appendChild(entry);
+    });
+  }
+
+  // Hinweis auf letzte vollständige Sitzung
+  const lastCompleted = state.weeklyArchive.find(s => s.completed);
+  const hint = document.getElementById('weekly-last-hint');
+  const hintText = document.getElementById('weekly-last-text');
+  if (lastCompleted && lastCompleted.answers.some(a => a && a.trim())) {
+    const d = new Date(lastCompleted.startedAt);
+    const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
+    // Zeige Schluss-Sätze (letzte drei Antworten = Kapitel 3)
+    const last3 = lastCompleted.answers.slice(-3).filter(a => a && a.trim());
+    if (last3.length) {
+      hint.style.display = '';
+      hintText.innerHTML = `Vor ${daysAgo} Tagen habt ihr geschrieben:<br><em style="font-family:'EB Garamond',serif;font-size:0.95rem;">„${escapeHtml(last3[last3.length-1].slice(0, 140))}${last3[last3.length-1].length > 140 ? '…' : ''}"</em>`;
+    } else {
+      hint.style.display = 'none';
+    }
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+function renderWeeklyResume() {
+  const s = state.weeklySession;
+  if (!s) return;
+  const d = new Date(s.pausedAt || s.startedAt);
+  const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
+  const q = WEEKLY_QUESTIONS[s.currentQ] || WEEKLY_QUESTIONS[0];
+  const answered = s.answers.filter(a => a && a.trim()).length;
+  const info = document.getElementById('weekly-resume-info');
+  info.innerHTML = `
+    Ihr seid bei <strong>Kapitel ${q.chapter}: ${escapeHtml(q.chapterLabel)}</strong>,
+    Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}.<br>
+    ${answered} Notiz${answered === 1 ? '' : 'en'} schon hinterlegt.<br>
+    <span style="color:var(--muted);font-size:0.82rem;">
+      Pausiert vor ${daysAgo === 0 ? 'weniger als einem Tag' : daysAgo + ' Tag' + (daysAgo === 1 ? '' : 'en')}.
+    </span>
+  `;
+}
+
+function startWeekly() {
+  state.weeklySession = {
+    startedAt: new Date().toISOString(),
+    currentQ: 0,
+    answers: new Array(WEEKLY_QUESTIONS.length).fill(''),
+    paused: false
+  };
+  saveState();
+  renderWeekly();
+}
+
+function confirmRestartWeekly() {
+  askConfirm(
+    'Wirklich neu beginnen? Der bisherige Zwischenstand wird als abgebrochene Sitzung archiviert.',
+    () => {
+      if (state.weeklySession) {
+        archiveSession(state.weeklySession, false);
+      }
+      startWeekly();
+    },
+    { title: 'Neu beginnen?', yesText: 'Ja, neu beginnen' }
+  );
+}
+
+function resumeWeekly() {
+  if (state.weeklySession) {
+    state.weeklySession.paused = false;
+    saveState();
+    renderWeekly();
+  }
+}
+
+function pauseWeekly() {
+  if (!state.weeklySession) return;
+  // Aktuelle Antwort speichern
+  const note = (document.getElementById('weekly-q-note')?.value || '').trim();
+  state.weeklySession.answers[state.weeklySession.currentQ] = note;
+  state.weeklySession.paused = true;
+  state.weeklySession.pausedAt = new Date().toISOString();
+  saveState();
+  showToast('Pausiert. Ihr könnt jederzeit weitermachen.');
+  renderWeekly();
+}
+
+function endWeeklyEarly() {
+  if (!state.weeklySession) return;
+  askConfirm(
+    'Sitzung hier beenden? Was ihr bisher notiert habt, wird archiviert.',
+    () => {
+      const note = (document.getElementById('weekly-q-note')?.value || '').trim();
+      state.weeklySession.answers[state.weeklySession.currentQ] = note;
+      archiveSession(state.weeklySession, false);
+      state.weeklySession = null;
+      saveState();
+      showToast('Archiviert.');
+      renderWeekly();
+    },
+    { title: 'Hier beenden?', yesText: 'Ja, beenden' }
+  );
+}
+
+function weeklyBack() {
+  if (!state.weeklySession) return;
+  // Aktuelle Antwort speichern
+  const note = (document.getElementById('weekly-q-note')?.value || '').trim();
+  state.weeklySession.answers[state.weeklySession.currentQ] = note;
+  if (state.weeklySession.currentQ > 0) {
+    state.weeklySession.currentQ--;
+    saveState();
+    renderWeekly();
+  }
+}
+
+function weeklyNext() {
+  if (!state.weeklySession) return;
+  const note = (document.getElementById('weekly-q-note')?.value || '').trim();
+  state.weeklySession.answers[state.weeklySession.currentQ] = note;
+  if (state.weeklySession.currentQ < WEEKLY_QUESTIONS.length - 1) {
+    state.weeklySession.currentQ++;
+    saveState();
+    renderWeekly();
+  } else {
+    // Fertig — archivieren und Finish-Screen zeigen
+    finishWeekly();
+  }
+}
+
+function finishWeekly() {
+  if (!state.weeklySession) return;
+  archiveSession(state.weeklySession, true);
+  state.weeklySession = null;
+  saveState();
+
+  // Finish-Screen mit Zitat
+  const start = document.getElementById('weekly-start');
+  const resume = document.getElementById('weekly-resume');
+  const active = document.getElementById('weekly-active');
+  const finish = document.getElementById('weekly-finish');
+  [start, resume, active].forEach(el => el.style.display = 'none');
+  finish.style.display = '';
+
+  // Zitat: bevorzugt aus Favoriten, sonst zufällig
+  let idx;
+  if (state.favoriteQuotes && state.favoriteQuotes.length) {
+    idx = state.favoriteQuotes[Math.floor(Math.random() * state.favoriteQuotes.length)];
+  } else {
+    idx = Math.floor(Math.random() * OPENING_QUOTES.length);
+  }
+  const q = OPENING_QUOTES[idx];
+  document.getElementById('weekly-finish-quote').textContent = '„' + q.text + '"';
+  document.getElementById('weekly-finish-source').textContent = '— ' + q.source;
+}
+
+function closeWeeklyFinish() {
+  showSection('home');
+}
+
+function archiveSession(session, completed) {
+  const answered = session.answers.filter(a => a && a.trim()).length;
+  if (!answered) return; // Leere Sitzungen nicht archivieren
+  state.weeklyArchive.unshift({
+    startedAt: session.startedAt,
+    endedAt: new Date().toISOString(),
+    answers: [...session.answers],
+    completed,
+    stoppedAt: session.currentQ + 1
+  });
+  if (state.weeklyArchive.length > 100) state.weeklyArchive.pop();
+  saveState();
+}
+
+function renderWeeklyQuestion() {
+  const s = state.weeklySession;
+  if (!s) return;
+  const q = WEEKLY_QUESTIONS[s.currentQ];
+
+  // Fortschritt
+  document.getElementById('weekly-chapter-label').textContent =
+    `Kapitel ${q.chapter} · ${q.chapterLabel}`;
+  const pct = ((s.currentQ + 1) / WEEKLY_QUESTIONS.length) * 100;
+  document.getElementById('weekly-progress-fill').style.width = pct + '%';
+  document.getElementById('weekly-progress-q').textContent =
+    `Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}`;
+
+  // Frage
+  document.getElementById('weekly-q-title').textContent = q.title;
+  document.getElementById('weekly-q-sub').textContent = q.sub;
+
+  // Notiz
+  document.getElementById('weekly-q-note').value = s.answers[s.currentQ] || '';
+
+  // Datenanzeige
+  const dataDiv = document.getElementById('weekly-q-data');
+  if (q.dataKey) {
+    const dataHtml = getWeeklyDataFor(q.dataKey);
+    if (dataHtml) {
+      dataDiv.innerHTML = dataHtml;
+      dataDiv.style.display = '';
+    } else {
+      dataDiv.style.display = 'none';
+    }
+  } else {
+    dataDiv.style.display = 'none';
+  }
+
+  // Zurück-Button nur wenn möglich
+  const backBtn = document.getElementById('weekly-back-btn');
+  backBtn.style.display = s.currentQ > 0 ? '' : 'none';
+
+  // Weiter-Button: bei letzter Frage "Abschließen"
+  const nextBtn = document.getElementById('weekly-next-btn');
+  nextBtn.textContent = s.currentQ === WEEKLY_QUESTIONS.length - 1 ? 'Abschließen' : 'Weiter';
+}
+
+function getWeeklyDataFor(key) {
+  const start = weekStart();
+  const inWeek = ts => new Date(ts) >= start;
+
+  const fmtTime = ts => {
+    const d = new Date(ts);
+    return d.toLocaleDateString('de-DE', { weekday: 'short' }) + ' ' +
+           d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  if (key === 'gratitude') {
+    const entries = state.gratitudeLog.filter(e => inWeek(e.ts)).slice(0, 5);
+    if (!entries.length) return '';
+    return `<div class="weekly-data-box">
+      <div class="weekly-data-title">Dankbarkeits-Notizen der Woche</div>
+      ${entries.map(e => `<div class="weekly-data-item"><span class="data-time">${fmtTime(e.ts)}</span>„${escapeHtml(e.text.slice(0, 100))}${e.text.length > 100 ? '…' : ''}"</div>`).join('')}
+    </div>`;
+  }
+
+  if (key === 'hard') {
+    const feelings = state.feelingLog
+      .filter(e => inWeek(e.ts))
+      .filter(e => (e.feelings || []).some(f => f.quadrant === 'ua' || f.quadrant === 'ur'))
+      .slice(0, 5);
+    const body = state.bodyLog.filter(e => inWeek(e.ts)).slice(0, 5);
+    if (!feelings.length && !body.length) return '';
+    let html = '<div class="weekly-data-box"><div class="weekly-data-title">Was schwer war</div>';
+    feelings.forEach(e => {
+      const labels = (e.feelings || []).filter(f => f.quadrant === 'ua' || f.quadrant === 'ur').map(f => f.label).join(', ');
+      html += `<div class="weekly-data-item"><span class="data-time">${fmtTime(e.ts)}</span>${escapeHtml(labels)}</div>`;
+    });
+    body.forEach(e => {
+      const typesText = Array.isArray(e.types) ? e.types.join(', ') : (e.type || '');
+      html += `<div class="weekly-data-item"><span class="data-time">${fmtTime(e.ts)}</span>${escapeHtml(e.zone)}: ${escapeHtml(typesText)} (${e.intensity}/10)</div>`;
+    });
+    html += '</div>';
+    return html;
+  }
+
+  if (key === 'easy') {
+    const feelings = state.feelingLog
+      .filter(e => inWeek(e.ts))
+      .filter(e => (e.feelings || []).some(f => f.quadrant === 'aa' || f.quadrant === 'ar'))
+      .slice(0, 5);
+    const activities = state.activityLog.filter(e => inWeek(e.ts)).slice(0, 5);
+    if (!feelings.length && !activities.length) return '';
+    let html = '<div class="weekly-data-box"><div class="weekly-data-title">Was gut war</div>';
+    feelings.forEach(e => {
+      const labels = (e.feelings || []).filter(f => f.quadrant === 'aa' || f.quadrant === 'ar').map(f => f.label).join(', ');
+      html += `<div class="weekly-data-item"><span class="data-time">${fmtTime(e.ts)}</span>${escapeHtml(labels)}</div>`;
+    });
+    activities.forEach(e => {
+      const extra = e.min ? ` (${e.min} min)` : '';
+      html += `<div class="weekly-data-item"><span class="data-time">${fmtTime(e.ts)}</span>${escapeHtml(e.name)}${extra}</div>`;
+    });
+    html += '</div>';
+    return html;
+  }
+
+  if (key === 'feelings') {
+    const weekFeelings = state.feelingLog.filter(e => inWeek(e.ts));
+    if (!weekFeelings.length) return '';
+    // Zähle Quadranten
+    const counts = { ua: 0, aa: 0, ur: 0, ar: 0 };
+    const wordCounts = {};
+    weekFeelings.forEach(e => {
+      (e.feelings || []).forEach(f => {
+        counts[f.quadrant] = (counts[f.quadrant] || 0) + 1;
+        wordCounts[f.label] = (wordCounts[f.label] || 0) + 1;
+      });
+    });
+    const topWords = Object.entries(wordCounts).sort((a,b) => b[1]-a[1]).slice(0, 6);
+    const quadNames = { ua: 'unangenehm + aktiviert', aa: 'angenehm + aktiviert', ur: 'unangenehm + ruhig', ar: 'angenehm + ruhig' };
+    const dominant = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+    let html = '<div class="weekly-data-box"><div class="weekly-data-title">Gefühle dieser Woche</div>';
+    html += `<div class="weekly-data-item"><em>Dominanter Bereich:</em> ${quadNames[dominant[0]]} (${dominant[1]} Eintragungen)</div>`;
+    if (topWords.length) {
+      html += `<div class="weekly-data-item"><em>Häufig genannt:</em> ${topWords.map(([w, c]) => `${escapeHtml(w)} (${c}×)`).join(', ')}</div>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  if (key === 'needs') {
+    const weekFeelings = state.feelingLog.filter(e => inWeek(e.ts));
+    const needCounts = {};
+    weekFeelings.forEach(e => {
+      (e.needs || []).forEach(n => {
+        needCounts[n] = (needCounts[n] || 0) + 1;
+      });
+    });
+    const topNeeds = Object.entries(needCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    if (!topNeeds.length) return '';
+    let html = '<div class="weekly-data-box"><div class="weekly-data-title">Bedürfnisse, die oft auftauchten</div>';
+    html += `<div class="weekly-data-item">${topNeeds.map(([n, c]) => `${escapeHtml(n)}${c > 1 ? ` (${c}×)` : ''}`).join(' · ')}</div>`;
+    html += '</div>';
+    return html;
+  }
+
+  return '';
+}
+
+let archiveDetailIndex = null;
+
+function openArchiveSession(i) {
+  const s = state.weeklyArchive[i];
+  if (!s) return;
+  archiveDetailIndex = i;
+
+  const d = new Date(s.startedAt);
+  const dateStr = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+  document.getElementById('archive-detail-title').textContent = dateStr;
+
+  const meta = document.getElementById('archive-detail-meta');
+  const answered = (s.answers || []).filter(a => a && a.trim()).length;
+  meta.textContent = `Begonnen ${timeStr} · ${s.completed ? 'vollständig durchgesprochen' : `abgebrochen bei Frage ${s.stoppedAt}`} · ${answered} Notizen`;
+
+  // Inhalt rendern
+  const content = document.getElementById('archive-detail-content');
+  let html = '';
+  let currentChapter = null;
+  (s.answers || []).forEach((a, idx) => {
+    const q = WEEKLY_QUESTIONS[idx];
+    if (!q) return;
+    if (q.chapter !== currentChapter) {
+      currentChapter = q.chapter;
+      html += `<div style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.1em;margin-top:16px;margin-bottom:8px;">Kapitel ${q.chapter} · ${escapeHtml(q.chapterLabel)}</div>`;
+    }
+    html += `<div style="margin-bottom:14px;">
+      <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);margin-bottom:4px;">${escapeHtml(q.title)}</div>`;
+    if (a && a.trim()) {
+      html += `<div style="font-style:italic;color:var(--ink);padding-left:12px;border-left:2px solid var(--accent-soft);">„${escapeHtml(a)}"</div>`;
+    } else {
+      html += `<div style="color:var(--muted);font-size:0.85rem;font-style:italic;padding-left:12px;opacity:0.6;">(nicht beantwortet)</div>`;
+    }
+    html += '</div>';
+  });
+  content.innerHTML = html || '<p class="muted-note">Keine Notizen.</p>';
+
+  document.getElementById('archive-detail-overlay').classList.add('visible');
+}
+
+function closeArchiveDetail() {
+  document.getElementById('archive-detail-overlay').classList.remove('visible');
+  archiveDetailIndex = null;
+}
+
+function formatSessionAsText(s) {
+  const d = new Date(s.startedAt);
+  const dateStr = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const partner = state.partner?.name ? ` mit ${state.partner.name}` : '';
+  let out = `Eine Stunde zu zweit${partner}\n${dateStr}\n`;
+  out += '—'.repeat(40) + '\n\n';
+  let currentChapter = null;
+  (s.answers || []).forEach((a, idx) => {
+    const q = WEEKLY_QUESTIONS[idx];
+    if (!q) return;
+    if (!a || !a.trim()) return;
+    if (q.chapter !== currentChapter) {
+      currentChapter = q.chapter;
+      out += `\n[ Kapitel ${q.chapter} · ${q.chapterLabel} ]\n\n`;
+    }
+    out += `${q.title}\n`;
+    out += `„${a}"\n\n`;
+  });
+  out += '—'.repeat(40) + '\n';
+  out += 'Notiert in Ad se';
+  return out;
+}
+
+function exportSessionAsText() {
+  if (archiveDetailIndex === null) return;
+  const s = state.weeklyArchive[archiveDetailIndex];
+  if (!s) return;
+  const text = formatSessionAsText(s);
+
+  // Web Share API bevorzugt (iOS Sharesheet öffnet)
+  if (navigator.share) {
+    const d = new Date(s.startedAt);
+    const dateStr = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+    navigator.share({
+      title: `Wochengespräch ${dateStr}`,
+      text
+    }).catch(() => {
+      // Abgebrochen vom User - nichts tun
+    });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Text kopiert — einfügen in WhatsApp, Mail …');
+    }).catch(() => {
+      fallbackDownload(text, 'wochengespraech.txt', 'text/plain');
+    });
+  } else {
+    fallbackDownload(text, 'wochengespraech.txt', 'text/plain');
+  }
+}
+
+function exportSessionAsJson() {
+  if (archiveDetailIndex === null) return;
+  const s = state.weeklyArchive[archiveDetailIndex];
+  if (!s) return;
+  const payload = {
+    kind: 'adse-weekly-session',
+    version: 1,
+    partner: state.partner?.name || null,
+    session: s,
+    exportedAt: new Date().toISOString()
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const d = new Date(s.startedAt);
+  const fn = `wochengespraech-${dayKey(d)}.json`;
+  fallbackDownload(json, fn, 'application/json');
+  showToast('Datei erstellt.');
+}
+
+function exportAllSessions() {
+  if (!state.weeklyArchive.length) {
+    showToast('Noch nichts archiviert.');
+    return;
+  }
+  const payload = {
+    kind: 'adse-weekly-archive',
+    version: 1,
+    partner: state.partner?.name || null,
+    sessions: state.weeklyArchive,
+    exportedAt: new Date().toISOString()
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const fn = `ad-se-unser-buch-${dayKey(new Date())}.json`;
+  fallbackDownload(json, fn, 'application/json');
+  showToast('Alle Sitzungen gesichert.');
+}
+
+function fallbackDownload(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function triggerImportSessions() {
+  document.getElementById('import-sessions-file').click();
+}
+
+function handleImportSessions(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      importSessionsFromData(data);
+    } catch (err) {
+      showToast('Datei konnte nicht gelesen werden.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = ''; // Reset, damit man dieselbe Datei nochmal wählen kann
+}
+
+function importSessionsFromData(data) {
+  let newSessions = [];
+  if (data?.kind === 'adse-weekly-session' && data.session) {
+    newSessions = [data.session];
+  } else if (data?.kind === 'adse-weekly-archive' && Array.isArray(data.sessions)) {
+    newSessions = data.sessions;
+  } else if (Array.isArray(data)) {
+    newSessions = data;
+  } else {
+    showToast('Format unbekannt.');
+    return;
+  }
+
+  // Sanity: nur Objekte mit startedAt und answers übernehmen
+  const valid = newSessions.filter(s => s && s.startedAt && Array.isArray(s.answers));
+  if (!valid.length) {
+    showToast('Keine gültigen Sitzungen gefunden.');
+    return;
+  }
+
+  // Duplikate vermeiden (gleicher startedAt)
+  const existing = new Set(state.weeklyArchive.map(s => s.startedAt));
+  const toAdd = valid.filter(s => !existing.has(s.startedAt));
+  const skipped = valid.length - toAdd.length;
+
+  state.weeklyArchive = [...toAdd, ...state.weeklyArchive];
+  // Nach Datum sortieren, neueste oben
+  state.weeklyArchive.sort((a, b) => new Date(b.startedAt) - new Date(a.startedAt));
+  if (state.weeklyArchive.length > 200) state.weeklyArchive.length = 200;
+  saveState();
+
+  let msg = `${toAdd.length} Sitzung${toAdd.length === 1 ? '' : 'en'} importiert`;
+  if (skipped > 0) msg += ` (${skipped} bereits vorhanden)`;
+  showToast(msg + '.');
+  renderWeekly();
+}
+
+function confirmDeleteSession() {
+  if (archiveDetailIndex === null) return;
+  askConfirm(
+    'Diese Sitzung wirklich löschen? Das kann nicht rückgängig gemacht werden.',
+    () => {
+      state.weeklyArchive.splice(archiveDetailIndex, 1);
+      saveState();
+      closeArchiveDetail();
+      renderWeekly();
+      showToast('Gelöscht.');
+    }
+  );
+}
+
+/* ===== SETTINGS ===== */
+function renderSettings() {
+  const nameEl = document.getElementById('settings-name');
+  const partnerEl = document.getElementById('settings-partner-name');
+  const clearBtn = document.getElementById('clear-partner-btn');
+  if (nameEl) nameEl.value = state.profile?.name || '';
+  if (partnerEl) partnerEl.value = state.partner?.name || '';
+  if (clearBtn) clearBtn.style.display = state.partner?.name ? '' : 'none';
+}
+
+function saveName() {
+  const val = (document.getElementById('settings-name')?.value || '').trim();
+  if (!state.profile) state.profile = {};
+  state.profile.name = val;
+  saveState();
+  renderHome();
+  if (val) showToast('Notiert.');
+}
+
+function savePartner() {
+  const val = (document.getElementById('settings-partner-name')?.value || '').trim();
+  state.partner = val ? { name: val } : null;
+  saveState();
+  renderHome();
+  renderSettings();
+  if (val) showToast('Partner gesetzt.');
+}
+
+function clearPartner() {
+  state.partner = null;
+  document.getElementById('settings-partner-name').value = '';
+  saveState();
+  renderHome();
+  renderSettings();
+  showToast('Partner entfernt.');
+}
+
+/* ===== DATENSICHERUNG (alles) ===== */
+
+function exportAllData() {
+  const payload = {
+    kind: 'adse-full-backup',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    state: state
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const today = dayKey(new Date());
+  const name = state.profile?.name ? state.profile.name.toLowerCase().replace(/\s+/g, '-') + '-' : '';
+  const fn = `ad-se-sicherung-${name}${today}.json`;
+  fallbackDownload(json, fn, 'application/json');
+  showToast('Sicherung erstellt.');
+}
+
+function triggerImportAllData() {
+  document.getElementById('import-all-file').click();
+}
+
+function handleImportAllData(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      importAllFromData(data);
+    } catch (err) {
+      showToast('Datei konnte nicht gelesen werden.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function importAllFromData(data) {
+  // Akzeptiere: adse-full-backup ODER adse-weekly-archive (fallback zu Sitzungs-Import) ODER roher State
+  if (data?.kind === 'adse-weekly-archive' || data?.kind === 'adse-weekly-session') {
+    // Route zu Sitzungs-Import
+    importSessionsFromData(data);
+    return;
+  }
+
+  let imported = null;
+  if (data?.kind === 'adse-full-backup' && data.state) {
+    imported = data.state;
+  } else if (data && typeof data === 'object' && (data.feelingLog || data.bodyLog || data.profile)) {
+    // Roher State-Dump
+    imported = data;
+  } else {
+    showToast('Format unbekannt.');
+    return;
+  }
+
+  // Frage: Ersetzen oder zusammenführen?
+  askConfirm(
+    'Bestehende Daten durch die Sicherung ersetzen? Alternativ: zusammenführen (Abbrechen wählen, dann erneut versuchen — Zusammenführen folgt).',
+    () => {
+      replaceStateFromImport(imported);
+    },
+    { title: 'Ersetzen?', yesText: 'Ja, ersetzen' }
+  );
+}
+
+function replaceStateFromImport(imported) {
+  // Schutz: Defaults behalten, wo imported nichts hat
+  const defaults = {
+    profile: { name: '', identity: '' },
+    partner: null,
+    feelingLog: [],
+    bodyLog: [],
+    activityLog: [],
+    waterLog: [],
+    gratitudeLog: [],
+    todayItems: {},
+    todaySuggestions: [],
+    favoriteQuotes: [],
+    weeklySession: null,
+    weeklyArchive: [],
+    theme: 'terracotta',
+    lastOpenedDate: null
+  };
+  state = { ...defaults, ...imported };
+  // Arrays absichern
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','favoriteQuotes','todaySuggestions','weeklyArchive'].forEach(k => {
+    if (!Array.isArray(state[k])) state[k] = defaults[k];
+  });
+  if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
+  saveState();
+  // Alles neu rendern
+  if (state.theme && state.theme !== 'terracotta') {
+    document.documentElement.setAttribute('data-theme', state.theme);
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  renderHome();
+  renderSettings();
+  showToast('Daten geladen.');
+  showSection('home');
+}
+
+function confirmResetAll() {
+  askConfirm(
+    'Wirklich alle Daten löschen? Das kann nicht rückgängig gemacht werden. Wir empfehlen, vorher eine Sicherung zu erstellen.',
+    () => {
+      localStorage.removeItem('adse_state');
+      state = loadState();
+      showToast('Ad se zurückgesetzt.');
+      setTimeout(() => location.reload(), 800);
+    },
+    { title: 'Alles löschen?', yesText: 'Ja, alles löschen' }
+  );
+}
+
+/* ===== INIT ===== */
+// Theme anwenden
+if (state.theme && state.theme !== 'terracotta') {
+  document.documentElement.setAttribute('data-theme', state.theme);
+}
+
+showOpening();
+renderHome();
+renderFeelingMatrix();
+</script>
+
+</body>
+</html>
