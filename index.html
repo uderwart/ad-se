@@ -200,6 +200,7 @@ h1 {
 h2 {
   font-family: 'EB Garamond', serif;
   font-weight: 500;
+  font-style: italic;
   font-size: 1.3rem;
   color: var(--ink);
   margin-bottom: 10px;
@@ -300,12 +301,13 @@ h3 {
 }
 .identity-card:active { transform: scale(0.99); }
 .identity-label {
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-family: 'EB Garamond', serif;
+  font-weight: 500;
+  font-style: italic;
+  font-size: 1.3rem;
   color: var(--accent-deep);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 4px;
+  letter-spacing: -0.005em;
+  margin-bottom: 6px;
 }
 .identity-text {
   font-family: 'EB Garamond', serif;
@@ -330,14 +332,15 @@ h3 {
   padding: 14px 18px;
   margin-bottom: 16px;
   font-family: 'EB Garamond', serif;
-  font-size: 1.05rem;
+  font-size: 1.3rem;
+  font-weight: 500;
   font-style: italic;
   color: var(--ink);
   line-height: 1.4;
 }
 .partner-card strong {
   font-weight: 500;
-  font-style: normal;
+  font-style: italic;
   color: var(--accent-deep);
 }
 
@@ -1137,7 +1140,7 @@ h3 {
 }
 .moment-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-top: 22px;
   gap: 16px;
@@ -1277,7 +1280,7 @@ h3 {
 }
 .morning-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-top: 22px;
   gap: 16px;
@@ -1316,24 +1319,27 @@ h3 {
 }
 .morning-gift-text {
   font-family: 'EB Garamond', serif;
-  font-size: 1.55rem;
+  font-size: 1.85rem;
   font-weight: 500;
   font-style: italic;
-  line-height: 1.4;
+  line-height: 1.35;
   color: #3a1f1a;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   padding: 0 8px;
 }
-.morning-gift-text::before { content: "„"; }
-.morning-gift-text::after { content: """; }
+.morning-gift-text::before { content: "\201E"; }
+.morning-gift-text::after { content: "\201C"; }
+/* \201E = „  (öffnendes deutsches Anführungszeichen unten)
+   \201C = "  (schließendes deutsches Anführungszeichen oben) */
 .morning-gift-source {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.82rem;
-  letter-spacing: 0.12em;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
   text-align: center;
-  opacity: 0.55;
-  margin-bottom: 34px;
+  opacity: 0.6;
+  margin-top: 4px;
+  margin-bottom: 44px;
 }
 .morning-signature {
   font-family: 'EB Garamond', serif;
@@ -1475,7 +1481,7 @@ h3 {
 }
 .evening-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   margin-top: 22px;
   gap: 16px;
@@ -1991,7 +1997,6 @@ textarea, input {
       <div class="breath-progress">
         <div class="breath-progress-fill" id="breath-progress-fill"></div>
       </div>
-      <button class="moment-skip-btn" onclick="momentClose()">Schließen</button>
     </div>
 
     <!-- Phase 2: Frage -->
@@ -2000,7 +2005,6 @@ textarea, input {
       <p class="moment-q-sub">Ein Wort reicht. Oder ein Satz. Oder nichts.</p>
       <textarea id="moment-note" placeholder="…" rows="3" class="moment-note"></textarea>
       <div class="moment-actions">
-        <button class="moment-skip-btn" onclick="momentClose()">Schließen</button>
         <button class="moment-save-btn" onclick="momentSave()">Notieren</button>
       </div>
     </div>
@@ -2022,8 +2026,7 @@ textarea, input {
         <p class="morning-q-sub" id="morning-q-sub"></p>
         <textarea id="morning-q-note" placeholder="…" rows="3" class="morning-note"></textarea>
         <div class="morning-actions">
-          <button class="morning-skip" onclick="morningClose()">Schließen</button>
-          <button class="morning-next" id="morning-next-btn" onclick="morningNext()">Weiter</button>
+          <button class="morning-next" id="morning-next-btn" onclick="morningNext()">Eintragen</button>
         </div>
       </div>
 
@@ -2031,7 +2034,6 @@ textarea, input {
       <div id="morning-finish" style="display:none;">
         <div class="morning-gift-text" id="morning-gift-text"></div>
         <div class="morning-gift-source">— Heute</div>
-        <div class="morning-signature">Ad se</div>
         <button class="morning-close-btn" onclick="morningClose()">In den Tag</button>
       </div>
 
@@ -2055,7 +2057,6 @@ textarea, input {
         <p class="evening-q-sub" id="evening-q-sub"></p>
         <textarea id="evening-q-note" placeholder="…" rows="3" class="evening-note"></textarea>
         <div class="evening-actions">
-          <button class="evening-skip" onclick="eveningClose()">Schließen</button>
           <button class="evening-next" id="evening-next-btn" onclick="eveningNext()">Weiter</button>
         </div>
       </div>
@@ -5477,7 +5478,7 @@ function showEveningQuestion() {
   setTimeout(() => note.focus(), 200);
 
   const nextBtn = document.getElementById('evening-next-btn');
-  nextBtn.textContent = (eveningStep === EVENING_QUESTIONS.length - 1) ? 'Schließen' : 'Weiter';
+  nextBtn.textContent = (eveningStep === EVENING_QUESTIONS.length - 1) ? 'Eintragen' : 'Weiter';
 
   // Klammer zum Morgen: Echo nur bei erster Frage und wenn heute ein Morgen-Eintrag existiert
   const echoEl = document.getElementById('evening-morning-echo');
@@ -5649,7 +5650,7 @@ function showMorningQuestion() {
   setTimeout(() => note.focus(), 200);
 
   const nextBtn = document.getElementById('morning-next-btn');
-  nextBtn.textContent = 'Schließen';
+  nextBtn.textContent = 'Eintragen';
 }
 
 function morningNext() {
