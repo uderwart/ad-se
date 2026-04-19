@@ -1944,14 +1944,17 @@ textarea, input {
 <div class="entry-overlay" id="entry-activity">
   <div class="entry-modal">
     <h2>Aktivität notieren</h2>
-    <p class="muted-note" style="margin-bottom:14px;">Was hast du gemacht? Wie lange?</p>
+    <p class="muted-note" style="margin-bottom:14px;">Was hast du gemacht? Wie lange oder wie weit?</p>
+
+    <div id="activity-suggestions-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
+
     <input type="text" id="activity-name" placeholder="z. B. Radfahren, Gehen, Krafttraining…"
-      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;">
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;">
-      <input type="number" id="activity-min" placeholder="Minuten" min="1"
-        style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
-      <span style="color:var(--muted);font-size:0.85rem;">min</span>
-    </div>
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:10px;"
+      oninput="onActivityNameInput()">
+
+    <input type="text" id="activity-duration" placeholder='Dauer / Umfang (optional) — z. B. "30 min", "2 Std", "10 km"'
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;">
+
     <textarea id="activity-note" placeholder="Notiz (optional)" rows="2"
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
     <div style="display:flex;gap:8px;">
@@ -2123,6 +2126,21 @@ textarea, input {
   </div>
 
   <div class="card">
+    <h2>Vorschläge</h2>
+    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+      Diese Liste erscheint als Chips bei Vorhaben und Aktivitäten. Sie wächst automatisch,
+      wenn du Neues einträgst — oder ergänze sie hier direkt.
+    </p>
+    <div id="suggestions-list" style="margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="new-suggestion" placeholder="Neuen Vorschlag hinzufügen…"
+        style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+        onkeydown="if(event.key==='Enter'){addSuggestion();}">
+      <button class="btn small" onclick="addSuggestion()">+</button>
+    </div>
+  </div>
+
+  <div class="card">
     <h2>Datensicherung</h2>
     <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
       Alles, was du in Ad se einträgst, bleibt auf deinem Gerät. Nichts wird versendet.
@@ -2243,6 +2261,19 @@ textarea, input {
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;" onclick="confirmNo()">Abbrechen</button>
       <button class="btn" style="flex:1;background:#b04848;" id="confirm-yes-btn" onclick="confirmYes()">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== VORHABEN → AKTIVITÄT DIALOG ====== -->
+<div class="entry-overlay" id="vorhaben-activity-dialog">
+  <div class="entry-modal" style="max-width:380px;">
+    <h2 style="margin-bottom:4px;">Als Aktivität eintragen?</h2>
+    <p class="muted-note" style="margin-bottom:6px;">Du hast abgehakt:</p>
+    <p id="va-dialog-text" style="font-family:'EB Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--ink);margin-bottom:18px;padding:10px 14px;background:var(--accent-soft);border-radius:10px;"></p>
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;" onclick="closeVorhabenActivityDialog()">Nein, danke</button>
+      <button class="btn" style="flex:1;" onclick="proceedToActivityFromVorhaben()">Ja, eintragen</button>
     </div>
   </div>
 </div>
@@ -2373,6 +2404,7 @@ function loadState() {
     momentQuestionsSeen: [],
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
+    lastDurations: {},
     favoriteQuotes: [],
     weeklySession: null,
     weeklyArchive: [],
@@ -2388,6 +2420,7 @@ function loadState() {
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
     if (typeof saved.momentSettings !== 'object' || saved.momentSettings === null) saved.momentSettings = defaults.momentSettings;
+    if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     return saved;
   } catch(e) { return defaults; }
 }
@@ -2935,13 +2968,59 @@ function addTodayItemText(text) {
 
 function toggleTodayItem(i) {
   const items = getTodayItems();
-  if (items[i]) {
-    items[i].done = !items[i].done;
-    items[i].doneTs = items[i].done ? new Date().toISOString() : null;
+  if (!items[i]) return;
+
+  const wasActive = items[i].done;
+
+  // Beim Rückgängigmachen: still (kein Dialog)
+  if (wasActive) {
+    items[i].done = false;
+    items[i].doneTs = null;
     saveState();
     renderTodayItems();
     updateCollapsibleSummaries();
-    if (items[i].done) showToast('✓');
+    return;
+  }
+
+  // Beim Aktivieren: markieren + nachfragen
+  const itemText = items[i].text;
+  items[i].done = true;
+  items[i].doneTs = new Date().toISOString();
+  saveState();
+  renderTodayItems();
+  updateCollapsibleSummaries();
+  showToast('✓');
+
+  // Dialog "Als Aktivität eintragen?" zeigen
+  askActivityFromVorhaben(itemText);
+}
+
+function askActivityFromVorhaben(itemText) {
+  // Kleinen Bestätigungs-Dialog öffnen, der beide Optionen anbietet
+  const dialog = document.getElementById('vorhaben-activity-dialog');
+  if (!dialog) return;
+  document.getElementById('va-dialog-text').textContent = itemText;
+  dialog.dataset.itemText = itemText;
+  dialog.classList.add('visible');
+}
+
+function closeVorhabenActivityDialog() {
+  const dialog = document.getElementById('vorhaben-activity-dialog');
+  if (dialog) dialog.classList.remove('visible');
+}
+
+function proceedToActivityFromVorhaben() {
+  const dialog = document.getElementById('vorhaben-activity-dialog');
+  const itemText = dialog?.dataset?.itemText || '';
+  closeVorhabenActivityDialog();
+  if (!itemText) return;
+  // Aktivitäts-Dialog öffnen mit Namen vorgefüllt
+  openQuickEntry('activity');
+  const nameInput = document.getElementById('activity-name');
+  if (nameInput) {
+    nameInput.value = itemText;
+    // Dauer ggf. vorfüllen (lastDurations)
+    onActivityNameInput();
   }
 }
 
@@ -2960,8 +3039,9 @@ function openQuickEntry(type) {
   // Felder leeren
   if (type === 'activity') {
     document.getElementById('activity-name').value = '';
-    document.getElementById('activity-min').value = '';
+    document.getElementById('activity-duration').value = '';
     document.getElementById('activity-note').value = '';
+    renderActivitySuggestionChips();
   }
   if (type === 'gratitude') {
     document.getElementById('gratitude-text').value = '';
@@ -2973,13 +3053,61 @@ function closeEntry(type) {
   if (ov) ov.classList.remove('visible');
 }
 
+function renderActivitySuggestionChips() {
+  const c = document.getElementById('activity-suggestions-chips');
+  if (!c) return;
+  c.innerHTML = '';
+  const list = Array.isArray(state.todaySuggestions) ? state.todaySuggestions : [];
+  list.slice(0, 10).forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = s;
+    btn.onclick = () => {
+      document.getElementById('activity-name').value = s;
+      onActivityNameInput();
+    };
+    c.appendChild(btn);
+  });
+}
+
+// Bei Namenseingabe: ggf. gespeicherte Dauer vorfüllen (wenn Dauer-Feld noch leer)
+function onActivityNameInput() {
+  const name = (document.getElementById('activity-name').value || '').trim();
+  const durInput = document.getElementById('activity-duration');
+  if (!durInput) return;
+  if (durInput.value) return;  // Nutzer hat schon etwas eingegeben — nicht überschreiben
+  if (!name) return;
+  const key = name.toLowerCase();
+  const remembered = state.lastDurations && state.lastDurations[key];
+  if (remembered) durInput.value = remembered;
+}
+
 function logActivity() {
   const name = (document.getElementById('activity-name').value || '').trim();
-  const min = parseInt(document.getElementById('activity-min').value) || null;
+  const duration = (document.getElementById('activity-duration').value || '').trim();
   const note = (document.getElementById('activity-note').value || '').trim();
   if (!name) { showToast('Bitte Aktivität eingeben.'); return; }
-  state.activityLog.unshift({ ts: new Date().toISOString(), name, min, note: note || null });
+
+  state.activityLog.unshift({
+    ts: new Date().toISOString(),
+    name,
+    duration: duration || null,
+    note: note || null
+  });
   if (state.activityLog.length > 500) state.activityLog.pop();
+
+  // Aktivität auch in gemeinsame Vorschlagsliste übernehmen (wenn neu)
+  if (!state.todaySuggestions.some(s => s.toLowerCase() === name.toLowerCase())) {
+    state.todaySuggestions.unshift(name);
+    if (state.todaySuggestions.length > 20) state.todaySuggestions.pop();
+  }
+
+  // Dauer pro Aktivität merken (nur wenn tatsächlich eingegeben)
+  if (duration) {
+    if (!state.lastDurations) state.lastDurations = {};
+    state.lastDurations[name.toLowerCase()] = duration;
+  }
+
   saveState();
   closeEntry('activity');
   showToast('Notiert.');
@@ -3457,7 +3585,8 @@ function makeVerlaufEntry(e) {
     if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
   } else if (e.type === 'activity') {
     body = `<strong>Aktivität:</strong> ${escapeHtml(dat.name)}`;
-    if (dat.min) body += ` — ${dat.min} min`;
+    if (dat.duration) body += ` — ${escapeHtml(dat.duration)}`;
+    else if (dat.min) body += ` — ${dat.min} min`;  // Legacy
     if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
   } else if (e.type === 'water') {
     body = `<strong>Wasser:</strong> ${dat.ml} ml`;
@@ -4497,6 +4626,60 @@ function renderMomentSettings() {
     if (btn) btn.classList.toggle('active', String(s.duration) === d);
   });
   renderMomentQuestionsList();
+  renderSuggestionsList();
+}
+
+/* ===== VORSCHLÄGE (gemeinsame Liste für Vorhaben + Aktivitäten) ===== */
+function renderSuggestionsList() {
+  const list = document.getElementById('suggestions-list');
+  if (!list) return;
+  const items = Array.isArray(state.todaySuggestions) ? state.todaySuggestions : [];
+  if (!items.length) {
+    list.innerHTML = `<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.88rem;font-style:italic;">Keine Vorschläge — füge unten etwas hinzu.</div>`;
+    return;
+  }
+  list.innerHTML = items.map((s, i) => `
+    <div class="mq-item" data-idx="${i}">
+      <div class="mq-text" style="font-style:normal;font-family:'Inter',sans-serif;font-size:0.92rem;">${escapeHtml(s)}</div>
+      <button class="mq-remove" data-idx="${i}" title="Entfernen">✕</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.mq-remove').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      removeSuggestion(idx);
+    });
+  });
+}
+
+function addSuggestion() {
+  const input = document.getElementById('new-suggestion');
+  if (!input) return;
+  const s = (input.value || '').trim();
+  if (!s) return;
+  if (!Array.isArray(state.todaySuggestions)) state.todaySuggestions = [];
+  if (state.todaySuggestions.some(x => x.toLowerCase() === s.toLowerCase())) {
+    showToast('Vorschlag existiert schon.');
+    input.value = '';
+    return;
+  }
+  state.todaySuggestions.unshift(s);
+  if (state.todaySuggestions.length > 20) state.todaySuggestions.pop();
+  saveState();
+  input.value = '';
+  renderSuggestionsList();
+  renderTodaySuggestions();
+  showToast('Hinzugefügt.');
+}
+
+function removeSuggestion(idx) {
+  if (!Array.isArray(state.todaySuggestions)) return;
+  if (idx < 0 || idx >= state.todaySuggestions.length) return;
+  state.todaySuggestions.splice(idx, 1);
+  saveState();
+  renderSuggestionsList();
+  renderTodaySuggestions();
 }
 
 function renderMomentQuestionsList() {
@@ -4847,6 +5030,7 @@ function replaceStateFromImport(imported) {
     momentQuestionsSeen: [],
     todayItems: {},
     todaySuggestions: [],
+    lastDurations: {},
     favoriteQuotes: [],
     weeklySession: null,
     weeklyArchive: [],
@@ -4861,6 +5045,7 @@ function replaceStateFromImport(imported) {
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
   if (typeof state.momentSettings !== 'object' || state.momentSettings === null) state.momentSettings = defaults.momentSettings;
+  if (typeof state.lastDurations !== 'object' || state.lastDurations === null) state.lastDurations = {};
   saveState();
   // Alles neu rendern
   if (state.theme && state.theme !== 'terracotta') {
