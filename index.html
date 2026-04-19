@@ -626,6 +626,16 @@ h3 {
   background: var(--border);
   min-width: 12px;
 }
+.heatmap-cell.empty {
+  background: transparent;
+  border: 1px solid var(--border);
+  opacity: 0.4;
+}
+.heatmap-cell.phantom {
+  background: transparent;
+  border: none;
+  visibility: hidden;
+}
 .heatmap-cell.l1 { background: var(--accent-soft); }
 .heatmap-cell.l2 { background: var(--accent); opacity: 0.55; }
 .heatmap-cell.l3 { background: var(--accent); opacity: 0.8; }
@@ -695,7 +705,29 @@ h3 {
   box-shadow: var(--shadow);
 }
 
-/* ===== EIN MOMENT MIT MIR ===== */
+/* Klappbare Karten (Gefühlsmatrix / Vorhaben) */
+.collapsible-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+.collapsible-arrow {
+  color: var(--muted);
+  font-size: 1rem;
+  transition: transform 0.2s;
+  padding-top: 6px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.collapsible.open .collapsible-arrow {
+  transform: rotate(90deg);
+}
+.collapsible-body {
+  margin-top: 14px;
+}
+
 /* ===== EIN MOMENT MIT MIR ===== */
 .breath-option {
   display: flex;
@@ -717,6 +749,63 @@ h3 {
 .breath-option input {
   margin-top: 3px;
   accent-color: var(--accent);
+}
+
+/* Schlaf-Auswahl im Körper-Dialog */
+.sleep-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  color: var(--ink);
+  transition: background 0.15s;
+}
+.sleep-option:hover {
+  background: rgba(255,255,255,0.4);
+}
+.sleep-option input {
+  accent-color: var(--accent);
+}
+
+/* Moment-Fragen-Liste in Einstellungen */
+.mq-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+.mq-text {
+  flex: 1;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  color: var(--ink);
+  line-height: 1.4;
+}
+.mq-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.mq-remove:hover {
+  opacity: 1;
+  color: #b04848;
 }
 
 /* Favoriten (gesammelte Zitate) */
@@ -842,8 +931,8 @@ h3 {
   border: 1.5px dashed rgba(61,53,39,0.25);
 }
 .breath-circle {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #b89a6b, #7d6338);
   box-shadow: 0 4px 20px rgba(61,53,39,0.25);
@@ -1446,8 +1535,16 @@ textarea, input {
   </div>
 
   <!-- Gefühls-Matrix -->
-  <div class="card matrix-card">
-    <h2>Wie fühlst du dich?</h2>
+  <div class="card matrix-card collapsible" id="matrix-collapsible">
+    <div class="collapsible-header" onclick="toggleMatrix()">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Wie fühlst du dich?</h2>
+        <p class="muted-note" id="matrix-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow" id="matrix-arrow">▸</span>
+    </div>
+
+    <div class="collapsible-body" id="matrix-body" style="display:none;">
     <p class="matrix-sub">Bis zu fünf Gefühle. Gemischte Gefühle sind normal.</p>
 
     <div class="matrix-tabs">
@@ -1492,11 +1589,20 @@ textarea, input {
     <div class="fm-needs" id="fm-needs"></div>
 
     <div class="fm-hint" id="fm-hint">Maximal 5 Gefühle – tippe auf ein markiertes Wort, um es abzuwählen.</div>
+    </div>
   </div>
 
   <!-- Vorhaben für heute -->
-  <div class="card">
-    <h2>Vorhaben</h2>
+  <div class="card collapsible" id="vorhaben-collapsible">
+    <div class="collapsible-header" onclick="toggleVorhaben()">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Vorhaben</h2>
+        <p class="muted-note" id="vorhaben-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow" id="vorhaben-arrow">▸</span>
+    </div>
+
+    <div class="collapsible-body" id="vorhaben-body" style="display:none;">
     <p class="muted-note" style="margin-bottom:12px;">Was nimmst du dir für heute vor? Tippe etwas ein oder wähle aus der Liste. Alles freiwillig.</p>
 
     <div id="today-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
@@ -1509,6 +1615,7 @@ textarea, input {
     </div>
 
     <div id="today-suggestions" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;"></div>
+    </div>
   </div>
 
   <!-- Schnell-Eintrag -->
@@ -1568,7 +1675,7 @@ textarea, input {
 
     <!-- Phase 2: Frage -->
     <div class="moment-inner" id="moment-question" style="display:none;">
-      <h2 class="moment-q-title">Was bewegt dich jetzt?</h2>
+      <h2 class="moment-q-title" id="moment-question-text">Was bewegt dich jetzt?</h2>
       <p class="moment-q-sub">Ein Wort reicht. Oder ein Satz. Oder nichts.</p>
       <textarea id="moment-note" placeholder="…" rows="3" class="moment-note"></textarea>
       <div class="moment-actions">
@@ -1890,6 +1997,17 @@ textarea, input {
         oninput="document.getElementById('body-intensity-val').textContent=this.value">
     </div>
 
+    <!-- Schlaf-Block: nur sichtbar wenn "Schlaf" ausgewählt -->
+    <div id="body-sleep-block" style="display:none;margin-bottom:14px;padding:12px 14px;background:var(--accent-soft);border-radius:10px;">
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label class="sleep-option"><input type="radio" name="body-sleep" value="tief_erholt"> Tief und erholt</label>
+        <label class="sleep-option"><input type="radio" name="body-sleep" value="gut_zu_kurz"> Gut, aber zu kurz</label>
+        <label class="sleep-option"><input type="radio" name="body-sleep" value="unruhig"> Unruhig</label>
+        <label class="sleep-option"><input type="radio" name="body-sleep" value="gruebeln"> Schwer — Grübeln</label>
+        <label class="sleep-option"><input type="radio" name="body-sleep" value="unbekannt"> Ich weiß es nicht</label>
+      </div>
+    </div>
+
     <textarea id="body-note" placeholder="Notiz (optional)" rows="2"
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
 
@@ -1986,6 +2104,20 @@ textarea, input {
         <button class="chip" id="moment-dur-60" onclick="saveMomentDuration(60)">1 Minute</button>
         <button class="chip" id="moment-dur-120" onclick="saveMomentDuration(120)">2 Minuten</button>
         <button class="chip" id="moment-dur-180" onclick="saveMomentDuration(180)">3 Minuten</button>
+      </div>
+    </div>
+
+    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+      <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Reflexionsfragen</div>
+      <p class="muted-note" style="margin-bottom:12px;font-size:0.82rem;line-height:1.5;">
+        Die Frage nach der Atemphase wechselt bei jedem Moment. Füge eigene Fragen hinzu oder entferne, was dir nicht passt.
+      </p>
+      <div id="moment-questions-list" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-moment-question" placeholder="Neue Frage hinzufügen…"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          onkeydown="if(event.key==='Enter'){addMomentQuestion();}">
+        <button class="btn small" onclick="addMomentQuestion()">+</button>
       </div>
     </div>
   </div>
@@ -2164,6 +2296,7 @@ const OPENING_QUOTES = [
   { text: "Habe Geduld mit allem Ungelösten in deinem Herzen. Versuche, die Fragen selbst zu lieben.", source: "Rainer Maria Rilke" },
   { text: "Die Welt kennen lernen heißt wenig – sich selbst kennen lernen ist alles.", source: "Michel de Montaigne" },
   { text: "Nicht die Aktivität zerstört uns, sondern die Unfähigkeit, innezuhalten.", source: "Byung-Chul Han" },
+  { text: "Der Geist ist wie ein Fallschirm — er funktioniert nur, wenn er sich öffnet.", source: "Thomas Dewar" },
 ];
 
 /* ===== FEELING MATRIX DATA ===== */
@@ -2236,6 +2369,8 @@ function loadState() {
     eveningLog: [],
     momentLog: [],
     momentSettings: { breathType: 'box', duration: 60 },
+    momentQuestions: null,
+    momentQuestionsSeen: [],
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     favoriteQuotes: [],
@@ -2248,7 +2383,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -2419,6 +2554,81 @@ function renderHome() {
   renderTodayItems();
   renderWeeklyHomeCard();
   renderEveningHomeCard();
+  updateCollapsibleSummaries();
+}
+
+/* ===== KLAPPBARE KARTEN (Home-Screen) ===== */
+function toggleMatrix() {
+  const card = document.getElementById('matrix-collapsible');
+  const body = document.getElementById('matrix-body');
+  if (!card || !body) return;
+  const isOpen = card.classList.contains('open');
+  if (isOpen) {
+    card.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    card.classList.add('open');
+    body.style.display = '';
+  }
+}
+
+function toggleVorhaben() {
+  const card = document.getElementById('vorhaben-collapsible');
+  const body = document.getElementById('vorhaben-body');
+  if (!card || !body) return;
+  const isOpen = card.classList.contains('open');
+  if (isOpen) {
+    card.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    card.classList.add('open');
+    body.style.display = '';
+  }
+}
+
+function updateCollapsibleSummaries() {
+  // Matrix-Summary: letzter Eintrag
+  const matSummary = document.getElementById('matrix-summary');
+  if (matSummary) {
+    const last = state.feelingLog[0];
+    if (last && last.feelings && last.feelings.length) {
+      const words = last.feelings.slice(0, 3).map(f => f.label).join(', ');
+      const when = formatRelativeTime(last.ts);
+      matSummary.textContent = `Zuletzt: ${words} · ${when}`;
+    } else {
+      matSummary.textContent = 'Tippen, um Gefühle einzutragen';
+    }
+  }
+
+  // Vorhaben-Summary: offen / erledigt heute
+  const vorSummary = document.getElementById('vorhaben-summary');
+  if (vorSummary) {
+    const todayStr = dayKey();
+    const items = (state.todayItems && state.todayItems[todayStr]) || [];
+    const open = items.filter(it => !it.done).length;
+    const done = items.filter(it => it.done).length;
+    if (!items.length) {
+      vorSummary.textContent = 'Tippen, um etwas vorzunehmen';
+    } else {
+      const parts = [];
+      if (open > 0) parts.push(`${open} offen`);
+      if (done > 0) parts.push(`${done} erledigt`);
+      vorSummary.textContent = parts.join(' · ');
+    }
+  }
+}
+
+function formatRelativeTime(isoTs) {
+  const diff = Date.now() - new Date(isoTs).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1) return 'gerade eben';
+  if (mins < 60) return `vor ${mins} Min.`;
+  if (hours < 24) return `vor ${hours} Std.`;
+  if (days === 1) return 'gestern';
+  if (days < 7) return `vor ${days} Tagen`;
+  return new Date(isoTs).toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
 }
 
 function renderWeeklyHomeCard() {
@@ -2644,6 +2854,14 @@ function finishNeedsReflection() {
   fmSelected = [];
   document.getElementById('fm-context').value = '';
   renderFeelingMatrix();
+  // Matrix automatisch zuklappen und Summary aktualisieren
+  const card = document.getElementById('matrix-collapsible');
+  const body = document.getElementById('matrix-body');
+  if (card && body) {
+    card.classList.remove('open');
+    body.style.display = 'none';
+  }
+  updateCollapsibleSummaries();
 }
 
 /* ===== TODAY-ITEMS ===== */
@@ -2712,6 +2930,7 @@ function addTodayItemText(text) {
   }
   saveState();
   renderTodayItems();
+  updateCollapsibleSummaries();
 }
 
 function toggleTodayItem(i) {
@@ -2721,6 +2940,7 @@ function toggleTodayItem(i) {
     items[i].doneTs = items[i].done ? new Date().toISOString() : null;
     saveState();
     renderTodayItems();
+    updateCollapsibleSummaries();
     if (items[i].done) showToast('✓');
   }
 }
@@ -2730,6 +2950,7 @@ function deleteTodayItem(i) {
   items.splice(i, 1);
   saveState();
   renderTodayItems();
+  updateCollapsibleSummaries();
 }
 
 /* ===== QUICK ENTRIES ===== */
@@ -2778,7 +2999,7 @@ function logGratitude() {
 // Typen für lokale Körperstellen (wenn Zone angeklickt)
 const BODY_TYPES_LOCAL = ['Schmerz','Verspannung','Druck','Kribbeln','Wärme','Kälte','Schweregefühl','Wohlgefühl','Taubheit','Juckreiz'];
 // Typen für Allgemein-Zustand (systemisch)
-const BODY_TYPES_GENERAL = ['Kopfschmerzen','Migräne','Fieber','Erkältung','Übelkeit','Schwindel','Erschöpfung','Schlafmangel','Herzrasen','Atemnot','Unwohlsein','Wohlbefinden'];
+const BODY_TYPES_GENERAL = ['Kopfschmerzen','Migräne','Fieber','Erkältung','Übelkeit','Schwindel','Erschöpfung','Schlaf','Herzrasen','Atemnot','Unwohlsein','Wohlbefinden'];
 
 let bodyActiveZone = null;
 let bodyActiveTypes = [];
@@ -2792,12 +3013,22 @@ function openBodyEntry(zone) {
   document.getElementById('body-note').value = '';
   const custom = document.getElementById('body-type-custom');
   if (custom) custom.value = '';
+  // Schlaf-Block zurücksetzen
+  updateSleepBlockVisibility();
+  document.querySelectorAll('input[name="body-sleep"]').forEach(r => r.checked = false);
   renderBodyTypeChips();
   document.getElementById('entry-body').classList.add('visible');
 }
 
 function openBodyGeneralEntry() {
   openBodyEntry('Allgemein');
+}
+
+function updateSleepBlockVisibility() {
+  const block = document.getElementById('body-sleep-block');
+  if (!block) return;
+  const hasSleep = bodyActiveTypes.includes('Schlaf');
+  block.style.display = hasSleep ? '' : 'none';
 }
 
 function renderBodyTypeChips() {
@@ -2814,6 +3045,7 @@ function renderBodyTypeChips() {
       if (i >= 0) bodyActiveTypes.splice(i, 1);
       else bodyActiveTypes.push(t);
       renderBodyTypeChips();
+      updateSleepBlockVisibility();
     };
     c.appendChild(btn);
   });
@@ -2832,12 +3064,21 @@ function saveBodyEntry() {
 
   const intensity = parseInt(document.getElementById('body-intensity').value) || 5;
   const note = (document.getElementById('body-note').value || '').trim();
+
+  // Schlaf-Qualität, falls Schlaf ausgewählt wurde
+  let sleepQuality = null;
+  if (bodyActiveTypes.includes('Schlaf')) {
+    const selected = document.querySelector('input[name="body-sleep"]:checked');
+    if (selected) sleepQuality = selected.value;
+  }
+
   state.bodyLog.unshift({
     ts: new Date().toISOString(),
     zone: bodyActiveZone,
     types: allTypes,
     intensity,
-    note: note || null
+    note: note || null,
+    sleepQuality: sleepQuality
   });
   if (state.bodyLog.length > 500) state.bodyLog.pop();
   saveState();
@@ -3203,6 +3444,16 @@ function makeVerlaufEntry(e) {
   } else if (e.type === 'body') {
     const typesText = Array.isArray(dat.types) ? dat.types.join(', ') : (dat.type || '');
     body = `<strong>Körper:</strong> ${escapeHtml(dat.zone)} — ${escapeHtml(typesText)} (${dat.intensity}/10)`;
+    if (dat.sleepQuality) {
+      const labels = {
+        tief_erholt: 'Tief und erholt',
+        gut_zu_kurz: 'Gut, aber zu kurz',
+        unruhig: 'Unruhig',
+        gruebeln: 'Schwer — Grübeln',
+        unbekannt: 'Nicht bewusst wahrgenommen'
+      };
+      body += `<div style="margin-top:3px;color:var(--accent-deep);font-size:0.82rem;"><em>Schlaf:</em> ${escapeHtml(labels[dat.sleepQuality] || dat.sleepQuality)}</div>`;
+    }
     if (dat.note) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">${escapeHtml(dat.note)}</div>`;
   } else if (e.type === 'activity') {
     body = `<strong>Aktivität:</strong> ${escapeHtml(dat.name)}`;
@@ -3227,8 +3478,11 @@ function makeVerlaufEntry(e) {
       }
     });
   } else if (e.type === 'moment') {
-    body = `<strong>Ein Moment mit mir</strong>
-      <div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.text)}"</div>`;
+    body = `<strong>Ein Moment mit mir</strong>`;
+    if (dat.question) {
+      body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;font-style:italic;">${escapeHtml(dat.question)}</div>`;
+    }
+    body += `<div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.text)}"</div>`;
   }
 
   // Lösch-Button (dezent, rechts)
@@ -3303,11 +3557,12 @@ function renderHeatmap() {
   if (!container) return;
   container.innerHTML = '';
 
-  // Zähle Einträge pro Tag (letzte 90)
+  // Zähle Einträge pro Tag
   const counts = {};
   const all = [
     ...state.feelingLog, ...state.bodyLog, ...state.activityLog,
-    ...state.waterLog, ...state.gratitudeLog
+    ...state.waterLog, ...state.gratitudeLog,
+    ...(state.eveningLog || []), ...(state.momentLog || [])
   ];
   all.forEach(e => {
     const dk = dayKey(new Date(e.ts));
@@ -3319,7 +3574,34 @@ function renderHeatmap() {
   });
 
   const today = new Date();
-  const days = 90;
+
+  // Heatmap so viele Tage zurück, wie Daten vorhanden (+Puffer), max 90
+  let days = 90;
+  const entryDates = Object.keys(counts).sort();
+  if (entryDates.length > 0) {
+    const firstEntryDate = new Date(entryDates[0]);
+    const daysSinceFirst = Math.floor((today - firstEntryDate) / (1000 * 60 * 60 * 24));
+    days = Math.min(90, Math.max(14, daysSinceFirst + 3));
+  } else {
+    days = 14;
+  }
+
+  // Feste Spaltenzahl verwenden — 14 Spalten
+  const COLS = 14;
+  container.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+
+  // Padding-Zellen vorne, damit heute garantiert rechts unten landet
+  // Wir wollen: Die letzte Zelle ist heute. Also muss (days + padding) durch COLS teilbar sein,
+  // ODER wir fügen vorne so viele leere "Phantom"-Zellen ein, dass heute in der letzten Spalte landet.
+  // Einfachste Form: die letzte Zeile voll machen, indem wir vorne auffüllen
+  const padding = (COLS - (days % COLS)) % COLS;
+
+  for (let p = 0; p < padding; p++) {
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell phantom';
+    container.appendChild(cell);
+  }
+
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
@@ -3327,10 +3609,11 @@ function renderHeatmap() {
     const c = counts[dk] || 0;
     const cell = document.createElement('div');
     cell.className = 'heatmap-cell';
-    if (c >= 1 && c < 3) cell.classList.add('l1');
+    if (c === 0) cell.classList.add('empty');
+    else if (c < 3) cell.classList.add('l1');
     else if (c < 5) cell.classList.add('l2');
     else if (c < 8) cell.classList.add('l3');
-    else if (c >= 8) cell.classList.add('l4');
+    else cell.classList.add('l4');
     cell.title = d.toLocaleDateString('de-DE') + ' — ' + c + ' Einträge';
     container.appendChild(cell);
   }
@@ -3991,6 +4274,60 @@ const BREATH_CYCLES = {
   calm:   [4, 7, 8, 0]        // 19s/Zyklus – Beruhigend 4-7-8
 };
 
+// Default-Fragen — können vom Nutzer ergänzt und gelöscht werden
+const DEFAULT_MOMENT_QUESTIONS = [
+  'Was bewegt dich jetzt?',
+  'Wo bist du gerade — im Kopf, im Herz, im Körper?',
+  'Welches Gefühl ist gerade dein Gast?',
+  'Was nimmst du in diesem Moment wahr?',
+  'Was brauchst du gerade?',
+  'Wofür ist jetzt Zeit?',
+  'Mit welcher Haltung willst du weitergehen?',
+  'Was willst du heute nicht verlieren?',
+  'Was darf jetzt klein sein, was darf groß sein?',
+  'Was möchte gesagt werden?',
+  'Was ist heute dein Faden?',
+  'Welcher Gedanke bleibt bei dir?',
+  'Was hat dich heute berührt?',
+  'Wenn dieser Moment ein Wort wäre — welches?',
+  'Was ist dir gerade wichtig, auch wenn es klein ist?'
+];
+
+function getMomentQuestions() {
+  // Wenn Nutzer noch nie Fragen angefasst hat: Default-Liste verwenden
+  if (!Array.isArray(state.momentQuestions) || state.momentQuestions === null) {
+    return [...DEFAULT_MOMENT_QUESTIONS];
+  }
+  return state.momentQuestions;
+}
+
+function pickNextMomentQuestion() {
+  const questions = getMomentQuestions();
+  if (!questions.length) return 'Was bewegt dich jetzt?';  // Fallback
+  if (!Array.isArray(state.momentQuestionsSeen)) state.momentQuestionsSeen = [];
+
+  // Unseen = Fragen, die noch nicht gezeigt wurden
+  let unseen = questions.filter(q => !state.momentQuestionsSeen.includes(q));
+
+  const lastShown = state.momentQuestionsSeen[state.momentQuestionsSeen.length - 1] || '';
+
+  if (unseen.length === 0) {
+    // Alle gesehen: Bag leeren, von vorne
+    state.momentQuestionsSeen = [];
+    unseen = questions.filter(q => q !== lastShown);
+    if (unseen.length === 0) unseen = questions;
+  }
+
+  const chosen = unseen[Math.floor(Math.random() * unseen.length)];
+  state.momentQuestionsSeen.push(chosen);
+  // Seen-Liste nicht länger als die Frageliste
+  if (state.momentQuestionsSeen.length > questions.length) {
+    state.momentQuestionsSeen = state.momentQuestionsSeen.slice(-questions.length);
+  }
+  saveState();
+  return chosen;
+}
+
 let momentTimers = [];
 let momentRunning = false;
 
@@ -3999,8 +4336,20 @@ function openMoment() {
   document.getElementById('moment-question').style.display = 'none';
   document.getElementById('moment-note').value = '';
   document.getElementById('breath-progress-fill').style.width = '0%';
+  // Kreis garantiert klein starten (Klasse entfernen, kurz ohne Transition)
+  const circle = document.getElementById('breath-circle');
+  if (circle) {
+    circle.style.transition = 'none';
+    circle.classList.remove('inhaling');
+    // Force-Reflow, damit die Größe wirklich klein ist, bevor die Animation startet
+    void circle.offsetWidth;
+  }
+  const hint = document.getElementById('breath-hint');
+  if (hint) hint.textContent = 'Bereit';
   showSection('moment');
-  startBreathing();
+  // Kurze Pause, damit der Nutzer kurz den kleinen Kreis wahrnimmt,
+  // bevor das erste Einatmen losgeht
+  setTimeout(() => startBreathing(), 600);
 }
 
 function startBreathing() {
@@ -4094,6 +4443,9 @@ function stopBreathing() {
 function showMomentQuestion() {
   document.getElementById('moment-breathing').style.display = 'none';
   document.getElementById('moment-question').style.display = '';
+  // Aktuelle Frage setzen
+  const titleEl = document.getElementById('moment-question-text');
+  if (titleEl) titleEl.textContent = pickNextMomentQuestion();
   setTimeout(() => {
     const note = document.getElementById('moment-note');
     if (note) note.focus();
@@ -4102,10 +4454,12 @@ function showMomentQuestion() {
 
 function momentSave() {
   const note = (document.getElementById('moment-note').value || '').trim();
+  const question = document.getElementById('moment-question-text')?.textContent || '';
   if (note) {
     state.momentLog.unshift({
       ts: new Date().toISOString(),
-      text: note
+      text: note,
+      question: question
     });
     if (state.momentLog.length > 500) state.momentLog.pop();
     saveState();
@@ -4142,6 +4496,62 @@ function renderMomentSettings() {
     const btn = document.getElementById(`moment-dur-${d}`);
     if (btn) btn.classList.toggle('active', String(s.duration) === d);
   });
+  renderMomentQuestionsList();
+}
+
+function renderMomentQuestionsList() {
+  const list = document.getElementById('moment-questions-list');
+  if (!list) return;
+  const questions = getMomentQuestions();
+  if (!questions.length) {
+    list.innerHTML = `<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.88rem;font-style:italic;">Keine Fragen — füge unten eine hinzu.</div>`;
+    return;
+  }
+  list.innerHTML = questions.map((q, i) => `
+    <div class="mq-item" data-idx="${i}">
+      <div class="mq-text">${escapeHtml(q)}</div>
+      <button class="mq-remove" data-idx="${i}" title="Frage entfernen">✕</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.mq-remove').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      removeMomentQuestion(idx);
+    });
+  });
+}
+
+function addMomentQuestion() {
+  const input = document.getElementById('new-moment-question');
+  if (!input) return;
+  const q = (input.value || '').trim();
+  if (!q) return;
+  // Liste initialisieren (aus Default) falls null
+  if (!Array.isArray(state.momentQuestions)) {
+    state.momentQuestions = [...DEFAULT_MOMENT_QUESTIONS];
+  }
+  if (state.momentQuestions.includes(q)) {
+    showToast('Frage existiert schon.');
+    input.value = '';
+    return;
+  }
+  state.momentQuestions.push(q);
+  saveState();
+  input.value = '';
+  renderMomentQuestionsList();
+  showToast('Hinzugefügt.');
+}
+
+function removeMomentQuestion(idx) {
+  // Liste initialisieren (aus Default) falls null, damit Löschen auch bei Defaults möglich ist
+  if (!Array.isArray(state.momentQuestions)) {
+    state.momentQuestions = [...DEFAULT_MOMENT_QUESTIONS];
+  }
+  if (idx < 0 || idx >= state.momentQuestions.length) return;
+  state.momentQuestions.splice(idx, 1);
+  saveState();
+  renderMomentQuestionsList();
 }
 
 /* ===== ABENDSTUNDE ===== */
@@ -4433,6 +4843,8 @@ function replaceStateFromImport(imported) {
     eveningLog: [],
     momentLog: [],
     momentSettings: { breathType: 'box', duration: 60 },
+    momentQuestions: null,
+    momentQuestionsSeen: [],
     todayItems: {},
     todaySuggestions: [],
     favoriteQuotes: [],
@@ -4444,7 +4856,7 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
@@ -4489,6 +4901,21 @@ function closeVersionHistory() {
 if (state.theme && state.theme !== 'terracotta') {
   document.documentElement.setAttribute('data-theme', state.theme);
 }
+
+// Einmalig: Dewar-Zitat als Favorit markieren (Nummer 27, Index 26)
+// Nur einmal — beim zweiten Öffnen passiert nichts mehr
+(function autoFavoriteDewar() {
+  const DEWAR_INDEX = 26;
+  if (!state.autoFavsDone) state.autoFavsDone = [];
+  if (!state.autoFavsDone.includes('dewar')) {
+    if (!Array.isArray(state.favoriteQuotes)) state.favoriteQuotes = [];
+    if (!state.favoriteQuotes.includes(DEWAR_INDEX) && DEWAR_INDEX < OPENING_QUOTES.length) {
+      state.favoriteQuotes.push(DEWAR_INDEX);
+    }
+    state.autoFavsDone.push('dewar');
+    saveState();
+  }
+})();
 
 showOpening();
 renderHome();
