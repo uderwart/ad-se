@@ -238,6 +238,55 @@ h3 {
   color: var(--muted);
   margin-top: 2px;
 }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 4px;
+  transition: color 0.15s;
+}
+.back-link:hover {
+  color: var(--accent-deep);
+}
+
+/* Vollbild-Schließen-Knopf (für Moment/Morgen/Abend/Wochenstunde) */
+.fullscreen-close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: 18px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: inherit;
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background 0.15s;
+}
+.fullscreen-close:hover {
+  background: rgba(255,255,255,0.3);
+}
+/* Hellerer Kontrast im Morgen-Context */
+.morning-wrap .fullscreen-close {
+  background: rgba(74,47,42,0.1);
+  border-color: rgba(74,47,42,0.3);
+  color: #3a1f1a;
+}
+.morning-wrap .fullscreen-close:hover {
+  background: rgba(74,47,42,0.2);
+}
 
 /* Identitäts-Satz */
 .identity-card {
@@ -808,7 +857,16 @@ h3 {
   color: #b04848;
 }
 
-/* Zitat-Verwaltungsliste (Mehr → Gedanken verwalten) */
+/* Zitat-Verwaltungsliste (Mehr → Gesammelte Gedanken) */
+.quote-section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
 .quote-item {
   display: flex;
   align-items: flex-start;
@@ -952,6 +1010,7 @@ h3 {
   max-width: none;
 }
 .moment-wrap {
+  position: relative;
   min-height: 100vh;
   min-height: 100svh;
   background: linear-gradient(160deg, #e8dcbf, #c9b893);
@@ -1109,6 +1168,196 @@ h3 {
 }
 .moment-save-btn:hover, .moment-save-btn:active { background: rgba(61,53,39,0.2); }
 
+/* ===== MORGENSTUNDE ===== */
+.morning-card {
+  background: linear-gradient(135deg, #f5c9c0, #e8a89d);
+  color: #4a2f2a;
+  border-radius: 14px;
+  padding: 20px 20px 22px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.morning-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.morning-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.08rem;
+  opacity: 0.85;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+.morning-btn {
+  padding: 11px 24px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(74,47,42,0.4);
+  background: rgba(255,255,255,0.3);
+  color: #4a2f2a;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.morning-btn:hover, .morning-btn:active { background: rgba(255,255,255,0.5); }
+
+#section-morning {
+  padding: 0;
+  max-width: none;
+}
+.morning-wrap {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: linear-gradient(160deg, #f7d4cc, #e8a89d);
+  color: #4a2f2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top, 40px) 28px calc(80px + env(safe-area-inset-bottom, 0px));
+}
+.morning-inner {
+  max-width: 520px;
+  width: 100%;
+}
+.morning-step {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.morning-q-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 10px;
+  color: #3a1f1a;
+  text-align: center;
+}
+.morning-q-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  opacity: 0.7;
+  margin-bottom: 28px;
+  text-align: center;
+  line-height: 1.5;
+}
+.morning-note {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(74,47,42,0.2);
+  border-radius: 12px;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  resize: none;
+  background: rgba(255,255,255,0.3);
+  color: #3a1f1a;
+  outline: none;
+  line-height: 1.55;
+}
+.morning-note::placeholder {
+  color: rgba(74,47,42,0.4);
+}
+.morning-note:focus {
+  border-color: rgba(74,47,42,0.45);
+  background: rgba(255,255,255,0.5);
+}
+.morning-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 22px;
+  gap: 16px;
+}
+.morning-skip {
+  background: none;
+  border: none;
+  color: rgba(74,47,42,0.55);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 10px 4px;
+}
+.morning-skip:hover { color: rgba(74,47,42,0.85); }
+.morning-next {
+  padding: 11px 28px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(74,47,42,0.55);
+  background: rgba(255,255,255,0.4);
+  color: #3a1f1a;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.morning-next:hover, .morning-next:active { background: rgba(255,255,255,0.6); }
+.morning-welcome {
+  font-family: 'EB Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #3a1f1a;
+  text-align: center;
+  margin-bottom: 28px;
+}
+.morning-gift-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.4;
+  color: #3a1f1a;
+  text-align: center;
+  margin-bottom: 10px;
+  padding: 0 8px;
+}
+.morning-gift-text::before { content: "„"; }
+.morning-gift-text::after { content: """; }
+.morning-gift-source {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  opacity: 0.55;
+  margin-bottom: 34px;
+}
+.morning-signature {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  text-align: center;
+  font-size: 1.1rem;
+  opacity: 0.55;
+  margin-bottom: 36px;
+}
+.morning-close-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 12px 28px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(74,47,42,0.55);
+  background: rgba(255,255,255,0.4);
+  color: #3a1f1a;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.morning-close-btn:hover { background: rgba(255,255,255,0.6); }
+
 /* ===== ABENDSTUNDE ===== */
 .evening-card {
   background: linear-gradient(135deg, #3a4066, #2a2d4a);
@@ -1162,6 +1411,7 @@ h3 {
   max-width: none;
 }
 .evening-wrap {
+  position: relative;
   min-height: 100vh;
   min-height: 100svh;
   background: linear-gradient(160deg, #3a4066, #1f2239);
@@ -1567,7 +1817,6 @@ textarea, input {
     <div id="opening-quote">&nbsp;</div>
     <div id="opening-source">&nbsp;</div>
     <div class="opening-actions">
-      <button class="opening-heart" id="opening-heart-btn" onclick="toggleOpeningFavorite()" title="Zu Favoriten">♡</button>
       <button class="opening-btn primary" onclick="closeOpening()">Eintreten</button>
     </div>
   </div>
@@ -1592,6 +1841,13 @@ textarea, input {
     <div id="partner-text"></div>
   </div>
 
+  <!-- Morgenstunde (nur morgens sichtbar) -->
+  <div class="morning-card" id="morning-home-card" style="display:none;">
+    <div class="morning-label">Morgen</div>
+    <div class="morning-sub">Wir begrüßen einen neuen Tag.</div>
+    <button class="morning-btn" onclick="openMorning()">Beginnen</button>
+  </div>
+
   <!-- Ein Moment mit mir (immer verfügbar) -->
   <div class="moment-card" onclick="openMoment()">
     <div class="moment-label">Ein Moment mit mir</div>
@@ -1613,7 +1869,7 @@ textarea, input {
 
     <div class="matrix-tabs">
       <button class="chip active" id="fm-tab-kern" onclick="setFeelingMatrixMode('kern')">Kernwörter</button>
-      <button class="chip" id="fm-tab-erweitert" onclick="setFeelingMatrixMode('erweitert')">Erweitert (GFK)</button>
+      <button class="chip" id="fm-tab-erweitert" onclick="setFeelingMatrixMode('erweitert')">Erweitert</button>
     </div>
 
     <div class="feeling-matrix" id="feeling-matrix">
@@ -1722,6 +1978,7 @@ textarea, input {
 <!-- ====== EIN MOMENT MIT MIR ====== -->
 <div id="section-moment" class="section">
   <div class="moment-wrap">
+    <button class="fullscreen-close" onclick="momentClose()" title="Schließen">✕</button>
 
     <!-- Phase 1: Atmen -->
     <div class="moment-inner" id="moment-breathing">
@@ -1752,12 +2009,47 @@ textarea, input {
 </div>
 
 <!-- ====== ABENDSTUNDE ====== -->
+<!-- ====== MORGENSTUNDE ====== -->
+<div id="section-morning" class="section">
+  <div class="morning-wrap">
+    <button class="fullscreen-close" onclick="morningClose()" title="Schließen">✕</button>
+    <div class="morning-inner">
+
+      <!-- Laufende Frage -->
+      <div id="morning-question" style="display:none;">
+        <div class="morning-step" id="morning-step-label"></div>
+        <h2 class="morning-q-title" id="morning-q-title"></h2>
+        <p class="morning-q-sub" id="morning-q-sub"></p>
+        <textarea id="morning-q-note" placeholder="…" rows="3" class="morning-note"></textarea>
+        <div class="morning-actions">
+          <button class="morning-skip" onclick="morningClose()">Schließen</button>
+          <button class="morning-next" id="morning-next-btn" onclick="morningNext()">Weiter</button>
+        </div>
+      </div>
+
+      <!-- Abschluss -->
+      <div id="morning-finish" style="display:none;">
+        <div class="morning-gift-text" id="morning-gift-text"></div>
+        <div class="morning-gift-source">— Heute</div>
+        <div class="morning-signature">Ad se</div>
+        <button class="morning-close-btn" onclick="morningClose()">In den Tag</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <div id="section-evening" class="section">
   <div class="evening-wrap">
+    <button class="fullscreen-close" onclick="eveningClose()" title="Schließen">✕</button>
     <div class="evening-inner">
 
       <!-- Laufende Frage -->
       <div id="evening-question" style="display:none;">
+        <!-- Echo vom Morgen (nur bei Frage 1 sichtbar, wenn es einen Morgen-Eintrag gibt) -->
+        <div id="evening-morning-echo" style="display:none;background:rgba(255,255,255,0.08);border-left:2px solid rgba(255,255,255,0.3);border-radius:6px;padding:12px 16px;margin-bottom:24px;">
+          <div id="evening-morning-echo-text" style="font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;line-height:1.5;opacity:0.85;"></div>
+        </div>
         <div class="evening-step" id="evening-step-label"></div>
         <h2 class="evening-q-title" id="evening-q-title"></h2>
         <p class="evening-q-sub" id="evening-q-sub"></p>
@@ -1781,6 +2073,7 @@ textarea, input {
 
 <!-- ====== WOCHENSTUNDE ====== -->
 <div id="section-weekly" class="section">
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
     <h1 id="weekly-heading">Eine Stunde zu zweit</h1>
     <div class="greeting-sub" id="weekly-subheading">Ein Rückblick auf die vergangenen Tage — gemeinsam.</div>
@@ -1883,6 +2176,7 @@ textarea, input {
 <!-- ====== KÖRPER ====== -->
 <div id="section-body" class="section">
 
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
     <h1>Körper</h1>
     <div class="greeting-sub">Tippe eine Stelle an, um eine Empfindung zu notieren.</div>
@@ -1965,6 +2259,7 @@ textarea, input {
 <!-- ====== VERLAUF ====== -->
 <div id="section-verlauf" class="section">
 
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
     <h1>Verlauf</h1>
     <div class="greeting-sub">Was du in den letzten Tagen wahrgenommen hast.</div>
@@ -1990,6 +2285,7 @@ textarea, input {
       <button class="chip" id="vf-body" onclick="setVerlaufFilter('body')">Körper</button>
       <button class="chip" id="vf-activity" onclick="setVerlaufFilter('activity')">Aktivität</button>
       <button class="chip" id="vf-gratitude" onclick="setVerlaufFilter('gratitude')">Dankbarkeit</button>
+      <button class="chip" id="vf-morning" onclick="setVerlaufFilter('morning')">Morgenstunde</button>
       <button class="chip" id="vf-evening" onclick="setVerlaufFilter('evening')">Abendstunde</button>
       <button class="chip" id="vf-moment" onclick="setVerlaufFilter('moment')">Moment</button>
       <button class="chip" id="vf-today" onclick="setVerlaufFilter('today')">Vorhaben</button>
@@ -2106,9 +2402,10 @@ textarea, input {
 <!-- ====== MEHR / EINSTELLUNGEN (minimal für Runde 1) ====== -->
 <div id="section-settings" class="section">
 
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
     <h1>Mehr</h1>
-    <div class="greeting-sub">Einstellungen kommen vollständig in Runde 3.</div>
+    <div class="greeting-sub">Einstellungen, Sammlungen, Rituale.</div>
   </div>
 
   <div class="card">
@@ -2132,71 +2429,107 @@ textarea, input {
     <button class="btn secondary full" onclick="clearPartner()" id="clear-partner-btn" style="display:none;">Partner entfernen</button>
   </div>
 
-  <!-- Aktive Zitate (früher: Favoriten) -->
-  <div class="card" id="favorites-card">
-    <h2>Gesammelte Gedanken</h2>
-    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;" id="favorites-intro">
-      Diese Zitate begleiten dich in der Morgen-Rotation. Tippe auf ♥, um ein Zitat aus der Rotation zu nehmen — es bleibt in der Liste und kann jederzeit wieder aktiviert werden. Eigene Gedanken kannst du unten im Bereich „Gedanken verwalten" hinzufügen.
-    </p>
-    <div id="favorites-list"></div>
-  </div>
-
-  <!-- Verwaltung: Alle Zitate (aktiv + inaktiv + eigene) -->
-  <div class="card">
-    <h2>Gedanken verwalten</h2>
-    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
-      Alle Zitate — aktive und ruhende. Aktiviere oder deaktiviere mit dem Stern, lösche mit ✕.
-      Füge eigene Gedanken hinzu, die dich begleiten sollen.
-    </p>
-    <div id="all-quotes-list" style="margin-bottom:14px;"></div>
-    <div style="padding-top:14px;border-top:1px solid var(--border);">
-      <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Eigenen Gedanken hinzufügen</div>
-      <textarea id="new-quote-text" placeholder="Der Gedanke, das Zitat…" rows="2"
-        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;resize:none;"></textarea>
-      <div style="display:flex;gap:8px;">
-        <input type="text" id="new-quote-source" placeholder="Quelle (Autor, oder „eigen")"
-          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.88rem;background:var(--bg);color:var(--ink);outline:none;">
-        <button class="btn small" onclick="addCustomQuote()">+</button>
+  <!-- Rituale — einklappbar -->
+  <div class="card collapsible" id="rituals-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('rituals')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Rituale</h2>
+        <p class="muted-note" id="rituals-summary" style="margin:0;font-size:0.85rem;"></p>
       </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="rituals-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Die Morgenstunde erscheint normalerweise von 5 bis 11 Uhr,
+        die Abendstunde von 18 bis 3 Uhr. Manchmal passt die Uhrzeit nicht —
+        dann kannst du hier kurz eine Tür öffnen. Die Karte erscheint auf
+        dem Home-Screen, bis du sie nutzt, wieder ausschaltest, oder der Tag wechselt.
+      </p>
+      <div id="rituals-controls" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
   </div>
 
-  <div class="card">
-    <h2>Ein Moment mit mir</h2>
-    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
-      Der Atemrhythmus und die Dauer des stillen Moments. Ändere, was dir guttut.
-    </p>
-
-    <div style="margin-bottom:16px;">
-      <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Atmung</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <label class="breath-option">
-          <input type="radio" name="moment-breath" value="simple" onchange="saveMomentBreath('simple')">
-          <span><strong>Einfach</strong><br><span style="font-size:0.78rem;color:var(--muted);">Nur Ein und Aus, dein Tempo (je 4s)</span></span>
-        </label>
-        <label class="breath-option">
-          <input type="radio" name="moment-breath" value="box" onchange="saveMomentBreath('box')">
-          <span><strong>Gleichmäßig 4-4-4-4</strong><br><span style="font-size:0.78rem;color:var(--muted);">Einatmen, halten, ausatmen, halten</span></span>
-        </label>
-        <label class="breath-option">
-          <input type="radio" name="moment-breath" value="calm" onchange="saveMomentBreath('calm')">
-          <span><strong>Beruhigend 4-7-8</strong><br><span style="font-size:0.78rem;color:var(--muted);">Einatmen 4, halten 7, ausatmen 8</span></span>
-        </label>
+  <!-- Gesammelte Gedanken — einklappbar -->
+  <div class="card collapsible" id="quotes-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('quotes')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Gesammelte Gedanken</h2>
+        <p class="muted-note" id="quotes-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="quotes-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Deine Zitate. Mit dem Stern ★ bestimmst du, welche dich morgens begleiten — mit ✕ löschst du einen Gedanken endgültig.
+      </p>
+      <div id="all-quotes-list" style="margin-bottom:14px;"></div>
+      <div style="padding-top:14px;border-top:1px solid var(--border);">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Eigenen Gedanken hinzufügen</div>
+        <textarea id="new-quote-text" placeholder="Der Gedanke, das Zitat…" rows="2"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;resize:none;"></textarea>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="new-quote-source" placeholder="Quelle (Autor, oder „eigen")"
+            style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.88rem;background:var(--bg);color:var(--ink);outline:none;">
+          <button class="btn small" onclick="addCustomQuote()">+</button>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div>
-      <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Dauer</div>
-      <div style="display:flex;gap:6px;">
-        <button class="chip" id="moment-dur-60" onclick="saveMomentDuration(60)">1 Minute</button>
-        <button class="chip" id="moment-dur-120" onclick="saveMomentDuration(120)">2 Minuten</button>
-        <button class="chip" id="moment-dur-180" onclick="saveMomentDuration(180)">3 Minuten</button>
+  <!-- Ein Moment mit mir — einklappbar, nur Atmung + Dauer -->
+  <div class="card collapsible" id="moment-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('moment')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Ein Moment mit mir</h2>
+        <p class="muted-note" id="moment-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="moment-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Der Atemrhythmus und die Dauer des stillen Moments. Ändere, was dir guttut.
+      </p>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Atmung</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label class="breath-option">
+            <input type="radio" name="moment-breath" value="simple" onchange="saveMomentBreath('simple')">
+            <span><strong>Einfach</strong><br><span style="font-size:0.78rem;color:var(--muted);">Nur Ein und Aus, dein Tempo (je 4s)</span></span>
+          </label>
+          <label class="breath-option">
+            <input type="radio" name="moment-breath" value="box" onchange="saveMomentBreath('box')">
+            <span><strong>Gleichmäßig 4-4-4-4</strong><br><span style="font-size:0.78rem;color:var(--muted);">Einatmen, halten, ausatmen, halten</span></span>
+          </label>
+          <label class="breath-option">
+            <input type="radio" name="moment-breath" value="calm" onchange="saveMomentBreath('calm')">
+            <span><strong>Beruhigend 4-7-8</strong><br><span style="font-size:0.78rem;color:var(--muted);">Einatmen 4, halten 7, ausatmen 8</span></span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Dauer</div>
+        <div style="display:flex;gap:6px;">
+          <button class="chip" id="moment-dur-60" onclick="saveMomentDuration(60)">1 Minute</button>
+          <button class="chip" id="moment-dur-120" onclick="saveMomentDuration(120)">2 Minuten</button>
+          <button class="chip" id="moment-dur-180" onclick="saveMomentDuration(180)">3 Minuten</button>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
-      <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Reflexionsfragen</div>
-      <p class="muted-note" style="margin-bottom:12px;font-size:0.82rem;line-height:1.5;">
+  <!-- Reflexionsfragen — eigene Karte, einklappbar -->
+  <div class="card collapsible" id="questions-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('questions')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Reflexionsfragen</h2>
+        <p class="muted-note" id="questions-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="questions-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
         Die Frage nach der Atemphase wechselt bei jedem Moment. Füge eigene Fragen hinzu oder entferne, was dir nicht passt.
       </p>
       <div id="moment-questions-list" style="margin-bottom:10px;"></div>
@@ -2209,18 +2542,50 @@ textarea, input {
     </div>
   </div>
 
-  <div class="card">
-    <h2>Vorschläge</h2>
-    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
-      Diese Liste erscheint als Chips bei Vorhaben und Aktivitäten. Sie wächst automatisch,
-      wenn du Neues einträgst — oder ergänze sie hier direkt.
-    </p>
-    <div id="suggestions-list" style="margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;">
-      <input type="text" id="new-suggestion" placeholder="Neuen Vorschlag hinzufügen…"
-        style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
-        onkeydown="if(event.key==='Enter'){addSuggestion();}">
-      <button class="btn small" onclick="addSuggestion()">+</button>
+  <!-- Morgengaben — einklappbar -->
+  <div class="card collapsible" id="gifts-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('gifts')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Morgengaben</h2>
+        <p class="muted-note" id="gifts-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="gifts-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
+        Was der Tag dir morgens zuspricht — ein stiller Gruß, nachdem du deine Haltung notiert hast. Füge eigene Sätze hinzu oder entferne, was dich nicht berührt.
+      </p>
+      <div id="morning-gifts-list" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-morning-gift" placeholder="Neuen Gruß hinzufügen…"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          onkeydown="if(event.key==='Enter'){addMorningGift();}">
+        <button class="btn small" onclick="addMorningGift()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vorschläge — einklappbar -->
+  <div class="card collapsible" id="suggestions-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('suggestions')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Vorschläge</h2>
+        <p class="muted-note" id="suggestions-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="suggestions-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Diese Liste erscheint als Chips bei Vorhaben und Aktivitäten. Sie wächst automatisch,
+        wenn du Neues einträgst — oder ergänze sie hier direkt.
+      </p>
+      <div id="suggestions-list" style="margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-suggestion" placeholder="Neuen Vorschlag hinzufügen…"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          onkeydown="if(event.key==='Enter'){addSuggestion();}">
+        <button class="btn small" onclick="addSuggestion()">+</button>
+      </div>
     </div>
   </div>
 
@@ -2482,15 +2847,19 @@ function loadState() {
     waterLog: [],
     gratitudeLog: [],
     eveningLog: [],
+    morningLog: [],
     momentLog: [],
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
+    morningGifts: null,
+    morningGiftsSeen: [],
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     lastDurations: {},
     favoriteQuotes: [],
     quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
+    ritualOverrides: { morning: null, evening: null },  // Override-Tag (dayKey) — aktiv bis Nutzung oder Tageswechsel
     weeklySession: null,
     weeklyArchive: [],
     seenQuotes: [],  // IDs der bereits in laufender Runde gezeigten Zitate (Bag-Shuffle)
@@ -2500,12 +2869,13 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
     if (typeof saved.momentSettings !== 'object' || saved.momentSettings === null) saved.momentSettings = defaults.momentSettings;
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
+    if (typeof saved.ritualOverrides !== 'object' || saved.ritualOverrides === null) saved.ritualOverrides = { morning: null, evening: null };
     return saved;
   } catch(e) { return defaults; }
 }
@@ -2737,6 +3107,7 @@ function renderHome() {
   renderTodayItems();
   renderWeeklyHomeCard();
   renderEveningHomeCard();
+  renderMorningHomeCard();
   updateCollapsibleSummaries();
 }
 
@@ -3455,6 +3826,7 @@ function getAllEntries() {
   state.waterLog.forEach(e => out.push({ type: 'water', ts: e.ts, data: e }));
   state.gratitudeLog.forEach(e => out.push({ type: 'gratitude', ts: e.ts, data: e }));
   (state.eveningLog || []).forEach(e => out.push({ type: 'evening', ts: e.ts, data: e }));
+  (state.morningLog || []).forEach(e => out.push({ type: 'morning', ts: e.ts, data: e }));
   (state.momentLog || []).forEach(e => out.push({ type: 'moment', ts: e.ts, data: e }));
   // Today-Items (abgehakt und offen)
   Object.keys(state.todayItems).forEach(dk => {
@@ -3756,6 +4128,15 @@ function makeVerlaufEntry(e) {
         </div>`;
       }
     });
+  } else if (e.type === 'morning') {
+    body = `<strong>Morgenstunde</strong>`;
+    const haltung = (dat.answers && dat.answers[0]) ? dat.answers[0].trim() : '';
+    if (haltung) {
+      body += `<div style="margin-top:4px;font-size:0.9rem;">
+        <span style="color:var(--muted);font-size:0.72rem;">Haltung:</span>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;margin-top:1px;">„${escapeHtml(haltung)}"</div>
+      </div>`;
+    }
   } else if (e.type === 'moment') {
     body = `<strong>Ein Moment mit mir</strong>`;
     if (dat.question) {
@@ -3815,6 +4196,9 @@ function deleteVerlaufEntry(e) {
   } else if (e.type === 'evening') {
     const i = state.eveningLog.findIndex(x => x.ts === e.ts);
     if (i >= 0) state.eveningLog.splice(i, 1);
+  } else if (e.type === 'morning') {
+    const i = state.morningLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.morningLog.splice(i, 1);
   } else if (e.type === 'moment') {
     const i = state.momentLog.findIndex(x => x.ts === e.ts);
     if (i >= 0) state.momentLog.splice(i, 1);
@@ -4756,6 +5140,7 @@ function saveMomentBreath(type) {
   if (!state.momentSettings) state.momentSettings = { breathType: 'box', duration: 60 };
   state.momentSettings.breathType = type;
   saveState();
+  updateSettingsSummaries();
   showToast('Gespeichert.');
 }
 
@@ -4764,6 +5149,7 @@ function saveMomentDuration(seconds) {
   state.momentSettings.duration = seconds;
   saveState();
   renderMomentSettings();
+  updateSettingsSummaries();
   showToast('Gespeichert.');
 }
 
@@ -4778,11 +5164,13 @@ function renderMomentSettings() {
   renderMomentQuestionsList();
   renderSuggestionsList();
   renderAllQuotesList();
+  renderMorningGiftsList();
 }
 
 /* ===== ZITATE VERWALTEN ===== */
 function renderAllQuotesList() {
   const list = document.getElementById('all-quotes-list');
+  updateSettingsSummaries();
   if (!list) return;
   ensureQuotesInitialized();
   const quotes = state.quotes;
@@ -4791,16 +5179,22 @@ function renderAllQuotesList() {
     return;
   }
 
-  list.innerHTML = quotes.map(q => `
-    <div class="quote-item" data-id="${escapeHtml(q.id)}">
-      <button class="quote-toggle${q.active ? ' active' : ''}" data-id="${escapeHtml(q.id)}" title="${q.active ? 'Aus Rotation nehmen' : 'In Rotation aufnehmen'}">${q.active ? '★' : '☆'}</button>
-      <div class="quote-content">
-        <div class="quote-text${q.active ? '' : ' dim'}">„${escapeHtml(q.text)}"</div>
-        <div class="quote-source">— ${escapeHtml(q.source)}</div>
-      </div>
-      <button class="quote-delete" data-id="${escapeHtml(q.id)}" title="Endgültig löschen">✕</button>
-    </div>
-  `).join('');
+  const active = quotes.filter(q => q.active);
+  const resting = quotes.filter(q => !q.active);
+
+  let html = '';
+
+  if (active.length) {
+    html += `<div class="quote-section-label">In Rotation</div>`;
+    html += active.map(q => quoteItemHtml(q)).join('');
+  }
+
+  if (resting.length) {
+    html += `<div class="quote-section-label" style="margin-top:18px;">Ruhend</div>`;
+    html += resting.map(q => quoteItemHtml(q)).join('');
+  }
+
+  list.innerHTML = html;
 
   // Stern: active toggle
   list.querySelectorAll('.quote-toggle').forEach(btn => {
@@ -4812,7 +5206,6 @@ function renderAllQuotesList() {
         q.active = !q.active;
         saveState();
         renderAllQuotesList();
-        renderFavorites();
       }
     });
   });
@@ -4827,17 +5220,28 @@ function renderAllQuotesList() {
       askConfirm(`Diesen Gedanken wirklich löschen? „${q.text.substring(0, 60)}${q.text.length > 60 ? '…' : ''}"`, () => {
         const idx = state.quotes.findIndex(x => x.id === id);
         if (idx >= 0) state.quotes.splice(idx, 1);
-        // Auch aus seenQuotes entfernen
         if (Array.isArray(state.seenQuotes)) {
           state.seenQuotes = state.seenQuotes.filter(sid => sid !== id);
         }
         saveState();
         renderAllQuotesList();
-        renderFavorites();
         showToast('Gelöscht.');
       });
     });
   });
+}
+
+function quoteItemHtml(q) {
+  return `
+    <div class="quote-item" data-id="${escapeHtml(q.id)}">
+      <button class="quote-toggle${q.active ? ' active' : ''}" data-id="${escapeHtml(q.id)}" title="${q.active ? 'Aus Rotation nehmen' : 'In Rotation aufnehmen'}">${q.active ? '★' : '☆'}</button>
+      <div class="quote-content">
+        <div class="quote-text${q.active ? '' : ' dim'}">„${escapeHtml(q.text)}"</div>
+        <div class="quote-source">— ${escapeHtml(q.source)}</div>
+      </div>
+      <button class="quote-delete" data-id="${escapeHtml(q.id)}" title="Endgültig löschen">✕</button>
+    </div>
+  `;
 }
 
 function addCustomQuote() {
@@ -4863,13 +5267,13 @@ function addCustomQuote() {
   textEl.value = '';
   sourceEl.value = '';
   renderAllQuotesList();
-  renderFavorites();
   showToast('Hinzugefügt.');
 }
 
 /* ===== VORSCHLÄGE (gemeinsame Liste für Vorhaben + Aktivitäten) ===== */
 function renderSuggestionsList() {
   const list = document.getElementById('suggestions-list');
+  updateSettingsSummaries();
   if (!list) return;
   const items = Array.isArray(state.todaySuggestions) ? state.todaySuggestions : [];
   if (!items.length) {
@@ -4922,6 +5326,7 @@ function removeSuggestion(idx) {
 
 function renderMomentQuestionsList() {
   const list = document.getElementById('moment-questions-list');
+  updateSettingsSummaries();
   if (!list) return;
   const questions = getMomentQuestions();
   if (!questions.length) {
@@ -4975,6 +5380,61 @@ function removeMomentQuestion(idx) {
   renderMomentQuestionsList();
 }
 
+/* ===== MORGENGABEN (verwalten) ===== */
+function renderMorningGiftsList() {
+  const list = document.getElementById('morning-gifts-list');
+  updateSettingsSummaries();
+  if (!list) return;
+  const gifts = getMorningGifts();
+  if (!gifts.length) {
+    list.innerHTML = `<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.88rem;font-style:italic;">Keine Morgengaben — füge unten welche hinzu.</div>`;
+    return;
+  }
+  list.innerHTML = gifts.map((g, i) => `
+    <div class="mq-item" data-idx="${i}">
+      <div class="mq-text">„${escapeHtml(g)}"</div>
+      <button class="mq-remove" data-idx="${i}" title="Entfernen">✕</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.mq-remove').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      removeMorningGift(idx);
+    });
+  });
+}
+
+function addMorningGift() {
+  const input = document.getElementById('new-morning-gift');
+  if (!input) return;
+  const g = (input.value || '').trim();
+  if (!g) return;
+  if (!Array.isArray(state.morningGifts)) {
+    state.morningGifts = [...DEFAULT_MORNING_GIFTS];
+  }
+  if (state.morningGifts.some(x => x.toLowerCase() === g.toLowerCase())) {
+    showToast('Gruß existiert schon.');
+    input.value = '';
+    return;
+  }
+  state.morningGifts.push(g);
+  saveState();
+  input.value = '';
+  renderMorningGiftsList();
+  showToast('Hinzugefügt.');
+}
+
+function removeMorningGift(idx) {
+  if (!Array.isArray(state.morningGifts)) {
+    state.morningGifts = [...DEFAULT_MORNING_GIFTS];
+  }
+  if (idx < 0 || idx >= state.morningGifts.length) return;
+  state.morningGifts.splice(idx, 1);
+  saveState();
+  renderMorningGiftsList();
+}
+
 /* ===== ABENDSTUNDE ===== */
 const EVENING_QUESTIONS = [
   {
@@ -5018,6 +5478,25 @@ function showEveningQuestion() {
 
   const nextBtn = document.getElementById('evening-next-btn');
   nextBtn.textContent = (eveningStep === EVENING_QUESTIONS.length - 1) ? 'Schließen' : 'Weiter';
+
+  // Klammer zum Morgen: Echo nur bei erster Frage und wenn heute ein Morgen-Eintrag existiert
+  const echoEl = document.getElementById('evening-morning-echo');
+  const echoTextEl = document.getElementById('evening-morning-echo-text');
+  if (echoEl && echoTextEl) {
+    const morningEntry = getTodayMorningEntry();
+    if (eveningStep === 0 && morningEntry && Array.isArray(morningEntry.answers)) {
+      // Die Haltung als Echo zeigen (erste Antwort)
+      const haltung = (morningEntry.answers[0] || '').trim();
+      if (haltung) {
+        echoTextEl.innerHTML = `Heute Morgen wolltest du: <em>„${escapeHtml(haltung)}"</em>`;
+        echoEl.style.display = '';
+      } else {
+        echoEl.style.display = 'none';
+      }
+    } else {
+      echoEl.style.display = 'none';
+    }
+  }
 }
 
 function eveningNext() {
@@ -5036,6 +5515,7 @@ function eveningNext() {
         answers: [...eveningAnswers]
       });
       if (state.eveningLog.length > 500) state.eveningLog.pop();
+      if (state.ritualOverrides) state.ritualOverrides.evening = null;
       saveState();
     }
     showEveningFinish();
@@ -5063,20 +5543,189 @@ function eveningClose() {
         answers: [...eveningAnswers]
       });
       if (state.eveningLog.length > 500) state.eveningLog.pop();
+      if (state.ritualOverrides) state.ritualOverrides.evening = null;
       saveState();
     }
   }
   showSection('home');
 }
 
-// Abendstunden-Karte nur abends anzeigen
+// Abendstunden-Karte nur abends anzeigen (oder bei aktivem Override)
 function renderEveningHomeCard() {
   const card = document.getElementById('evening-home-card');
   if (!card) return;
   const hour = new Date().getHours();
-  // Sichtbar von 18 Uhr bis 3 Uhr morgens
-  const shouldShow = (hour >= 18 || hour < 3);
+  const inTimeWindow = (hour >= 18 || hour < 3);
+  const todayKey = dayKey();
+  const overrideActive = state.ritualOverrides?.evening === todayKey;
+  const shouldShow = inTimeWindow || overrideActive;
   card.style.display = shouldShow ? '' : 'none';
+}
+
+/* ===== MORGENSTUNDE ===== */
+const MORNING_QUESTIONS = [
+  {
+    step: 'Haltung',
+    title: 'Mit welcher inneren Haltung möchtest du den heutigen Tag erleben?',
+    sub: 'Nicht was du leisten willst — wie du sein willst. Ein Wort genügt.'
+  }
+];
+
+// Morgengaben — Sätze, die der Tag dir zuspricht. Verwaltbar in Einstellungen.
+const DEFAULT_MORNING_GIFTS = [
+  'Ich bin heute bei dir.',
+  'Ich trage dich mit, auch wenn ich schwer werde.',
+  'Ich habe etwas Schönes für dich, auch wenn du es noch nicht siehst.',
+  'Du darfst mich verstreichen lassen. Ich drücke dir nichts auf.',
+  'Ich bin nicht gestern. Ich bin neu.',
+  'Was immer war, ich habe es nicht mitgebracht.',
+  'Ich bin nur ein Tag. Mehr muss ich nicht sein.',
+  'Ich lasse dir Zeit.',
+  'Du musst mich nicht gewinnen. Ich bin einfach hier.',
+  'Ich komme, wie ich bin. Sei du auch, wie du bist.',
+  'Manchmal bin ich leise. Dann achte darauf.',
+  'Ich nehme dich, wie du aufstehst.',
+  'Etwas wartet in mir, das nur du finden kannst.',
+  'Ich bin kurz. Mach was draus — oder auch nicht.',
+  'Ich trage Stunden und zwischen ihnen Platz für dich.',
+  'Du bist nicht allein heute.',
+  'Das Wichtige in mir ist oft das Leise.',
+  'Auch wenn ich schwer werde — ich habe weiche Stellen.',
+  'Ich freue mich, dass du da bist.',
+  'Ich habe genug Raum für dich.'
+];
+
+function getMorningGifts() {
+  if (!Array.isArray(state.morningGifts) || state.morningGifts === null) {
+    return [...DEFAULT_MORNING_GIFTS];
+  }
+  return state.morningGifts;
+}
+
+function pickNextMorningGift() {
+  const gifts = getMorningGifts();
+  if (!gifts.length) return null;
+  if (!Array.isArray(state.morningGiftsSeen)) state.morningGiftsSeen = [];
+
+  let unseen = gifts.filter(g => !state.morningGiftsSeen.includes(g));
+  const lastShown = state.morningGiftsSeen[state.morningGiftsSeen.length - 1] || '';
+
+  if (unseen.length === 0) {
+    state.morningGiftsSeen = [];
+    unseen = gifts.filter(g => g !== lastShown);
+    if (unseen.length === 0) unseen = gifts;
+  }
+
+  const chosen = unseen[Math.floor(Math.random() * unseen.length)];
+  state.morningGiftsSeen.push(chosen);
+  if (state.morningGiftsSeen.length > gifts.length) {
+    state.morningGiftsSeen = state.morningGiftsSeen.slice(-gifts.length);
+  }
+  saveState();
+  return chosen;
+}
+
+let morningStep = 0;
+let morningAnswers = [''];
+
+function openMorning() {
+  morningStep = 0;
+  morningAnswers = [''];
+  showSection('morning');
+  showMorningQuestion();
+}
+
+function showMorningQuestion() {
+  document.getElementById('morning-question').style.display = '';
+  document.getElementById('morning-finish').style.display = 'none';
+
+  const q = MORNING_QUESTIONS[morningStep];
+  // Bei nur einer Frage keine Schritt-Angabe
+  document.getElementById('morning-step-label').textContent = q.step;
+  document.getElementById('morning-q-title').textContent = q.title;
+  document.getElementById('morning-q-sub').textContent = q.sub;
+  const note = document.getElementById('morning-q-note');
+  note.value = morningAnswers[morningStep] || '';
+  setTimeout(() => note.focus(), 200);
+
+  const nextBtn = document.getElementById('morning-next-btn');
+  nextBtn.textContent = 'Schließen';
+}
+
+function morningNext() {
+  const note = (document.getElementById('morning-q-note')?.value || '').trim();
+  morningAnswers[morningStep] = note;
+
+  if (morningStep < MORNING_QUESTIONS.length - 1) {
+    morningStep++;
+    showMorningQuestion();
+  } else {
+    // Speichern, wenn mindestens eine Antwort vorhanden ist
+    const hasContent = morningAnswers.some(a => a && a.trim());
+    if (hasContent) {
+      state.morningLog.unshift({
+        ts: new Date().toISOString(),
+        answers: [...morningAnswers]
+      });
+      if (state.morningLog.length > 500) state.morningLog.pop();
+      // Override clearen — Zweck erfüllt
+      if (state.ritualOverrides) state.ritualOverrides.morning = null;
+      saveState();
+    }
+    showMorningFinish();
+  }
+}
+
+function showMorningFinish() {
+  document.getElementById('morning-question').style.display = 'none';
+  document.getElementById('morning-finish').style.display = '';
+  // Morgengabe wählen und setzen
+  const giftEl = document.getElementById('morning-gift-text');
+  if (giftEl) {
+    const gift = pickNextMorningGift();
+    giftEl.textContent = gift || '';
+  }
+}
+
+function morningClose() {
+  // Beim Schließen: aktuelle Antwort noch speichern falls vorhanden
+  const noteEl = document.getElementById('morning-q-note');
+  const questionVisible = document.getElementById('morning-question').style.display !== 'none';
+  if (questionVisible && noteEl) {
+    const note = (noteEl.value || '').trim();
+    morningAnswers[morningStep] = note;
+    const hasContent = morningAnswers.some(a => a && a.trim());
+    if (hasContent) {
+      state.morningLog.unshift({
+        ts: new Date().toISOString(),
+        answers: [...morningAnswers]
+      });
+      if (state.morningLog.length > 500) state.morningLog.pop();
+      // Override clearen — Zweck erfüllt
+      if (state.ritualOverrides) state.ritualOverrides.morning = null;
+      saveState();
+    }
+  }
+  showSection('home');
+}
+
+// Morgenstunden-Karte nur morgens anzeigen (oder bei aktivem Override)
+function renderMorningHomeCard() {
+  const card = document.getElementById('morning-home-card');
+  if (!card) return;
+  const hour = new Date().getHours();
+  const inTimeWindow = (hour >= 5 && hour < 11);
+  const todayKey = dayKey();
+  const overrideActive = state.ritualOverrides?.morning === todayKey;
+  const shouldShow = inTimeWindow || overrideActive;
+  card.style.display = shouldShow ? '' : 'none';
+}
+
+// Heutigen Morgen-Eintrag finden (für die Klammer zur Abendstunde)
+function getTodayMorningEntry() {
+  if (!Array.isArray(state.morningLog)) return null;
+  const todayKey = dayKey();
+  return state.morningLog.find(e => dayKey(new Date(e.ts)) === todayKey) || null;
 }
 
 /* ===== SETTINGS ===== */
@@ -5088,56 +5737,127 @@ function renderSettings() {
   if (partnerEl) partnerEl.value = state.partner?.name || '';
   if (clearBtn) clearBtn.style.display = state.partner?.name ? '' : 'none';
   renderMomentSettings();
-  renderFavorites();
+  renderAllQuotesList();
+  updateSettingsSummaries();
 }
 
-function renderFavorites() {
-  const card = document.getElementById('favorites-card');
-  const list = document.getElementById('favorites-list');
-  if (!card || !list) return;
+/* ===== KLAPPBARE KARTEN (Einstellungen) ===== */
+function toggleSettingsCard(key) {
+  const card = document.getElementById(key + '-collapsible');
+  const body = document.getElementById(key + '-body');
+  if (!card || !body) return;
+  const isOpen = card.classList.contains('open');
+  if (isOpen) {
+    card.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    card.classList.add('open');
+    body.style.display = '';
+  }
+}
 
+function updateSettingsSummaries() {
   ensureQuotesInitialized();
-  const active = state.quotes.filter(q => q.active);
 
-  if (!active.length) {
-    list.innerHTML = `<div style="text-align:center;padding:20px 10px;color:var(--muted);font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">
-      Keine aktiven Gedanken. In den Einstellungen kannst du welche aktivieren oder eigene hinzufügen.
-    </div>`;
-    return;
+  // Gesammelte Gedanken: "X in Rotation · Y ruhend"
+  const quotesSum = document.getElementById('quotes-summary');
+  if (quotesSum) {
+    const active = state.quotes.filter(q => q.active).length;
+    const resting = state.quotes.filter(q => !q.active).length;
+    const parts = [`${active} in Rotation`];
+    if (resting > 0) parts.push(`${resting} ruhend`);
+    quotesSum.textContent = parts.join(' · ');
   }
 
-  list.innerHTML = active.map(q => `
-    <div class="fav-item" data-id="${escapeHtml(q.id)}">
-      <div class="fav-text">„${escapeHtml(q.text)}"</div>
-      <div class="fav-meta">
-        <span class="fav-source">— ${escapeHtml(q.source)}</span>
-        <button class="fav-remove" data-id="${escapeHtml(q.id)}" title="Aus Rotation nehmen">♥</button>
-      </div>
-    </div>
-  `).join('');
+  // Ein Moment mit mir: "4-4-4-4 · 1 Minute"
+  const momentSum = document.getElementById('moment-summary');
+  if (momentSum) {
+    const s = state.momentSettings || { breathType: 'box', duration: 60 };
+    const breathLabels = {
+      simple: 'Einfach',
+      box: '4-4-4-4',
+      calm: '4-7-8'
+    };
+    const durLabels = { 60: '1 Minute', 120: '2 Minuten', 180: '3 Minuten' };
+    const b = breathLabels[s.breathType] || '4-4-4-4';
+    const d = durLabels[s.duration] || `${s.duration}s`;
+    momentSum.textContent = `${b} · ${d}`;
+  }
 
-  // Herz: aus Rotation nehmen (active = false)
-  list.querySelectorAll('.fav-remove').forEach(btn => {
-    btn.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const id = btn.getAttribute('data-id');
-      const q = getQuoteById(id);
-      if (q) {
-        q.active = false;
-        saveState();
-        renderFavorites();
-        showToast('Aus Rotation genommen.');
-      }
-    });
-  });
+  // Reflexionsfragen: "15 Fragen"
+  const questionsSum = document.getElementById('questions-summary');
+  if (questionsSum) {
+    const questions = getMomentQuestions();
+    questionsSum.textContent = questions.length === 1 ? '1 Frage' : `${questions.length} Fragen`;
+  }
 
-  // Klick auf Zitat: Eröffnungsansicht öffnen
-  list.querySelectorAll('.fav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const id = item.getAttribute('data-id');
-      openSpecificQuote(id);
-    });
-  });
+  // Vorschläge: "10 Vorschläge"
+  const suggestionsSum = document.getElementById('suggestions-summary');
+  if (suggestionsSum) {
+    const items = Array.isArray(state.todaySuggestions) ? state.todaySuggestions : [];
+    suggestionsSum.textContent = items.length === 1 ? '1 Vorschlag' : `${items.length} Vorschläge`;
+  }
+
+  // Morgengaben: "20 Gaben"
+  const giftsSum = document.getElementById('gifts-summary');
+  if (giftsSum) {
+    const gifts = getMorningGifts();
+    giftsSum.textContent = gifts.length === 1 ? '1 Gabe' : `${gifts.length} Gaben`;
+  }
+
+  // Rituale: Status der Overrides
+  const ritualsSum = document.getElementById('rituals-summary');
+  if (ritualsSum) {
+    const todayKey = dayKey();
+    const morningOn = state.ritualOverrides?.morning === todayKey;
+    const eveningOn = state.ritualOverrides?.evening === todayKey;
+    if (morningOn && eveningOn) {
+      ritualsSum.textContent = 'Morgen- und Abendstunde zugänglich';
+    } else if (morningOn) {
+      ritualsSum.textContent = 'Morgenstunde zugänglich';
+    } else if (eveningOn) {
+      ritualsSum.textContent = 'Abendstunde zugänglich';
+    } else {
+      ritualsSum.textContent = 'Nach Zeitfenster';
+    }
+  }
+
+  // Rituale: Buttons rendern
+  renderRitualControls();
+}
+
+/* ===== RITUALE: Override-Schalter ===== */
+function renderRitualControls() {
+  const container = document.getElementById('rituals-controls');
+  if (!container) return;
+  const todayKey = dayKey();
+  const morningOn = state.ritualOverrides?.morning === todayKey;
+  const eveningOn = state.ritualOverrides?.evening === todayKey;
+
+  container.innerHTML = `
+    <button class="btn ${morningOn ? '' : 'secondary'} full" onclick="toggleRitualOverride('morning')">
+      ${morningOn ? 'Morgenstunde schließen' : 'Morgenstunde jetzt öffnen'}
+    </button>
+    <button class="btn ${eveningOn ? '' : 'secondary'} full" onclick="toggleRitualOverride('evening')">
+      ${eveningOn ? 'Abendstunde schließen' : 'Abendstunde jetzt öffnen'}
+    </button>
+  `;
+}
+
+function toggleRitualOverride(type) {
+  if (!state.ritualOverrides) state.ritualOverrides = { morning: null, evening: null };
+  const todayKey = dayKey();
+  const isActive = state.ritualOverrides[type] === todayKey;
+  state.ritualOverrides[type] = isActive ? null : todayKey;
+  saveState();
+  // Beide Karten auf Home neu rendern und die Rituale-Steuerung
+  renderMorningHomeCard();
+  renderEveningHomeCard();
+  updateSettingsSummaries();
+  if (!isActive) {
+    const label = type === 'morning' ? 'Morgenstunde' : 'Abendstunde';
+    showToast(`${label} zugänglich.`);
+  }
 }
 
 function openSpecificQuote(id) {
@@ -5256,15 +5976,19 @@ function replaceStateFromImport(imported) {
     waterLog: [],
     gratitudeLog: [],
     eveningLog: [],
+    morningLog: [],
     momentLog: [],
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
+    morningGifts: null,
+    morningGiftsSeen: [],
     todayItems: {},
     todaySuggestions: [],
     lastDurations: {},
     favoriteQuotes: [],
     quotes: null,
+    ritualOverrides: { morning: null, evening: null },
     weeklySession: null,
     weeklyArchive: [],
     seenQuotes: [],
@@ -5273,12 +5997,13 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
   if (typeof state.momentSettings !== 'object' || state.momentSettings === null) state.momentSettings = defaults.momentSettings;
   if (typeof state.lastDurations !== 'object' || state.lastDurations === null) state.lastDurations = {};
+  if (typeof state.ritualOverrides !== 'object' || state.ritualOverrides === null) state.ritualOverrides = { morning: null, evening: null };
   saveState();
   // Alles neu rendern
   if (state.theme && state.theme !== 'terracotta') {
