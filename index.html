@@ -808,6 +808,70 @@ h3 {
   color: #b04848;
 }
 
+/* Zitat-Verwaltungsliste (Mehr → Gedanken verwalten) */
+.quote-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+.quote-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.quote-toggle.active {
+  color: var(--accent);
+}
+.quote-toggle:hover {
+  color: var(--accent-deep);
+}
+.quote-content {
+  flex: 1;
+  min-width: 0;
+}
+.quote-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.45;
+  margin-bottom: 3px;
+}
+.quote-text.dim {
+  opacity: 0.5;
+}
+.quote-source {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.quote-delete {
+  background: none;
+  border: none;
+  color: var(--muted);
+  opacity: 0.4;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 4px 8px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.quote-delete:hover {
+  opacity: 1;
+  color: #b04848;
+}
+
 /* Favoriten (gesammelte Zitate) */
 .fav-item {
   padding: 14px 0;
@@ -2068,13 +2132,33 @@ textarea, input {
     <button class="btn secondary full" onclick="clearPartner()" id="clear-partner-btn" style="display:none;">Partner entfernen</button>
   </div>
 
-  <!-- Favoriten-Zitate -->
+  <!-- Aktive Zitate (früher: Favoriten) -->
   <div class="card" id="favorites-card">
     <h2>Gesammelte Gedanken</h2>
     <p class="muted-note" style="margin-bottom:14px;line-height:1.55;" id="favorites-intro">
-      Die Zitate, die du mit <span style="color:var(--accent);">♥</span> markiert hast.
+      Diese Zitate begleiten dich in der Morgen-Rotation. Tippe auf ♥, um ein Zitat aus der Rotation zu nehmen — es bleibt in der Liste und kann jederzeit wieder aktiviert werden. Eigene Gedanken kannst du unten im Bereich „Gedanken verwalten" hinzufügen.
     </p>
     <div id="favorites-list"></div>
+  </div>
+
+  <!-- Verwaltung: Alle Zitate (aktiv + inaktiv + eigene) -->
+  <div class="card">
+    <h2>Gedanken verwalten</h2>
+    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+      Alle Zitate — aktive und ruhende. Aktiviere oder deaktiviere mit dem Stern, lösche mit ✕.
+      Füge eigene Gedanken hinzu, die dich begleiten sollen.
+    </p>
+    <div id="all-quotes-list" style="margin-bottom:14px;"></div>
+    <div style="padding-top:14px;border-top:1px solid var(--border);">
+      <div style="font-size:0.8rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Eigenen Gedanken hinzufügen</div>
+      <textarea id="new-quote-text" placeholder="Der Gedanke, das Zitat…" rows="2"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;resize:none;"></textarea>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-quote-source" placeholder="Quelle (Autor, oder „eigen")"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.88rem;background:var(--bg);color:var(--ink);outline:none;">
+        <button class="btn small" onclick="addCustomQuote()">+</button>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -2406,9 +2490,10 @@ function loadState() {
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     lastDurations: {},
     favoriteQuotes: [],
+    quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
     weeklySession: null,
     weeklyArchive: [],
-    seenQuotes: [],  // Indizes bereits gezeigter Zitate (wird bei vollständigem Durchlauf geleert)
+    seenQuotes: [],  // IDs der bereits in laufender Runde gezeigten Zitate (Bag-Shuffle)
     theme: 'terracotta',
     lastOpenedDate: null
   };
@@ -2432,38 +2517,101 @@ function saveState() {
 let state = loadState();
 
 /* ===== OPENING QUOTE ===== */
-let currentOpeningIndex = 0;
+let currentOpeningId = null;
 
-function pickNextQuoteIndex() {
-  // Bag-Shuffle: Wähle aus Zitaten, die noch nicht "gesehen" sind.
-  // Wenn alle gesehen, fange neu an.
+// Initialisiert state.quotes aus den Default-Zitaten (nur beim ersten Aufruf)
+function ensureQuotesInitialized() {
+  if (!Array.isArray(state.quotes)) {
+    // Erstes Laden (oder nach Reset): alle Default-Zitate als aktiv
+    state.quotes = OPENING_QUOTES.map((q, i) => ({
+      id: 'default-' + i,
+      text: q.text,
+      source: q.source,
+      active: true,
+      isDefault: true
+    }));
+    saveState();
+  } else {
+    // Sicherstellen, dass alle Default-Zitate vorhanden sind (falls neue hinzugekommen sind)
+    // Wichtig: nur hinzufügen, wenn noch nicht vorhanden UND nicht vom Nutzer gelöscht
+    // Heuristik: wenn ein Default bereits einmal existiert hat, wurde er entweder aktiv gelassen oder gelöscht.
+    // Neue Defaults (höhere Indizes) fügen wir hinzu. Existierende lassen wir, wie sie sind.
+    OPENING_QUOTES.forEach((q, i) => {
+      const id = 'default-' + i;
+      // Nur hinzufügen, wenn dieser Default noch nie existiert hat
+      // Wir markieren "existierte einmal" durch eine Liste state.seenDefaultIds
+      if (!Array.isArray(state.seenDefaultIds)) state.seenDefaultIds = [];
+      if (!state.seenDefaultIds.includes(id)) {
+        // Neu für diese App-Version — hinzufügen, aktiv
+        if (!state.quotes.some(qu => qu.id === id)) {
+          state.quotes.push({
+            id: id,
+            text: q.text,
+            source: q.source,
+            active: true,
+            isDefault: true
+          });
+        }
+        state.seenDefaultIds.push(id);
+      }
+    });
+    // Einmal-Initialisierung der seenDefaultIds für bereits vorhandene Zitate
+    if (!Array.isArray(state.seenDefaultIds)) {
+      state.seenDefaultIds = state.quotes.filter(q => q.isDefault).map(q => q.id);
+    }
+    saveState();
+  }
+}
+
+// Liefert alle Zitate, die aktiv in der Rotation sind
+function getActiveQuotes() {
+  ensureQuotesInitialized();
+  return state.quotes.filter(q => q.active);
+}
+
+function pickNextQuoteId() {
+  const active = getActiveQuotes();
+  if (!active.length) return null;
   if (!Array.isArray(state.seenQuotes)) state.seenQuotes = [];
 
-  const allIndices = OPENING_QUOTES.map((_, i) => i);
-  let unseen = allIndices.filter(i => !state.seenQuotes.includes(i));
+  const activeIds = active.map(q => q.id);
+  let unseen = activeIds.filter(id => !state.seenQuotes.includes(id));
 
-  // Zusätzlich vermeiden wir, direkt das letzte Zitat nochmal zu zeigen,
-  // wenn wir den "Bag" gerade geleert haben.
   const lastShown = state.seenQuotes.length > 0
     ? state.seenQuotes[state.seenQuotes.length - 1]
-    : -1;
+    : null;
 
   if (unseen.length === 0) {
-    // Alle gesehen: Bag leeren, von vorne
     state.seenQuotes = [];
-    unseen = allIndices.filter(i => i !== lastShown);  // das letzte nicht direkt wiederholen
-    if (unseen.length === 0) unseen = allIndices;
+    unseen = activeIds.filter(id => id !== lastShown);
+    if (unseen.length === 0) unseen = activeIds;
   }
 
   const chosen = unseen[Math.floor(Math.random() * unseen.length)];
   state.seenQuotes.push(chosen);
+  // Seen-Liste auf aktuelle Größe begrenzen
+  if (state.seenQuotes.length > activeIds.length) {
+    state.seenQuotes = state.seenQuotes.slice(-activeIds.length);
+  }
   saveState();
   return chosen;
 }
 
+function getQuoteById(id) {
+  ensureQuotesInitialized();
+  return state.quotes.find(q => q.id === id) || null;
+}
+
 function showOpening() {
-  currentOpeningIndex = pickNextQuoteIndex();
-  const q = OPENING_QUOTES[currentOpeningIndex];
+  ensureQuotesInitialized();
+  const id = pickNextQuoteId();
+  currentOpeningId = id;
+  if (!id) {
+    // Keine aktiven Zitate — nichts zeigen
+    return;
+  }
+  const q = getQuoteById(id);
+  if (!q) return;
   document.getElementById('opening-quote').textContent = '„' + q.text + '"';
   document.getElementById('opening-source').textContent = '— ' + q.source;
   updateOpeningHeart();
@@ -2473,17 +2621,19 @@ function showOpening() {
 
 function updateOpeningHeart() {
   const btn = document.getElementById('opening-heart-btn');
-  if (!btn) return;
-  const isFav = state.favoriteQuotes.includes(currentOpeningIndex);
-  btn.textContent = isFav ? '♥' : '♡';
-  btn.classList.toggle('active', isFav);
+  if (!btn || !currentOpeningId) return;
+  const q = getQuoteById(currentOpeningId);
+  const isActive = q ? q.active : false;
+  btn.textContent = isActive ? '♥' : '♡';
+  btn.classList.toggle('active', isActive);
 }
 
+// Wenn der Stern am Zitat getippt wird: aktiv/inaktiv toggeln
 function toggleOpeningFavorite() {
-  const idx = currentOpeningIndex;
-  const pos = state.favoriteQuotes.indexOf(idx);
-  if (pos >= 0) { state.favoriteQuotes.splice(pos, 1); }
-  else { state.favoriteQuotes.push(idx); }
+  if (!currentOpeningId) return;
+  const q = getQuoteById(currentOpeningId);
+  if (!q) return;
+  q.active = !q.active;
   saveState();
   updateOpeningHeart();
 }
@@ -4627,6 +4777,94 @@ function renderMomentSettings() {
   });
   renderMomentQuestionsList();
   renderSuggestionsList();
+  renderAllQuotesList();
+}
+
+/* ===== ZITATE VERWALTEN ===== */
+function renderAllQuotesList() {
+  const list = document.getElementById('all-quotes-list');
+  if (!list) return;
+  ensureQuotesInitialized();
+  const quotes = state.quotes;
+  if (!quotes.length) {
+    list.innerHTML = `<div style="text-align:center;padding:12px;color:var(--muted);font-size:0.88rem;font-style:italic;">Keine Gedanken — füge unten welche hinzu.</div>`;
+    return;
+  }
+
+  list.innerHTML = quotes.map(q => `
+    <div class="quote-item" data-id="${escapeHtml(q.id)}">
+      <button class="quote-toggle${q.active ? ' active' : ''}" data-id="${escapeHtml(q.id)}" title="${q.active ? 'Aus Rotation nehmen' : 'In Rotation aufnehmen'}">${q.active ? '★' : '☆'}</button>
+      <div class="quote-content">
+        <div class="quote-text${q.active ? '' : ' dim'}">„${escapeHtml(q.text)}"</div>
+        <div class="quote-source">— ${escapeHtml(q.source)}</div>
+      </div>
+      <button class="quote-delete" data-id="${escapeHtml(q.id)}" title="Endgültig löschen">✕</button>
+    </div>
+  `).join('');
+
+  // Stern: active toggle
+  list.querySelectorAll('.quote-toggle').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      const q = getQuoteById(id);
+      if (q) {
+        q.active = !q.active;
+        saveState();
+        renderAllQuotesList();
+        renderFavorites();
+      }
+    });
+  });
+
+  // ✕: endgültig löschen
+  list.querySelectorAll('.quote-delete').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const id = btn.getAttribute('data-id');
+      const q = getQuoteById(id);
+      if (!q) return;
+      askConfirm(`Diesen Gedanken wirklich löschen? „${q.text.substring(0, 60)}${q.text.length > 60 ? '…' : ''}"`, () => {
+        const idx = state.quotes.findIndex(x => x.id === id);
+        if (idx >= 0) state.quotes.splice(idx, 1);
+        // Auch aus seenQuotes entfernen
+        if (Array.isArray(state.seenQuotes)) {
+          state.seenQuotes = state.seenQuotes.filter(sid => sid !== id);
+        }
+        saveState();
+        renderAllQuotesList();
+        renderFavorites();
+        showToast('Gelöscht.');
+      });
+    });
+  });
+}
+
+function addCustomQuote() {
+  const textEl = document.getElementById('new-quote-text');
+  const sourceEl = document.getElementById('new-quote-source');
+  if (!textEl) return;
+  const text = (textEl.value || '').trim();
+  const source = (sourceEl.value || '').trim() || 'eigen';
+  if (!text) {
+    showToast('Bitte einen Gedanken eintragen.');
+    return;
+  }
+  ensureQuotesInitialized();
+  const newQuote = {
+    id: 'custom-' + Date.now(),
+    text: text,
+    source: source,
+    active: true,
+    isDefault: false
+  };
+  state.quotes.push(newQuote);
+  saveState();
+  textEl.value = '';
+  sourceEl.value = '';
+  renderAllQuotesList();
+  renderFavorites();
+  showToast('Hinzugefügt.');
 }
 
 /* ===== VORSCHLÄGE (gemeinsame Liste für Vorhaben + Aktivitäten) ===== */
@@ -4856,62 +5094,56 @@ function renderSettings() {
 function renderFavorites() {
   const card = document.getElementById('favorites-card');
   const list = document.getElementById('favorites-list');
-  const intro = document.getElementById('favorites-intro');
   if (!card || !list) return;
 
-  const favs = Array.isArray(state.favoriteQuotes) ? state.favoriteQuotes : [];
+  ensureQuotesInitialized();
+  const active = state.quotes.filter(q => q.active);
 
-  if (!favs.length) {
+  if (!active.length) {
     list.innerHTML = `<div style="text-align:center;padding:20px 10px;color:var(--muted);font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">
-      Noch leer. Tippe auf der Eröffnungs-Karte das ♡, um einen Gedanken zu sammeln.
+      Keine aktiven Gedanken. In den Einstellungen kannst du welche aktivieren oder eigene hinzufügen.
     </div>`;
     return;
   }
 
-  // Nur gültige Indizes behalten (falls sich OPENING_QUOTES mal ändert)
-  const valid = favs.filter(i => i >= 0 && i < OPENING_QUOTES.length);
-
-  list.innerHTML = valid.map(i => {
-    const q = OPENING_QUOTES[i];
-    return `
-      <div class="fav-item" data-idx="${i}">
-        <div class="fav-text">„${escapeHtml(q.text)}"</div>
-        <div class="fav-meta">
-          <span class="fav-source">— ${escapeHtml(q.source)}</span>
-          <button class="fav-remove" data-idx="${i}" title="Aus Favoriten entfernen">♥</button>
-        </div>
+  list.innerHTML = active.map(q => `
+    <div class="fav-item" data-id="${escapeHtml(q.id)}">
+      <div class="fav-text">„${escapeHtml(q.text)}"</div>
+      <div class="fav-meta">
+        <span class="fav-source">— ${escapeHtml(q.source)}</span>
+        <button class="fav-remove" data-id="${escapeHtml(q.id)}" title="Aus Rotation nehmen">♥</button>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 
-  // Handler: Herz entfernt Favorit
+  // Herz: aus Rotation nehmen (active = false)
   list.querySelectorAll('.fav-remove').forEach(btn => {
     btn.addEventListener('click', (ev) => {
       ev.stopPropagation();
-      const idx = parseInt(btn.getAttribute('data-idx'));
-      const pos = state.favoriteQuotes.indexOf(idx);
-      if (pos >= 0) {
-        state.favoriteQuotes.splice(pos, 1);
+      const id = btn.getAttribute('data-id');
+      const q = getQuoteById(id);
+      if (q) {
+        q.active = false;
         saveState();
         renderFavorites();
-        showToast('Entfernt.');
+        showToast('Aus Rotation genommen.');
       }
     });
   });
 
-  // Handler: Klick auf das Zitat öffnet Eröffnungs-Ansicht mit diesem Zitat
+  // Klick auf Zitat: Eröffnungsansicht öffnen
   list.querySelectorAll('.fav-item').forEach(item => {
     item.addEventListener('click', () => {
-      const idx = parseInt(item.getAttribute('data-idx'));
-      openSpecificQuote(idx);
+      const id = item.getAttribute('data-id');
+      openSpecificQuote(id);
     });
   });
 }
 
-function openSpecificQuote(idx) {
-  if (idx < 0 || idx >= OPENING_QUOTES.length) return;
-  currentOpeningIndex = idx;
-  const q = OPENING_QUOTES[idx];
+function openSpecificQuote(id) {
+  const q = getQuoteById(id);
+  if (!q) return;
+  currentOpeningId = id;
   document.getElementById('opening-quote').textContent = '„' + q.text + '"';
   document.getElementById('opening-source').textContent = '— ' + q.source;
   updateOpeningHeart();
@@ -5032,6 +5264,7 @@ function replaceStateFromImport(imported) {
     todaySuggestions: [],
     lastDurations: {},
     favoriteQuotes: [],
+    quotes: null,
     weeklySession: null,
     weeklyArchive: [],
     seenQuotes: [],
@@ -5087,20 +5320,8 @@ if (state.theme && state.theme !== 'terracotta') {
   document.documentElement.setAttribute('data-theme', state.theme);
 }
 
-// Einmalig: Dewar-Zitat als Favorit markieren (Nummer 27, Index 26)
-// Nur einmal — beim zweiten Öffnen passiert nichts mehr
-(function autoFavoriteDewar() {
-  const DEWAR_INDEX = 26;
-  if (!state.autoFavsDone) state.autoFavsDone = [];
-  if (!state.autoFavsDone.includes('dewar')) {
-    if (!Array.isArray(state.favoriteQuotes)) state.favoriteQuotes = [];
-    if (!state.favoriteQuotes.includes(DEWAR_INDEX) && DEWAR_INDEX < OPENING_QUOTES.length) {
-      state.favoriteQuotes.push(DEWAR_INDEX);
-    }
-    state.autoFavsDone.push('dewar');
-    saveState();
-  }
-})();
+// Zitate-System initialisieren (alle Defaults werden aktiv übernommen, wenn noch nicht vorhanden)
+ensureQuotesInitialized();
 
 showOpening();
 renderHome();
