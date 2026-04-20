@@ -1211,6 +1211,29 @@ h3 {
 }
 .morning-btn:hover, .morning-btn:active { background: rgba(255,255,255,0.5); }
 
+/* Morgen-Karte: Zustand "heute schon gemacht" — Haltung als Spiegel */
+.morning-haltung-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.55;
+  margin-bottom: 4px;
+  margin-top: 2px;
+}
+.morning-haltung-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #3a1f1a;
+  padding: 2px 0 2px;
+}
+.morning-haltung-text::before { content: "\201E"; }
+.morning-haltung-text::after { content: "\201C"; }
+
 #section-morning {
   padding: 0;
   max-width: none;
@@ -1363,6 +1386,294 @@ h3 {
   transition: all 0.2s;
 }
 .morning-close-btn:hover { background: rgba(255,255,255,0.6); }
+
+/* ===== EINEN GEDANKEN UNTERSUCHEN (ABC) ===== */
+#section-gedanken {
+  padding: 0;
+  max-width: none;
+}
+.gedanken-wrap {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: linear-gradient(160deg, #5d6b58, #3d4838);
+  color: rgba(255,255,255,0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top, 40px) 28px calc(80px + env(safe-area-inset-bottom, 0px));
+}
+.gedanken-inner {
+  max-width: 540px;
+  width: 100%;
+}
+.gedanken-step {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.gedanken-q-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.65rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.35;
+  margin-bottom: 10px;
+  color: white;
+  text-align: center;
+}
+.gedanken-q-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  opacity: 0.7;
+  margin-bottom: 24px;
+  text-align: center;
+  line-height: 1.5;
+}
+.gedanken-echo {
+  background: rgba(255,255,255,0.08);
+  border-left: 2px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+.gedanken-echo-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 4px;
+}
+.gedanken-echo-text { font-style: italic; }
+.gedanken-note {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  border-radius: 12px;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  resize: none;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  outline: none;
+  line-height: 1.55;
+}
+.gedanken-note::placeholder { color: rgba(255,255,255,0.35); }
+.gedanken-note:focus {
+  border-color: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.12);
+}
+.gedanken-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 22px;
+}
+.gedanken-next {
+  padding: 11px 30px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.gedanken-next:hover, .gedanken-next:active { background: rgba(255,255,255,0.1); }
+.gedanken-finish-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 2rem;
+  font-weight: 500;
+  font-style: italic;
+  text-align: center;
+  color: white;
+  margin-bottom: 18px;
+}
+.gedanken-finish-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  text-align: center;
+  opacity: 0.55;
+  margin-bottom: 40px;
+}
+.gedanken-close-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 12px 32px;
+  border-radius: 24px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.98rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.gedanken-close-btn:hover { background: rgba(255,255,255,0.1); }
+
+/* Gedanken-Karte auf Home (wenn aktiviert) */
+.gedanken-card {
+  background: linear-gradient(135deg, #6d7b64, #4d5a44);
+  color: rgba(255,255,255,0.95);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.gedanken-card:active { transform: scale(0.99); }
+.gedanken-card-label {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.gedanken-card-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+/* Gedanken-Karte auf Home: kleiner Link zu früheren Einträgen */
+.gedanken-card-link {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  padding: 4px 0;
+  display: inline-block;
+  margin-top: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.gedanken-card-link:hover {
+  color: white;
+  border-color: rgba(255,255,255,0.6);
+}
+
+/* Gedanken-Buch: Einträge wie Tagebuchseiten */
+.gedanken-entry {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 22px 22px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid #5d6b58;
+  position: relative;
+}
+.gedanken-entry-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5d6b58;
+  margin-bottom: 14px;
+}
+.gedanken-entry-row {
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.gedanken-entry-row:last-child {
+  margin-bottom: 0;
+}
+.gedanken-entry-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.gedanken-entry-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.02rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.gedanken-entry-text::before { content: "\201E"; }
+.gedanken-entry-text::after { content: "\201C"; }
+.gedanken-entry-delete {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.15s;
+  padding: 4px 8px;
+}
+.gedanken-entry-delete:hover { opacity: 1; color: var(--accent-deep); }
+
+/* Brücke von Gefühlsmatrix → Gedanken-Werkzeug */
+.gedanken-bridge {
+  background: rgba(93, 107, 88, 0.08);
+  border: 1px solid rgba(93, 107, 88, 0.2);
+  border-left: 3px solid #5d6b58;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.gedanken-bridge-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.gedanken-bridge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.gedanken-bridge-btn {
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+.gedanken-bridge-btn.primary {
+  background: #5d6b58;
+  color: white;
+}
+.gedanken-bridge-btn.primary:hover, .gedanken-bridge-btn.primary:active {
+  background: #4d5a48;
+}
+.gedanken-bridge-btn.ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.gedanken-bridge-btn.ghost:hover { background: var(--bg); color: var(--ink); }
 
 /* ===== ABENDSTUNDE ===== */
 .evening-card {
@@ -1517,7 +1828,7 @@ h3 {
   font-weight: 500;
   line-height: 1.3;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
   color: white;
 }
 .evening-signature {
@@ -1527,25 +1838,15 @@ h3 {
   opacity: 0.55;
   text-align: center;
   letter-spacing: 0.08em;
-  margin-bottom: 50px;
+  margin-bottom: 28px;
 }
-.evening-close-btn {
-  display: block;
-  margin: 0 auto;
-  padding: 12px 32px;
-  border-radius: 24px;
-  border: 1.5px solid rgba(255,255,255,0.4);
-  background: transparent;
-  color: rgba(255,255,255,0.85);
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.evening-close-btn:hover, .evening-close-btn:active {
-  background: rgba(255,255,255,0.1);
-  color: white;
+.evening-farewell {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  opacity: 0.45;
+  text-align: center;
+  letter-spacing: 0.02em;
 }
 .weekly-label {
   font-family: 'Inter', sans-serif;
@@ -1735,6 +2036,16 @@ h3 {
   transition: color 0.15s;
 }
 #bottom-nav button.active { color: var(--accent); }
+
+/* Bottom-Nav in Vollbild-Ritualen ausblenden — Stille bewahren */
+body.ritual-fullscreen #bottom-nav { display: none; }
+body.ritual-fullscreen { padding-bottom: 0; }
+body.ritual-fullscreen .moment-wrap,
+body.ritual-fullscreen .morning-wrap,
+body.ritual-fullscreen .evening-wrap,
+body.ritual-fullscreen .gedanken-wrap {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 30px);
+}
 .nav-icon { font-size: 1.35rem; line-height: 1; }
 
 /* Toast */
@@ -1849,15 +2160,32 @@ textarea, input {
 
   <!-- Morgenstunde (nur morgens sichtbar) -->
   <div class="morning-card" id="morning-home-card" style="display:none;">
-    <div class="morning-label">Morgen</div>
-    <div class="morning-sub">Wir begrüßen einen neuen Tag.</div>
-    <button class="morning-btn" onclick="openMorning()">Beginnen</button>
+    <div class="morning-label">Morgenstunde</div>
+    <!-- Zustand 1: noch nicht gemacht -->
+    <div id="morning-card-open">
+      <div class="morning-sub">Wir begrüßen einen neuen Tag.</div>
+      <button class="morning-btn" onclick="openMorning()">Beginnen</button>
+    </div>
+    <!-- Zustand 2: heute schon gemacht, Haltung spiegeln -->
+    <div id="morning-card-done" style="display:none;">
+      <div class="morning-haltung-label">Deine Haltung heute</div>
+      <div class="morning-haltung-text" id="morning-haltung-text"></div>
+    </div>
   </div>
 
   <!-- Ein Moment mit mir (immer verfügbar) -->
   <div class="moment-card" onclick="openMoment()">
     <div class="moment-label">Ein Moment mit mir</div>
     <div class="moment-sub">Einen Atemzug lang bei sich sein.</div>
+  </div>
+
+  <!-- Einen Gedanken untersuchen (nur wenn aktiviert) -->
+  <div class="gedanken-card" id="gedanken-home-card" style="display:none;">
+    <div onclick="openGedanken()">
+      <div class="gedanken-card-label">Einen Gedanken untersuchen</div>
+      <div class="gedanken-card-sub">Wenn dir etwas nachgeht.</div>
+    </div>
+    <span class="gedanken-card-link" id="gedanken-log-link" style="display:none;" onclick="event.stopPropagation(); showSection('gedanken-log');">Frühere ansehen →</span>
   </div>
 
   <!-- Gefühls-Matrix -->
@@ -1915,6 +2243,15 @@ textarea, input {
     <div class="fm-needs" id="fm-needs"></div>
 
     <div class="fm-hint" id="fm-hint">Maximal 5 Gefühle – tippe auf ein markiertes Wort, um es abzuwählen.</div>
+    </div>
+  </div>
+
+  <!-- Dezente Brücke: nach schwerem Gefühl zum Gedanken-Werkzeug -->
+  <div class="gedanken-bridge" id="gedanken-bridge" style="display:none;">
+    <div class="gedanken-bridge-text">Möchtest du dem nachgehen?</div>
+    <div class="gedanken-bridge-actions">
+      <button class="gedanken-bridge-btn primary" onclick="openGedankenFromBridge()">Einen Gedanken untersuchen</button>
+      <button class="gedanken-bridge-btn ghost" onclick="hideGedankenBridge()">Nicht jetzt</button>
     </div>
   </div>
 
@@ -2043,7 +2380,7 @@ textarea, input {
 
 <div id="section-evening" class="section">
   <div class="evening-wrap">
-    <button class="fullscreen-close" onclick="eveningClose()" title="Schließen">✕</button>
+    <button class="fullscreen-close" id="evening-close-x" onclick="eveningClose()" title="Schließen">✕</button>
     <div class="evening-inner">
 
       <!-- Laufende Frage -->
@@ -2065,11 +2402,57 @@ textarea, input {
       <div id="evening-finish" style="display:none;">
         <div class="evening-goodnight" id="evening-goodnight-text"></div>
         <div class="evening-signature">Ad se</div>
-        <button class="evening-close-btn" onclick="eveningClose()">Schlaf gut</button>
+        <div class="evening-farewell">Bis morgen.</div>
       </div>
 
     </div>
   </div>
+</div>
+
+<!-- ====== EINEN GEDANKEN UNTERSUCHEN (ABC-Modell, sanft) ====== -->
+<div id="section-gedanken" class="section">
+  <div class="gedanken-wrap">
+    <button class="fullscreen-close" id="gedanken-close-x" onclick="gedankenClose()" title="Schließen">✕</button>
+    <div class="gedanken-inner">
+
+      <!-- Frage-Schritt -->
+      <div id="gedanken-question" style="display:none;">
+        <div class="gedanken-step" id="gedanken-step-label"></div>
+        <h2 class="gedanken-q-title" id="gedanken-q-title"></h2>
+        <p class="gedanken-q-sub" id="gedanken-q-sub"></p>
+        <div id="gedanken-echo" style="display:none;" class="gedanken-echo"></div>
+        <textarea id="gedanken-q-note" placeholder="…" rows="4" class="gedanken-note"></textarea>
+        <div class="gedanken-actions">
+          <button class="gedanken-next" id="gedanken-next-btn" onclick="gedankenNext()">Weiter</button>
+        </div>
+      </div>
+
+      <!-- Abschluss -->
+      <div id="gedanken-finish" style="display:none;">
+        <div class="gedanken-finish-text">Du bist bei dir.</div>
+        <div class="gedanken-finish-sub">— Ad se</div>
+        <button class="gedanken-close-btn" onclick="gedankenClose()">Zurück</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ====== GEDANKEN-VERLAUF (eigenes kleines Gedankenbuch) ====== -->
+<div id="section-gedanken-log" class="section">
+
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
+  <div class="greeting-block">
+    <h1>Deine Gedanken</h1>
+    <div class="greeting-sub">Was du untersucht hast. In Ruhe nachzulesen.</div>
+  </div>
+
+  <div id="gedanken-log-list"></div>
+
+  <p class="muted-note" id="gedanken-log-empty" style="display:none;text-align:center;padding:40px 20px;font-style:italic;line-height:1.6;">
+    Noch nichts untersucht.<br>Wenn dir ein Gedanke nachgeht, findest du ihn später hier wieder.
+  </p>
+
 </div>
 
 <!-- ====== WOCHENSTUNDE ====== -->
@@ -2288,6 +2671,7 @@ textarea, input {
       <button class="chip" id="vf-gratitude" onclick="setVerlaufFilter('gratitude')">Dankbarkeit</button>
       <button class="chip" id="vf-morning" onclick="setVerlaufFilter('morning')">Morgenstunde</button>
       <button class="chip" id="vf-evening" onclick="setVerlaufFilter('evening')">Abendstunde</button>
+      <button class="chip" id="vf-gedanken" onclick="setVerlaufFilter('gedanken')">Gedanken</button>
       <button class="chip" id="vf-moment" onclick="setVerlaufFilter('moment')">Moment</button>
       <button class="chip" id="vf-today" onclick="setVerlaufFilter('today')">Vorhaben</button>
     </div>
@@ -2447,6 +2831,26 @@ textarea, input {
         dem Home-Screen, bis du sie nutzt, wieder ausschaltest, oder der Tag wechselt.
       </p>
       <div id="rituals-controls" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+  </div>
+
+  <!-- Einen Gedanken untersuchen — einklappbar -->
+  <div class="card collapsible" id="gedanken-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('gedanken')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Einen Gedanken untersuchen</h2>
+        <p class="muted-note" id="gedanken-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="gedanken-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Manchmal geht einem ein Gedanke nach — eine Sorge, ein Zweifel, eine Verletzung. Dieses Werkzeug hilft, ihn in Ruhe anzuschauen: Was ist passiert? Was denke ich darüber? Wie wirkt es auf mich? Und — gibt es vielleicht eine andere Lesart?
+      </p>
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;font-style:italic;">
+        Das Werkzeug folgt einem klassischen Ansatz aus der Psychologie (ABC-Modell nach Albert Ellis), in der Tradition der stoischen Selbstbetrachtung. Es ersetzt keine therapeutische Hilfe.
+      </p>
+      <div id="gedanken-toggle-controls" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
   </div>
 
@@ -2850,6 +3254,8 @@ function loadState() {
     eveningLog: [],
     morningLog: [],
     momentLog: [],
+    gedankenLog: [],
+    gedankenEnabled: false,
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
@@ -2870,7 +3276,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -3025,11 +3431,15 @@ function showSection(id) {
   document.querySelectorAll('#bottom-nav button').forEach(b => b.classList.remove('active'));
   const navBtn = document.getElementById('nav-' + id);
   if (navBtn) navBtn.classList.add('active');
+  // Bottom-Nav in Vollbild-Ritualen ausblenden
+  const isRitual = (id === 'moment' || id === 'morning' || id === 'evening' || id === 'gedanken');
+  document.body.classList.toggle('ritual-fullscreen', isRitual);
   if (id === 'settings') renderSettings();
   if (id === 'home') renderHome();
   if (id === 'body') renderBody();
   if (id === 'verlauf') { renderHeatmap(); renderVerlaufList(); }
   if (id === 'weekly') renderWeekly();
+  if (id === 'gedanken-log') renderGedankenLog();
   window.scrollTo(0, 0);
 }
 
@@ -3109,6 +3519,8 @@ function renderHome() {
   renderWeeklyHomeCard();
   renderEveningHomeCard();
   renderMorningHomeCard();
+  renderGedankenHomeCard();
+  renderGedankenBridge();
   updateCollapsibleSummaries();
 }
 
@@ -3371,8 +3783,8 @@ function showNeedsReflection(entry, logIndex) {
   html += `<textarea id="fm-needs-note" placeholder="Eigener Gedanke... (optional)" rows="1"
     style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.82rem;resize:none;background:var(--card);color:var(--ink);margin-bottom:10px;outline:none;"></textarea>
     <div style="display:flex;gap:8px;">
-      <button class="btn" style="flex:1;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
-      <button class="btn secondary" style="flex:1;" onclick="skipNeedsReflection()">Überspringen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="skipNeedsReflection()">Überspringen</button>
     </div>`;
   needsDiv.innerHTML = html;
 }
@@ -3404,8 +3816,19 @@ function skipNeedsReflection() {
   showToast('Notiert.');
 }
 
+// Ausgangsgefühle für die Gedanken-Brücke (muss vor finishNeedsReflection deklariert sein)
+let gedankenBridgeFeelings = [];
+let gedankenBridgeContext = '';
+let gedankenBridgeEchoActive = false;
+
 function finishNeedsReflection() {
   document.getElementById('fm-needs').classList.remove('visible');
+  // Schweres Gefühl? Dann Brücke zum Gedanken-Werkzeug anbieten (wenn aktiviert)
+  const lastEntry = state.feelingLog[0];
+  const hasHeavyFeeling = lastEntry && Array.isArray(lastEntry.feelings) &&
+    lastEntry.feelings.some(f => f.quadrant === 'ua' || f.quadrant === 'ur');
+  const showBridge = state.gedankenEnabled && hasHeavyFeeling;
+
   fmSelected = [];
   document.getElementById('fm-context').value = '';
   renderFeelingMatrix();
@@ -3417,6 +3840,47 @@ function finishNeedsReflection() {
     body.style.display = 'none';
   }
   updateCollapsibleSummaries();
+
+  // Brücke: Merke Gefühle als möglichen Einstieg und zeige dezente Karte
+  if (showBridge) {
+    gedankenBridgeFeelings = lastEntry.feelings.map(f => f.label);
+    gedankenBridgeContext = lastEntry.context || '';
+    renderGedankenBridge();
+    // Nach dem Zuklappen der Matrix sanft zur Brücke scrollen, damit sie sichtbar ist
+    setTimeout(() => {
+      const bridge = document.getElementById('gedanken-bridge');
+      if (bridge) bridge.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  }
+}
+
+function renderGedankenBridge() {
+  const bridge = document.getElementById('gedanken-bridge');
+  if (!bridge) return;
+  if (gedankenBridgeFeelings.length && state.gedankenEnabled) {
+    bridge.style.display = '';
+  } else {
+    bridge.style.display = 'none';
+  }
+}
+
+function hideGedankenBridge() {
+  gedankenBridgeFeelings = [];
+  gedankenBridgeContext = '';
+  const bridge = document.getElementById('gedanken-bridge');
+  if (bridge) bridge.style.display = 'none';
+}
+
+function openGedankenFromBridge() {
+  // Starte Gedanken-Werkzeug mit vorbefülltem Kontext aus dem Gefühl
+  gedankenStep = 0;
+  gedankenAnswers = ['', '', '', '', ''];
+  // Erste Frage "Was ist passiert?" bekommt den Gefühls-Kontext als Echo
+  gedankenBridgeEchoActive = true;
+  showSection('gedanken');
+  const closeX = document.getElementById('gedanken-close-x');
+  if (closeX) closeX.style.display = '';
+  showGedankenQuestion();
 }
 
 /* ===== TODAY-ITEMS ===== */
@@ -3828,6 +4292,7 @@ function getAllEntries() {
   state.gratitudeLog.forEach(e => out.push({ type: 'gratitude', ts: e.ts, data: e }));
   (state.eveningLog || []).forEach(e => out.push({ type: 'evening', ts: e.ts, data: e }));
   (state.morningLog || []).forEach(e => out.push({ type: 'morning', ts: e.ts, data: e }));
+  (state.gedankenLog || []).forEach(e => out.push({ type: 'gedanken', ts: e.ts, data: e }));
   (state.momentLog || []).forEach(e => out.push({ type: 'moment', ts: e.ts, data: e }));
   // Today-Items (abgehakt und offen)
   Object.keys(state.todayItems).forEach(dk => {
@@ -4138,6 +4603,17 @@ function makeVerlaufEntry(e) {
         <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;margin-top:1px;">„${escapeHtml(haltung)}"</div>
       </div>`;
     }
+  } else if (e.type === 'gedanken') {
+    body = `<strong>Gedanke untersucht</strong>`;
+    const labels = ['Situation', 'Gedanke', 'Wirkung', 'Andere Lesart', 'Jetzt'];
+    (dat.answers || []).forEach((a, i) => {
+      if (a && a.trim()) {
+        body += `<div style="margin-top:4px;font-size:0.9rem;">
+          <span style="color:var(--muted);font-size:0.72rem;">${labels[i]}:</span>
+          <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;margin-top:1px;">„${escapeHtml(a)}"</div>
+        </div>`;
+      }
+    });
   } else if (e.type === 'moment') {
     body = `<strong>Ein Moment mit mir</strong>`;
     if (dat.question) {
@@ -4200,6 +4676,9 @@ function deleteVerlaufEntry(e) {
   } else if (e.type === 'morning') {
     const i = state.morningLog.findIndex(x => x.ts === e.ts);
     if (i >= 0) state.morningLog.splice(i, 1);
+  } else if (e.type === 'gedanken') {
+    const i = state.gedankenLog.findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.gedankenLog.splice(i, 1);
   } else if (e.type === 'moment') {
     const i = state.momentLog.findIndex(x => x.ts === e.ts);
     if (i >= 0) state.momentLog.splice(i, 1);
@@ -5462,6 +5941,9 @@ function openEvening() {
   eveningStep = 0;
   eveningAnswers = ['', '', ''];
   showSection('evening');
+  // ✕ wieder sichtbar, falls vorher ausgeblendet
+  const closeX = document.getElementById('evening-close-x');
+  if (closeX) closeX.style.display = '';
   showEveningQuestion();
 }
 
@@ -5527,7 +6009,10 @@ function showEveningFinish() {
   document.getElementById('evening-question').style.display = 'none';
   document.getElementById('evening-finish').style.display = '';
   const name = state.profile?.name ? ', ' + state.profile.name : '';
-  document.getElementById('evening-goodnight-text').textContent = 'Gute Nacht' + name + '.';
+  document.getElementById('evening-goodnight-text').textContent = 'Schlaf gut' + name + '.';
+  // ✕ ausblenden — die App bleibt still, bis der Nutzer selbst das Handy weglegt
+  const closeX = document.getElementById('evening-close-x');
+  if (closeX) closeX.style.display = 'none';
 }
 
 function eveningClose() {
@@ -5720,6 +6205,23 @@ function renderMorningHomeCard() {
   const overrideActive = state.ritualOverrides?.morning === todayKey;
   const shouldShow = inTimeWindow || overrideActive;
   card.style.display = shouldShow ? '' : 'none';
+  if (!shouldShow) return;
+
+  // Haben wir heute schon einen Eintrag?
+  const todayEntry = getTodayMorningEntry();
+  const haltung = todayEntry && Array.isArray(todayEntry.answers) ? (todayEntry.answers[0] || '').trim() : '';
+
+  const openDiv = document.getElementById('morning-card-open');
+  const doneDiv = document.getElementById('morning-card-done');
+  const haltungText = document.getElementById('morning-haltung-text');
+  if (haltung) {
+    if (openDiv) openDiv.style.display = 'none';
+    if (doneDiv) doneDiv.style.display = '';
+    if (haltungText) haltungText.textContent = haltung;
+  } else {
+    if (openDiv) openDiv.style.display = '';
+    if (doneDiv) doneDiv.style.display = 'none';
+  }
 }
 
 // Heutigen Morgen-Eintrag finden (für die Klammer zur Abendstunde)
@@ -5727,6 +6229,248 @@ function getTodayMorningEntry() {
   if (!Array.isArray(state.morningLog)) return null;
   const todayKey = dayKey();
   return state.morningLog.find(e => dayKey(new Date(e.ts)) === todayKey) || null;
+}
+
+/* ===== EINEN GEDANKEN UNTERSUCHEN (ABC nach Ellis, in Ad-se-Sprache) ===== */
+const GEDANKEN_QUESTIONS = [
+  {
+    step: 'Situation',
+    title: 'Was ist passiert?',
+    sub: 'Schildere kurz, was geschehen ist — nur die Tatsachen, ohne Deutung.',
+    placeholder: 'z.B. Sabine hat beim Frühstück nichts gesagt.'
+  },
+  {
+    step: 'Gedanke',
+    title: 'Was ging dir dabei durch den Kopf?',
+    sub: 'Welche Gedanken oder Überzeugungen kamen in dir auf?',
+    placeholder: 'z.B. Sie ist sauer auf mich. Ich habe etwas falsch gemacht.'
+  },
+  {
+    step: 'Wirkung',
+    title: 'Was hat das mit dir gemacht?',
+    sub: 'Welche Gefühle, welche Körperempfindung, welche Handlung?',
+    placeholder: 'z.B. Sorge, Rückzug, Druck auf der Brust.'
+  },
+  {
+    step: 'Nochmals hinschauen',
+    title: 'Lies noch einmal, was du geschrieben hast.',
+    sub: 'Zwischen dem, was passiert ist, und dem, was du fühlst, liegt dein Gedanke. Ist da vielleicht eine andere Lesart möglich?',
+    placeholder: 'z.B. Vielleicht war sie einfach müde. Oder gedanklich woanders.',
+    showEchoes: true
+  },
+  {
+    step: 'Und jetzt',
+    title: 'Wie fühlst du dich damit jetzt?',
+    sub: 'Nichts muss sich geändert haben. Nur wahrnehmen.',
+    placeholder: 'z.B. Ein wenig leichter. Oder: noch immer unsicher.'
+  }
+];
+
+let gedankenStep = 0;
+let gedankenAnswers = ['', '', '', '', ''];
+
+function openGedanken() {
+  gedankenStep = 0;
+  gedankenAnswers = ['', '', '', '', ''];
+  showSection('gedanken');
+  // ✕ wieder sichtbar, falls vorher ausgeblendet
+  const closeX = document.getElementById('gedanken-close-x');
+  if (closeX) closeX.style.display = '';
+  showGedankenQuestion();
+}
+
+function showGedankenQuestion() {
+  document.getElementById('gedanken-question').style.display = '';
+  document.getElementById('gedanken-finish').style.display = 'none';
+
+  const q = GEDANKEN_QUESTIONS[gedankenStep];
+  document.getElementById('gedanken-step-label').textContent =
+    q.step + ' · ' + (gedankenStep + 1) + ' von ' + GEDANKEN_QUESTIONS.length;
+  document.getElementById('gedanken-q-title').textContent = q.title;
+  document.getElementById('gedanken-q-sub').textContent = q.sub;
+
+  const note = document.getElementById('gedanken-q-note');
+  note.value = gedankenAnswers[gedankenStep] || '';
+  note.placeholder = q.placeholder || '…';
+  setTimeout(() => note.focus(), 200);
+
+  // Echo: Im 4. Schritt die bisherigen Antworten als Spiegel zeigen
+  // Zusätzlich: Wenn per Brücke aus der Gefühlsmatrix gekommen, beim 1. Schritt das Gefühl zeigen
+  const echoEl = document.getElementById('gedanken-echo');
+  if (echoEl) {
+    if (q.showEchoes) {
+      const labels = ['Du sagtest', 'Dein Gedanke', 'Die Wirkung'];
+      const parts = [];
+      for (let i = 0; i < 3; i++) {
+        const ans = (gedankenAnswers[i] || '').trim();
+        if (ans) {
+          parts.push(
+            `<div style="margin-bottom:10px;">
+              <div class="gedanken-echo-label">${labels[i]}</div>
+              <div class="gedanken-echo-text">„${escapeHtml(ans)}"</div>
+            </div>`
+          );
+        }
+      }
+      if (parts.length) {
+        echoEl.innerHTML = parts.join('');
+        echoEl.style.display = '';
+      } else {
+        echoEl.style.display = 'none';
+      }
+    } else if (gedankenStep === 0 && gedankenBridgeEchoActive && gedankenBridgeFeelings.length) {
+      // Brücke von Gefühlsmatrix: eingetragenes Gefühl als Echo zeigen
+      const feelings = gedankenBridgeFeelings.map(f => `„${escapeHtml(f)}"`).join(', ');
+      let html = `
+        <div class="gedanken-echo-label">Du hast gerade eingetragen</div>
+        <div class="gedanken-echo-text">${feelings}</div>
+      `;
+      if (gedankenBridgeContext) {
+        html += `<div style="margin-top:8px;font-size:0.9rem;opacity:0.85;">${escapeHtml(gedankenBridgeContext)}</div>`;
+      }
+      echoEl.innerHTML = html;
+      echoEl.style.display = '';
+    } else {
+      echoEl.style.display = 'none';
+    }
+  }
+
+  const nextBtn = document.getElementById('gedanken-next-btn');
+  nextBtn.textContent = (gedankenStep === GEDANKEN_QUESTIONS.length - 1) ? 'Eintragen' : 'Weiter';
+}
+
+function gedankenNext() {
+  const note = (document.getElementById('gedanken-q-note')?.value || '').trim();
+  gedankenAnswers[gedankenStep] = note;
+
+  if (gedankenStep < GEDANKEN_QUESTIONS.length - 1) {
+    gedankenStep++;
+    showGedankenQuestion();
+  } else {
+    // Speichern, wenn mindestens eine Antwort da ist
+    const hasContent = gedankenAnswers.some(a => a && a.trim());
+    if (hasContent) {
+      if (!Array.isArray(state.gedankenLog)) state.gedankenLog = [];
+      state.gedankenLog.unshift({
+        ts: new Date().toISOString(),
+        answers: [...gedankenAnswers]
+      });
+      if (state.gedankenLog.length > 500) state.gedankenLog.pop();
+      saveState();
+    }
+    showGedankenFinish();
+  }
+}
+
+function showGedankenFinish() {
+  document.getElementById('gedanken-question').style.display = 'none';
+  document.getElementById('gedanken-finish').style.display = '';
+  // ✕ ausblenden für den ruhigen Abschluss
+  const closeX = document.getElementById('gedanken-close-x');
+  if (closeX) closeX.style.display = 'none';
+  // Brücke löschen — sie hat ihren Zweck erfüllt
+  gedankenBridgeEchoActive = false;
+  hideGedankenBridge();
+}
+
+function gedankenClose() {
+  // Beim vorzeitigen Schließen: aktuelle Antwort noch speichern, falls Inhalt da ist
+  const noteEl = document.getElementById('gedanken-q-note');
+  const questionVisible = document.getElementById('gedanken-question').style.display !== 'none';
+  if (questionVisible && noteEl) {
+    const note = (noteEl.value || '').trim();
+    gedankenAnswers[gedankenStep] = note;
+    const hasContent = gedankenAnswers.some(a => a && a.trim());
+    if (hasContent) {
+      if (!Array.isArray(state.gedankenLog)) state.gedankenLog = [];
+      state.gedankenLog.unshift({
+        ts: new Date().toISOString(),
+        answers: [...gedankenAnswers]
+      });
+      if (state.gedankenLog.length > 500) state.gedankenLog.pop();
+      saveState();
+    }
+  }
+  // Bridge-Status zurücksetzen
+  gedankenBridgeEchoActive = false;
+  hideGedankenBridge();
+  showSection('home');
+}
+
+// Gedanken-Karte auf Home nur anzeigen, wenn aktiviert
+function renderGedankenHomeCard() {
+  const card = document.getElementById('gedanken-home-card');
+  if (!card) return;
+  card.style.display = state.gedankenEnabled ? '' : 'none';
+  // Link zu "Frühere ansehen" nur zeigen, wenn es auch welche gibt
+  const link = document.getElementById('gedanken-log-link');
+  if (link) {
+    const hasEntries = Array.isArray(state.gedankenLog) && state.gedankenLog.length > 0;
+    link.style.display = (state.gedankenEnabled && hasEntries) ? '' : 'none';
+  }
+}
+
+/* ===== GEDANKEN-BUCH: eigener Verlauf ===== */
+function renderGedankenLog() {
+  const list = document.getElementById('gedanken-log-list');
+  const empty = document.getElementById('gedanken-log-empty');
+  if (!list) return;
+  const entries = Array.isArray(state.gedankenLog) ? state.gedankenLog : [];
+  if (!entries.length) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const labels = ['Was war passiert', 'Dein Gedanke', 'Die Wirkung', 'Andere Lesart', 'Und jetzt'];
+
+  list.innerHTML = entries.map((e, idx) => {
+    const d = new Date(e.ts);
+    const dateStr = formatGedankenDate(d);
+    const rows = (e.answers || []).map((a, i) => {
+      const txt = (a || '').trim();
+      if (!txt) return '';
+      return `<div class="gedanken-entry-row">
+        <div class="gedanken-entry-label">${labels[i]}</div>
+        <div class="gedanken-entry-text">${escapeHtml(txt)}</div>
+      </div>`;
+    }).join('');
+    return `<div class="gedanken-entry">
+      <button class="gedanken-entry-delete" onclick="deleteGedankenEntry(${idx})" title="Löschen">✕</button>
+      <div class="gedanken-entry-date">${dateStr}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+}
+
+function formatGedankenDate(d) {
+  const now = new Date();
+  const diffMs = now - d;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const weekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  if (diffDays === 0) {
+    return 'Heute · ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  }
+  if (diffDays === 1) {
+    return 'Gestern · ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+  }
+  if (diffDays < 7) {
+    return `Vor ${diffDays} Tagen · ${weekdays[d.getDay()]}`;
+  }
+  return `${d.getDate()}. ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function deleteGedankenEntry(idx) {
+  askConfirm('Diesen Eintrag wirklich löschen?', () => {
+    if (!Array.isArray(state.gedankenLog)) return;
+    if (idx < 0 || idx >= state.gedankenLog.length) return;
+    state.gedankenLog.splice(idx, 1);
+    saveState();
+    renderGedankenLog();
+    showToast('Gelöscht.');
+  }, { title: 'Eintrag löschen?', yesText: 'Löschen' });
 }
 
 /* ===== SETTINGS ===== */
@@ -5823,8 +6567,16 @@ function updateSettingsSummaries() {
     }
   }
 
+  // Einen Gedanken untersuchen: Aktiviert?
+  const gedankenSum = document.getElementById('gedanken-summary');
+  if (gedankenSum) {
+    gedankenSum.textContent = state.gedankenEnabled ? 'Verfügbar auf Home' : 'Noch nicht aktiviert';
+  }
+
   // Rituale: Buttons rendern
   renderRitualControls();
+  // Gedanken: Toggle rendern
+  renderGedankenToggle();
 }
 
 /* ===== RITUALE: Override-Schalter ===== */
@@ -5858,6 +6610,29 @@ function toggleRitualOverride(type) {
   if (!isActive) {
     const label = type === 'morning' ? 'Morgenstunde' : 'Abendstunde';
     showToast(`${label} zugänglich.`);
+  }
+}
+
+/* ===== GEDANKEN-AKTIVIERUNG ===== */
+function renderGedankenToggle() {
+  const container = document.getElementById('gedanken-toggle-controls');
+  if (!container) return;
+  const enabled = state.gedankenEnabled;
+  container.innerHTML = `
+    <button class="btn ${enabled ? '' : 'secondary'} full" onclick="toggleGedankenEnabled()">
+      ${enabled ? 'Werkzeug ausblenden' : 'Werkzeug verfügbar machen'}
+    </button>
+  `;
+}
+
+function toggleGedankenEnabled() {
+  state.gedankenEnabled = !state.gedankenEnabled;
+  saveState();
+  renderGedankenHomeCard();
+  renderGedankenToggle();
+  updateSettingsSummaries();
+  if (state.gedankenEnabled) {
+    showToast('Das Werkzeug ist jetzt auf dem Home-Schirm verfügbar.');
   }
 }
 
@@ -5979,6 +6754,8 @@ function replaceStateFromImport(imported) {
     eveningLog: [],
     morningLog: [],
     momentLog: [],
+    gedankenLog: [],
+    gedankenEnabled: false,
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
@@ -5998,7 +6775,7 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
