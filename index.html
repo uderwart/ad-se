@@ -1628,6 +1628,128 @@ h3 {
 }
 .gedanken-entry-delete:hover { opacity: 1; color: var(--accent-deep); }
 
+/* Komm-mit — dezenter Link auf den Abschluss-Schirmen */
+.kommmit-link-wrap {
+  text-align: center;
+  margin-top: 28px;
+}
+.kommmit-link {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: rgba(74,47,42,0.55);
+  border-bottom: 1px solid rgba(74,47,42,0.25);
+  padding: 2px 0;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.kommmit-link:hover {
+  color: rgba(74,47,42,0.85);
+  border-color: rgba(74,47,42,0.5);
+}
+.kommmit-link.evening {
+  color: rgba(255,255,255,0.55);
+  border-color: rgba(255,255,255,0.25);
+}
+.kommmit-link.evening:hover {
+  color: rgba(255,255,255,0.9);
+  border-color: rgba(255,255,255,0.55);
+}
+
+/* Menschen-Liste im Komm-mit-Dialog */
+.mensch-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.mensch-pick:hover, .mensch-pick.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.mensch-pick-name {
+  font-family: 'EB Garamond', serif;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.mensch-pick-relation {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.mensch-pick-gifted {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--muted);
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* Menschen-Verwaltung in Einstellungen */
+.mensch-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  position: relative;
+}
+.mensch-item-name {
+  font-family: 'EB Garamond', serif;
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.mensch-item-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.mensch-item-note {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-soft, var(--ink));
+  opacity: 0.8;
+  margin-top: 3px;
+  line-height: 1.45;
+}
+.mensch-item-gifted {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--accent-deep);
+  opacity: 0.8;
+  margin-top: 3px;
+}
+.mensch-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.mensch-item-btn {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.mensch-item-btn:hover { color: var(--accent-deep); }
+.mensch-item-btn.danger:hover { color: #a14b38; }
+
 /* Brücke von Gefühlsmatrix → Gedanken-Werkzeug */
 .gedanken-bridge {
   background: rgba(93, 107, 88, 0.08);
@@ -2372,6 +2494,9 @@ textarea, input {
         <div class="morning-gift-text" id="morning-gift-text"></div>
         <div class="morning-gift-source">— Heute</div>
         <button class="morning-close-btn" onclick="morningClose()">In den Tag</button>
+        <div class="kommmit-link-wrap">
+          <span class="kommmit-link" onclick="openKommMit()">Komm mit — weitergeben</span>
+        </div>
       </div>
 
     </div>
@@ -2403,6 +2528,9 @@ textarea, input {
         <div class="evening-goodnight" id="evening-goodnight-text"></div>
         <div class="evening-signature">Ad se</div>
         <div class="evening-farewell">Bis morgen.</div>
+        <div class="kommmit-link-wrap" style="margin-top:36px;">
+          <span class="kommmit-link evening" onclick="openKommMit()">Komm mit — weitergeben</span>
+        </div>
       </div>
 
     </div>
@@ -2854,6 +2982,57 @@ textarea, input {
     </div>
   </div>
 
+  <!-- Menschen — einklappbar -->
+  <div class="card collapsible" id="menschen-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('menschen')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Menschen</h2>
+        <p class="muted-note" id="menschen-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="menschen-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
+        Eine kleine Liste von Menschen, die dir wichtig sind. Nützlich beim Weitergeben von Ad se — und ein stilles Andenken, wer schon dabei ist.
+      </p>
+      <div id="menschen-list" style="margin-bottom:10px;"></div>
+      <button class="btn secondary full" onclick="openMenschEditor()">Jemanden hinzufügen</button>
+    </div>
+  </div>
+
+  <!-- Über Ad se — einklappbar -->
+  <div class="card collapsible" id="ueber-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('ueber')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Über Ad se</h2>
+        <p class="muted-note" style="margin:0;font-size:0.85rem;">Was diese App ist.</p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="ueber-body" style="display:none;">
+      <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:1.05rem;line-height:1.6;margin-bottom:14px;">
+        <em>Ad se ipsum</em> — zu sich selbst. So hat Mark Aurel seine Selbstbetrachtungen genannt.
+      </p>
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.6;">
+        Diese App ist kein Trainer und kein Coach. Sie misst nicht, sie belohnt nicht, sie drängt nicht. Sie ist ein Ort, an dem du bei dir sein kannst. Mehr nicht.
+      </p>
+      <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;line-height:1.55;margin-bottom:14px;color:var(--accent-deep);">
+        Bewusstsein schlägt Kontrolle. Kontinuität schlägt Perfektion.
+      </p>
+      <p class="muted-note" style="margin-bottom:18px;line-height:1.6;">
+        Wenn du nichts einträgst, ist das auch ein Eintrag.
+      </p>
+      <h3 style="font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px;">Wer ist Claude?</h3>
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.6;">
+        Claude ist ein Sprachmodell — eine Art KI von Anthropic. Er hat mir beim Bauen der App geholfen, in vielen Gesprächen und Stunden. Claude kann deine Einträge nicht sehen. Er hat keinen Zugang zu deinem Handy.
+      </p>
+      <h3 style="font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px;">Datenschutz</h3>
+      <p class="muted-note" style="line-height:1.6;">
+        Alles, was du einträgst, bleibt in deinem Handy. Es gibt keinen Server, keinen Cloud-Sync, keine Anmeldung. Die App läuft komplett offline. Nichts wird ausgelesen, nichts weitergegeben, nichts analysiert.
+      </p>
+    </div>
+  </div>
+
   <!-- Gesammelte Gedanken — einklappbar -->
   <div class="card collapsible" id="quotes-collapsible">
     <div class="collapsible-header" onclick="toggleSettingsCard('quotes')">
@@ -3107,6 +3286,44 @@ textarea, input {
 
 <div id="toast"></div>
 
+<!-- ====== KOMM MIT — Dialog zum Weitergeben ====== -->
+<div class="entry-overlay" id="kommmit-overlay">
+  <div class="entry-modal" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2 style="margin:0;">Komm mit</h2>
+      <button onclick="closeKommMit()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+      Ein Geschenk ohne Absicht. Wähle einen Menschen aus deiner Liste — oder gib einen Namen ein.
+    </p>
+
+    <!-- Menschen-Liste zum Auswählen -->
+    <div id="kommmit-menschen-list" style="margin-bottom:14px;"></div>
+
+    <!-- Freier Name -->
+    <div style="margin-bottom:12px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Oder an jemanden, der noch nicht auf der Liste ist:</div>
+      <input type="text" id="kommmit-name" placeholder="Name…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <!-- Eigener Satz -->
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Wenn du magst, ein Satz von dir (optional):</div>
+      <textarea id="kommmit-satz" rows="2" placeholder="…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <!-- Hinweis bei bereits beschenkt -->
+    <div id="kommmit-already-hint" style="display:none;background:var(--accent-soft);border-left:2px solid var(--accent);border-radius:6px;padding:10px 12px;margin-bottom:12px;font-size:0.88rem;font-style:italic;color:var(--ink);line-height:1.5;"></div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeKommMit()">Nicht jetzt</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="doKommMit()">Weitergeben</button>
+    </div>
+  </div>
+</div>
+
 <!-- ====== CONFIRM DIALOG ====== -->
 <div class="entry-overlay" id="confirm-overlay">
   <div class="entry-modal" style="max-width:360px;">
@@ -3256,6 +3473,7 @@ function loadState() {
     momentLog: [],
     gedankenLog: [],
     gedankenEnabled: false,
+    menschen: [],
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
@@ -3276,7 +3494,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -6573,10 +6791,19 @@ function updateSettingsSummaries() {
     gedankenSum.textContent = state.gedankenEnabled ? 'Verfügbar auf Home' : 'Noch nicht aktiviert';
   }
 
+  // Menschen: Anzahl
+  const menschenSum = document.getElementById('menschen-summary');
+  if (menschenSum) {
+    const n = Array.isArray(state.menschen) ? state.menschen.length : 0;
+    menschenSum.textContent = n === 0 ? 'Noch niemand notiert' : (n === 1 ? '1 notiert' : `${n} notiert`);
+  }
+
   // Rituale: Buttons rendern
   renderRitualControls();
   // Gedanken: Toggle rendern
   renderGedankenToggle();
+  // Menschen: Liste rendern
+  renderMenschenList();
 }
 
 /* ===== RITUALE: Override-Schalter ===== */
@@ -6634,6 +6861,239 @@ function toggleGedankenEnabled() {
   if (state.gedankenEnabled) {
     showToast('Das Werkzeug ist jetzt auf dem Home-Schirm verfügbar.');
   }
+}
+
+/* ===== MENSCHEN & KOMM MIT ===== */
+function uid() {
+  return 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+}
+
+function renderMenschenList() {
+  const container = document.getElementById('menschen-list');
+  if (!container) return;
+  const liste = Array.isArray(state.menschen) ? state.menschen : [];
+  if (!liste.length) {
+    container.innerHTML = `<p class="muted-note" style="text-align:center;padding:12px 0;font-style:italic;">Noch niemand notiert.</p>`;
+    return;
+  }
+  container.innerHTML = liste.map((m, idx) => {
+    const giftedLine = m.giftedAt
+      ? `<div class="mensch-item-gifted">Geschenkt ${formatGiftRelative(new Date(m.giftedAt))}</div>`
+      : '';
+    const relLine = m.relation
+      ? `<div class="mensch-item-meta">${escapeHtml(m.relation)}</div>`
+      : '';
+    const noteLine = m.note
+      ? `<div class="mensch-item-note">${escapeHtml(m.note)}</div>`
+      : '';
+    return `<div class="mensch-item">
+      <div class="mensch-item-name">${escapeHtml(m.name)}</div>
+      ${relLine}
+      ${noteLine}
+      ${giftedLine}
+      <div class="mensch-item-actions">
+        <button class="mensch-item-btn" onclick="editMensch('${m.id}')">Bearbeiten</button>
+        <button class="mensch-item-btn danger" onclick="deleteMensch('${m.id}')">Entfernen</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function formatGiftRelative(d) {
+  const now = new Date();
+  const diffMs = now - d;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return 'heute';
+  if (diffDays === 1) return 'gestern';
+  if (diffDays < 7) return `vor ${diffDays} Tagen`;
+  if (diffDays < 14) return 'vor einer Woche';
+  if (diffDays < 30) return `vor ${Math.floor(diffDays/7)} Wochen`;
+  if (diffDays < 60) return 'vor einem Monat';
+  if (diffDays < 365) return `vor ${Math.floor(diffDays/30)} Monaten`;
+  return `vor ${Math.floor(diffDays/365)} Jahr${Math.floor(diffDays/365) > 1 ? 'en' : ''}`;
+}
+
+function openMenschEditor(existingId) {
+  const existing = existingId ? (state.menschen || []).find(m => m.id === existingId) : null;
+  const name = prompt('Name', existing?.name || '');
+  if (name === null) return;
+  const cleanName = name.trim();
+  if (!cleanName) { showToast('Ein Name fehlt.'); return; }
+  const relation = prompt('Beziehung (optional, z.B. Partnerin, alter Freund)', existing?.relation || '');
+  if (relation === null) return;
+  const note = prompt('Notiz (optional, ein Satz)', existing?.note || '');
+  if (note === null) return;
+  if (!Array.isArray(state.menschen)) state.menschen = [];
+  if (existing) {
+    existing.name = cleanName;
+    existing.relation = relation.trim();
+    existing.note = note.trim();
+  } else {
+    state.menschen.push({
+      id: uid(),
+      name: cleanName,
+      relation: relation.trim(),
+      note: note.trim(),
+      giftedAt: null
+    });
+  }
+  saveState();
+  renderMenschenList();
+  updateSettingsSummaries();
+}
+
+function editMensch(id) { openMenschEditor(id); }
+
+function deleteMensch(id) {
+  const m = (state.menschen || []).find(x => x.id === id);
+  if (!m) return;
+  askConfirm(`"${m.name}" aus deiner Liste entfernen?`, () => {
+    state.menschen = state.menschen.filter(x => x.id !== id);
+    saveState();
+    renderMenschenList();
+    updateSettingsSummaries();
+    showToast('Entfernt.');
+  }, { title: 'Entfernen?', yesText: 'Entfernen' });
+}
+
+/* Komm-mit Dialog */
+let kommMitSelectedId = null;
+
+function openKommMit() {
+  kommMitSelectedId = null;
+  document.getElementById('kommmit-name').value = '';
+  document.getElementById('kommmit-satz').value = '';
+  document.getElementById('kommmit-already-hint').style.display = 'none';
+  renderKommMitMenschenList();
+  const ov = document.getElementById('kommmit-overlay');
+  ov.classList.add('visible');
+}
+
+function closeKommMit() {
+  const ov = document.getElementById('kommmit-overlay');
+  ov.classList.remove('visible');
+}
+
+function renderKommMitMenschenList() {
+  const container = document.getElementById('kommmit-menschen-list');
+  if (!container) return;
+  const liste = Array.isArray(state.menschen) ? state.menschen : [];
+  if (!liste.length) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = '<div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Aus deiner Liste:</div>' +
+    liste.map(m => {
+      const gifted = m.giftedAt ? `<div class="mensch-pick-gifted">Geschenkt ${formatGiftRelative(new Date(m.giftedAt))}</div>` : '';
+      const rel = m.relation ? `<div class="mensch-pick-relation">${escapeHtml(m.relation)}</div>` : '';
+      return `<div class="mensch-pick" data-id="${m.id}" onclick="selectKommMitMensch('${m.id}')">
+        <div class="mensch-pick-name">${escapeHtml(m.name)}</div>
+        ${rel}
+        ${gifted}
+      </div>`;
+    }).join('');
+}
+
+function selectKommMitMensch(id) {
+  kommMitSelectedId = id;
+  const m = state.menschen.find(x => x.id === id);
+  if (!m) return;
+  // Visuell als gewählt markieren
+  document.querySelectorAll('#kommmit-menschen-list .mensch-pick').forEach(el => {
+    el.classList.toggle('selected', el.dataset.id === id);
+  });
+  // Name-Eingabefeld mit Namen vorfüllen
+  document.getElementById('kommmit-name').value = m.name;
+  // Hinweis zeigen, wenn schon beschenkt
+  const hint = document.getElementById('kommmit-already-hint');
+  if (m.giftedAt) {
+    hint.textContent = `Dieser Mensch hat Ad se bereits von dir bekommen — ${formatGiftRelative(new Date(m.giftedAt))}. Möchtest du trotzdem weitergeben?`;
+    hint.style.display = '';
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+function doKommMit() {
+  const nameField = document.getElementById('kommmit-name');
+  const satzField = document.getElementById('kommmit-satz');
+  const name = (nameField?.value || '').trim();
+  const satz = (satzField?.value || '').trim();
+  if (!name) { showToast('An wen möchtest du es geben?'); return; }
+
+  const meinName = state.profile?.name || '';
+  const appUrl = window.location.href.split('#')[0];
+
+  let message = `Liebe/r ${name},\n\n`;
+  message += `mein Freund Claude und ich haben an einer kleinen App mitgebaut. Sie heißt Ad se — Latein für "zu sich selbst", so nannte Mark Aurel seine Selbstbetrachtungen.\n\n`;
+  message += `Sie misst nichts, sie zählt nichts, sie sendet nichts. Alles bleibt in deinem Handy. Niemand sieht es — auch ich nicht, auch Claude nicht. Dafür stehe ich mit meinem Namen.\n\n`;
+  message += `Sie ist einfach nur ein stiller Ort. Ein Geschenk ohne Absicht.\n\n`;
+  message += `Du brauchst mir nicht zu antworten. Vielleicht magst du einfach mal testen, ob sie dir gut tut.\n\n`;
+  if (satz) message += satz + '\n\n';
+  message += `Herzlich,\n${meinName || '—'}\n\n→ ${appUrl}`;
+
+  // Zeitstempel setzen, falls aus Menschen-Liste gewählt
+  if (kommMitSelectedId) {
+    const m = state.menschen.find(x => x.id === kommMitSelectedId);
+    if (m) {
+      m.giftedAt = new Date().toISOString();
+    }
+  } else if (name) {
+    // Falls freier Name eingegeben: fragen, ob zu Menschen hinzugefügt werden soll
+    // Das machen wir NACH dem Teilen — siehe unten
+  }
+  saveState();
+
+  // Web Share API probieren, sonst Fallback auf Clipboard
+  if (navigator.share) {
+    navigator.share({
+      title: 'Ad se',
+      text: message
+    }).then(() => {
+      closeKommMit();
+      askAddToMenschenIfNew(name);
+    }).catch(err => {
+      // Nutzer hat abgebrochen — kein Problem
+    });
+  } else {
+    // Fallback: In die Zwischenablage kopieren
+    try {
+      navigator.clipboard.writeText(message);
+      showToast('Nachricht kopiert. Füge sie in WhatsApp oder Email ein.');
+      closeKommMit();
+      askAddToMenschenIfNew(name);
+    } catch (e) {
+      // Letzter Fallback: Text-Area zeigen
+      prompt('Nachricht (zum Kopieren):', message);
+      closeKommMit();
+      askAddToMenschenIfNew(name);
+    }
+  }
+}
+
+function askAddToMenschenIfNew(name) {
+  // Nur fragen, wenn der Name nicht aus der Liste war und auch kein Match existiert
+  if (kommMitSelectedId) return;
+  const existing = (state.menschen || []).find(m => m.name.toLowerCase() === name.toLowerCase());
+  if (existing) {
+    // Nur Zeitstempel setzen
+    existing.giftedAt = new Date().toISOString();
+    saveState();
+    return;
+  }
+  askConfirm(`"${name}" zu deiner Menschen-Liste hinzufügen?`, () => {
+    if (!Array.isArray(state.menschen)) state.menschen = [];
+    state.menschen.push({
+      id: uid(),
+      name: name,
+      relation: '',
+      note: '',
+      giftedAt: new Date().toISOString()
+    });
+    saveState();
+    updateSettingsSummaries();
+    showToast('Zu deinen Menschen hinzugefügt.');
+  }, { title: 'Hinzufügen?', yesText: 'Ja, hinzufügen' });
 }
 
 function openSpecificQuote(id) {
@@ -6756,6 +7216,7 @@ function replaceStateFromImport(imported) {
     momentLog: [],
     gedankenLog: [],
     gedankenEnabled: false,
+    menschen: [],
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
@@ -6775,7 +7236,7 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
