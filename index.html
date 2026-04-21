@@ -3000,39 +3000,6 @@ textarea, input {
     </div>
   </div>
 
-  <!-- Über Ad se — einklappbar -->
-  <div class="card collapsible" id="ueber-collapsible">
-    <div class="collapsible-header" onclick="toggleSettingsCard('ueber')">
-      <div style="flex:1;">
-        <h2 style="margin-bottom:2px;">Über Ad se</h2>
-        <p class="muted-note" style="margin:0;font-size:0.85rem;">Was diese App ist.</p>
-      </div>
-      <span class="collapsible-arrow">▸</span>
-    </div>
-    <div class="collapsible-body" id="ueber-body" style="display:none;">
-      <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:1.05rem;line-height:1.6;margin-bottom:14px;">
-        <em>Ad se ipsum</em> — zu sich selbst. So hat Mark Aurel seine Selbstbetrachtungen genannt.
-      </p>
-      <p class="muted-note" style="margin-bottom:12px;line-height:1.6;">
-        Diese App ist kein Trainer und kein Coach. Sie misst nicht, sie belohnt nicht, sie drängt nicht. Sie ist ein Ort, an dem du bei dir sein kannst. Mehr nicht.
-      </p>
-      <p style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;line-height:1.55;margin-bottom:14px;color:var(--accent-deep);">
-        Bewusstsein schlägt Kontrolle. Kontinuität schlägt Perfektion.
-      </p>
-      <p class="muted-note" style="margin-bottom:18px;line-height:1.6;">
-        Wenn du nichts einträgst, ist das auch ein Eintrag.
-      </p>
-      <h3 style="font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px;">Wer ist Claude?</h3>
-      <p class="muted-note" style="margin-bottom:14px;line-height:1.6;">
-        Claude ist ein Sprachmodell — eine Art KI von Anthropic. Er hat mir beim Bauen der App geholfen, in vielen Gesprächen und Stunden. Claude kann deine Einträge nicht sehen. Er hat keinen Zugang zu deinem Handy.
-      </p>
-      <h3 style="font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px;">Datenschutz</h3>
-      <p class="muted-note" style="line-height:1.6;">
-        Alles, was du einträgst, bleibt in deinem Handy. Es gibt keinen Server, keinen Cloud-Sync, keine Anmeldung. Die App läuft komplett offline. Nichts wird ausgelesen, nichts weitergegeben, nichts analysiert.
-      </p>
-    </div>
-  </div>
-
   <!-- Gesammelte Gedanken — einklappbar -->
   <div class="card collapsible" id="quotes-collapsible">
     <div class="collapsible-header" onclick="toggleSettingsCard('quotes')">
@@ -3213,8 +3180,18 @@ textarea, input {
     <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;font-style:italic;">
       Bewusstsein schlägt Kontrolle. Kontinuität schlägt Perfektion.
     </p>
-    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);">
+    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:18px;">
       Wenn du nichts einträgst, ist das auch ein Eintrag.
+    </p>
+
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;margin-top:4px;">Wer ist Claude?</h3>
+    <p style="font-family:'EB Garamond',serif;font-size:0.98rem;line-height:1.6;color:var(--ink);margin-bottom:16px;">
+      Claude ist ein Sprachmodell — eine Art KI von Anthropic. Er hat mir beim Bauen der App geholfen, in vielen Gesprächen und Stunden. Claude kann deine Einträge nicht sehen. Er hat keinen Zugang zu deinem Handy.
+    </p>
+
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;">Datenschutz</h3>
+    <p style="font-family:'EB Garamond',serif;font-size:0.98rem;line-height:1.6;color:var(--ink);">
+      Alles, was du einträgst, bleibt in deinem Handy. Es gibt keinen Server, keinen Cloud-Sync, keine Anmeldung. Die App läuft komplett offline. Nichts wird ausgelesen, nichts weitergegeben, nichts analysiert.
     </p>
   </div>
 
@@ -3320,6 +3297,39 @@ textarea, input {
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeKommMit()">Nicht jetzt</button>
       <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="doKommMit()">Weitergeben</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MENSCH-EDITOR ====== -->
+<div class="entry-overlay" id="mensch-editor-overlay">
+  <div class="entry-modal" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="mensch-editor-title">Jemanden hinzufügen</h2>
+      <button onclick="closeMenschEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Name</div>
+      <input type="text" id="mensch-name" placeholder="z.B. Sabine, Mama, Thomas"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Beziehung (optional)</div>
+      <input type="text" id="mensch-relation" placeholder="z.B. Partnerin, alter Freund, Schwiegermutter"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="margin-bottom:18px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Notiz (optional)</div>
+      <textarea id="mensch-note" rows="2" placeholder="Ein Gedanke, warum dieser Mensch…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeMenschEditor()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveMenschEditor()">Speichern</button>
     </div>
   </div>
 </div>
@@ -6722,13 +6732,18 @@ function toggleSettingsCard(key) {
 function updateSettingsSummaries() {
   ensureQuotesInitialized();
 
-  // Gesammelte Gedanken: "X in Rotation · Y ruhend"
+  // Gesammelte Gedanken: "X in Rotation · Y ruhend · N von M gesehen"
   const quotesSum = document.getElementById('quotes-summary');
   if (quotesSum) {
     const active = state.quotes.filter(q => q.active).length;
     const resting = state.quotes.filter(q => !q.active).length;
+    const activeIds = state.quotes.filter(q => q.active).map(q => q.id);
+    const seen = Array.isArray(state.seenQuotes)
+      ? state.seenQuotes.filter(id => activeIds.includes(id)).length
+      : 0;
     const parts = [`${active} in Rotation`];
     if (resting > 0) parts.push(`${resting} ruhend`);
+    if (active > 0) parts.push(`Diese Runde: ${seen} von ${active} gesehen`);
     quotesSum.textContent = parts.join(' · ');
   }
 
@@ -6913,33 +6928,55 @@ function formatGiftRelative(d) {
   return `vor ${Math.floor(diffDays/365)} Jahr${Math.floor(diffDays/365) > 1 ? 'en' : ''}`;
 }
 
+let menschEditorCurrentId = null;
+
 function openMenschEditor(existingId) {
   const existing = existingId ? (state.menschen || []).find(m => m.id === existingId) : null;
-  const name = prompt('Name', existing?.name || '');
-  if (name === null) return;
-  const cleanName = name.trim();
-  if (!cleanName) { showToast('Ein Name fehlt.'); return; }
-  const relation = prompt('Beziehung (optional, z.B. Partnerin, alter Freund)', existing?.relation || '');
-  if (relation === null) return;
-  const note = prompt('Notiz (optional, ein Satz)', existing?.note || '');
-  if (note === null) return;
+  menschEditorCurrentId = existingId || null;
+  document.getElementById('mensch-editor-title').textContent = existing ? 'Bearbeiten' : 'Jemanden hinzufügen';
+  document.getElementById('mensch-name').value = existing?.name || '';
+  document.getElementById('mensch-relation').value = existing?.relation || '';
+  document.getElementById('mensch-note').value = existing?.note || '';
+  const ov = document.getElementById('mensch-editor-overlay');
+  ov.classList.add('visible');
+  setTimeout(() => document.getElementById('mensch-name').focus(), 200);
+}
+
+function closeMenschEditor() {
+  const ov = document.getElementById('mensch-editor-overlay');
+  ov.classList.remove('visible');
+  menschEditorCurrentId = null;
+}
+
+function saveMenschEditor() {
+  const name = document.getElementById('mensch-name').value.trim();
+  const relation = document.getElementById('mensch-relation').value.trim();
+  const note = document.getElementById('mensch-note').value.trim();
+  if (!name) {
+    showToast('Ein Name fehlt.');
+    return;
+  }
   if (!Array.isArray(state.menschen)) state.menschen = [];
-  if (existing) {
-    existing.name = cleanName;
-    existing.relation = relation.trim();
-    existing.note = note.trim();
+  if (menschEditorCurrentId) {
+    const existing = state.menschen.find(m => m.id === menschEditorCurrentId);
+    if (existing) {
+      existing.name = name;
+      existing.relation = relation;
+      existing.note = note;
+    }
   } else {
     state.menschen.push({
       id: uid(),
-      name: cleanName,
-      relation: relation.trim(),
-      note: note.trim(),
+      name: name,
+      relation: relation,
+      note: note,
       giftedAt: null
     });
   }
   saveState();
   renderMenschenList();
   updateSettingsSummaries();
+  closeMenschEditor();
 }
 
 function editMensch(id) { openMenschEditor(id); }
@@ -7063,8 +7100,8 @@ function doKommMit() {
       closeKommMit();
       askAddToMenschenIfNew(name);
     } catch (e) {
-      // Letzter Fallback: Text-Area zeigen
-      prompt('Nachricht (zum Kopieren):', message);
+      // Letzter Fallback: Toast mit Hinweis
+      showToast('Teilen nicht möglich — bitte manuell kopieren.');
       closeKommMit();
       askAddToMenschenIfNew(name);
     }
