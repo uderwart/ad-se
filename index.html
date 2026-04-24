@@ -7077,6 +7077,60 @@ function sampleFrom(arr, n) {
   return result;
 }
 
+// Tendenz-Satz für Gefühls-Quadranten
+// Beschreibt, keine Interpretation. Passt sich an die echten Zahlen an.
+function buildGefuehlsTendenz(quads, total) {
+  if (!total) return '';
+  const angenehm = (quads.aa || 0) + (quads.ar || 0);
+  const unangenehm = (quads.ua || 0) + (quads.ur || 0);
+  const ruhig = (quads.ar || 0) + (quads.ur || 0);
+  const aktiviert = (quads.aa || 0) + (quads.ua || 0);
+
+  const angenehmAnteil = angenehm / total;
+  const ruhigAnteil = ruhig / total;
+
+  // Hauptton bestimmen
+  let hauptton = '';
+  if (angenehmAnteil >= 0.6 && ruhigAnteil >= 0.6) {
+    hauptton = 'Ein insgesamt ruhiger und angenehmer Monat';
+  } else if (angenehmAnteil >= 0.6 && ruhigAnteil < 0.4) {
+    hauptton = 'Ein lebendiger, insgesamt angenehmer Monat';
+  } else if (angenehmAnteil >= 0.6) {
+    hauptton = 'Ein insgesamt angenehmer Monat';
+  } else if (angenehmAnteil <= 0.4 && ruhigAnteil >= 0.6) {
+    hauptton = 'Ein stiller, auch schwerer Monat';
+  } else if (angenehmAnteil <= 0.4 && ruhigAnteil < 0.4) {
+    hauptton = 'Ein aufwühlender Monat';
+  } else if (angenehmAnteil <= 0.4) {
+    hauptton = 'Ein spürbar schwerer Monat';
+  } else {
+    // Zwischen 40% und 60% — keine klare Richtung
+    hauptton = 'Ein Monat im Wechsel — vieles angenehm, manches schwer';
+  }
+
+  // Nuance-Ergänzung bei klarer Richtung
+  let nuance = '';
+  if (angenehmAnteil >= 0.6) {
+    // Überwiegend angenehm — nuancieren, wenn das Schwere nennenswert war
+    const schwerAnteil = unangenehm / total;
+    if (schwerAnteil >= 0.25) {
+      nuance = ' — mit spürbaren schweren Momenten dazwischen';
+    } else if (schwerAnteil >= 0.1) {
+      nuance = ' — mit wenigen schweren Momenten';
+    }
+  } else if (angenehmAnteil <= 0.4) {
+    // Überwiegend schwer — nuancieren, wenn das Angenehme spürbar war
+    const hellAnteil = angenehm / total;
+    if (hellAnteil >= 0.25) {
+      nuance = ' — mit hellen Momenten dazwischen';
+    } else if (hellAnteil >= 0.1) {
+      nuance = ' — mit wenigen hellen Momenten';
+    }
+  }
+
+  return hauptton + nuance + '.';
+}
+
 // Daten für Rückblick sammeln — trennt Datenextraktion von Textgenerierung
 // So bleibt später eine API-Anbindung möglich
 function collectRueckblickData(year, month) {
@@ -7287,10 +7341,18 @@ function renderRueckblickText(data) {
     let html = `<div class="rueckblick-section">
       <div class="rueckblick-section-headline">Deine Gefühle</div>
       <div class="rueckblick-stat">Du hast <strong>${data.feelingCount}</strong> Mal Gefühle verortet.</div>`;
+
     // Quadranten-Verteilung
     const quads = data.quadCounts || {};
     const totalFeelings = (quads.aa || 0) + (quads.ar || 0) + (quads.ua || 0) + (quads.ur || 0);
+
+    // Tendenz-Satz bilden
     if (totalFeelings > 0) {
+      const tendenz = buildGefuehlsTendenz(quads, totalFeelings);
+      if (tendenz) {
+        html += `<div class="rueckblick-stat" style="margin-top:10px;font-style:italic;">${tendenz}</div>`;
+      }
+
       html += `<div style="margin-top:10px;padding-left:16px;border-left:2px solid rgba(255, 250, 240, 0.25);">`;
       ['ar','aa','ur','ua'].forEach(q => {
         const count = quads[q] || 0;
