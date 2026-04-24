@@ -1749,6 +1749,13 @@ h3 {
 }
 .mensch-item-btn:hover { color: var(--accent-deep); }
 .mensch-item-btn.danger:hover { color: #a14b38; }
+.mensch-item-btn.primary {
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+.mensch-item-btn.primary:hover {
+  color: var(--ink);
+}
 
 /* ===== MONATSRÜCKBLICK ===== */
 #section-rueckblick {
@@ -7725,6 +7732,7 @@ function renderMenschenList() {
       ${noteLine}
       ${giftedLine}
       <div class="mensch-item-actions">
+        <button class="mensch-item-btn primary" onclick="openKommMitForMensch('${m.id}')">${m.giftedAt ? 'Nochmal senden' : 'Komm mit'}</button>
         <button class="mensch-item-btn" onclick="editMensch('${m.id}')">Bearbeiten</button>
         <button class="mensch-item-btn danger" onclick="deleteMensch('${m.id}')">Entfernen</button>
       </div>
@@ -7782,14 +7790,26 @@ function saveMenschEditor() {
       existing.relation = relation;
       existing.note = note;
     }
-  } else {
+    } else {
+    const newId = uid();
     state.menschen.push({
-      id: uid(),
+      id: newId,
       name: name,
       relation: relation,
       note: note,
       giftedAt: null
     });
+    saveState();
+    renderMenschenList();
+    updateSettingsSummaries();
+    closeMenschEditor();
+    // Direkt nach dem Anlegen: gleich schicken?
+    setTimeout(() => {
+      askConfirm(`Möchtest du ${name} gleich ein Komm mit schicken?`, () => {
+        openKommMitForMensch(newId);
+      }, { title: 'Komm mit?', yesText: 'Jetzt schicken' });
+    }, 200);
+    return;
   }
   saveState();
   renderMenschenList();
@@ -7826,6 +7846,15 @@ function openKommMit() {
   renderKommMitMenschenList();
   const ov = document.getElementById('kommmit-overlay');
   ov.classList.add('visible');
+}
+
+// Direkt aus Menschen-Liste: Komm-mit mit vorausgewählter Person öffnen
+function openKommMitForMensch(id) {
+  openKommMit();
+  // Nach kurzem Moment den Menschen auswählen (damit die Liste gerendert ist)
+  setTimeout(() => {
+    selectKommMitMensch(id);
+  }, 50);
 }
 
 function handleKommMitBild(event) {
