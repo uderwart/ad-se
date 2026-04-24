@@ -7016,7 +7016,39 @@ function entriesInMonth(list, year, month) {
 // Hilfsfunktion: häufige Wörter aus Texten extrahieren
 function topWords(texts, n = 3, minLen = 4) {
   const counts = {};
-  const stopWords = new Set(['und','oder','aber','dass','wenn','weil','auch','noch','mich','sich','mein','dein','sein','ihre','ihrer','einem','einer','eines','nicht','sehr','kein','mehr','werden','haben','hatte','hatten','wurde','wurden','können','konnte','machen','machte','immer','schon','heute','gestern','gerade','etwas','jemand','alles','nichts','schön','schönen','daran','damit','dafür','davon','dabei','durch','dann','mitte','vielleicht']);
+  // Umfassende deutsche Stopp-Wörter: Artikel, Pronomen, Präpositionen, Hilfsverben, Füllwörter
+  const stopWords = new Set([
+    // Artikel
+    'der','die','das','den','dem','des','ein','eine','einen','einem','einer','eines',
+    // Pronomen
+    'ich','du','er','sie','es','wir','ihr','mich','dich','mir','dir','uns','euch','ihm','ihn','ihnen',
+    'mein','meine','meinen','meinem','meiner','meines','dein','deine','deinen','deinem','deiner','deines',
+    'sein','seine','seinen','seinem','seiner','seines','ihre','ihren','ihrem','ihrer','ihres',
+    'unser','unsere','euer','eure','dieser','diese','dieses','diesen','diesem',
+    'jener','jene','jenes','manch','solch','welch',
+    // Präpositionen / Konjunktionen
+    'und','oder','aber','dass','wenn','weil','denn','also','doch','noch','nur','auch','nicht','kein','keine',
+    'für','durch','gegen','ohne','mit','bei','nach','von','aus','zu','zum','zur','auf','in','im','an','am','unter','über','vor','hinter','neben','zwischen','seit','während','um','bis','ab',
+    'als','wie','so','dann','dort','hier','heute','gestern','morgen','jetzt','schon','immer','nie','manchmal','oft','selten','vielleicht',
+    // Hilfsverben / häufige Verben (konjugiert)
+    'bin','bist','ist','sind','seid','war','warst','waren','wart','gewesen',
+    'habe','hast','hat','haben','habt','hatte','hatten','hattest','hattet','gehabt',
+    'werde','wirst','wird','werden','werdet','wurde','wurden','wurdest','wurdet','geworden',
+    'kann','kannst','können','konnte','konnten','könnte','könnten','gekonnt',
+    'soll','sollst','sollen','sollte','sollten','mag','magst','mögen','mochte','mochten',
+    'muss','musst','müssen','müsst','musste','mussten',
+    'will','willst','wollen','wollt','wollte','wollten','gewollt',
+    'darf','darfst','dürfen','dürft','durfte','durften',
+    // Sonstige häufige Wörter
+    'etwas','jemand','niemand','alles','nichts','alle','viele','wenige','einige','mehrere',
+    'sehr','ganz','recht','ziemlich','eher','mehr','weniger','genau','nur','bloß','schon',
+    'dazu','darin','daran','damit','dafür','davon','dabei','daher','darum','darüber','darunter',
+    'worauf','wobei','wodurch','wofür','womit','wonach','woran','worin','worum','wovon','wozu',
+    'werde','werden','sich','selbst','einander','beide','jeder','jede','jedes','jeden','jedem',
+    'gut','gute','guten','gutes','gute','besser','beste','schön','schönen','schöne','schönes',
+    'neue','neuen','neues','alte','alten','altes','groß','großen','großes','klein','kleinen','kleines'
+  ]);
+
   texts.forEach(t => {
     if (!t) return;
     const words = t.toLowerCase().match(/[a-zäöüß]+/g) || [];
@@ -7110,6 +7142,7 @@ function collectRueckblickData(year, month) {
       if (f.quadrant && quadCounts.hasOwnProperty(f.quadrant)) quadCounts[f.quadrant]++;
     });
   });
+  data.quadCounts = quadCounts;
   const quadMax = Math.max(...Object.values(quadCounts));
   data.dominantQuadrant = quadMax > 0
     ? Object.entries(quadCounts).find(([q,c]) => c === quadMax)[0]
@@ -7163,7 +7196,7 @@ function renderRueckblickText(data) {
     let html = `<div class="rueckblick-section">
       <div class="rueckblick-section-headline">Deine Morgen</div>
       <div class="rueckblick-stat">An <strong>${data.morningCount}</strong> Morgen warst du bei dir.</div>`;
-    const topHaltungen = topWords(data.morningHaltungen, 3, 3);
+    const topHaltungen = topWords(data.morningHaltungen, 3, 4);
     if (topHaltungen.length) {
       html += `<div class="rueckblick-stat" style="margin-top:6px;">Häufig wolltest du sein: <em>${topHaltungen.map(h => h.word).join(', ')}</em>.</div>`;
     }
@@ -7254,13 +7287,17 @@ function renderRueckblickText(data) {
     let html = `<div class="rueckblick-section">
       <div class="rueckblick-section-headline">Deine Gefühle</div>
       <div class="rueckblick-stat">Du hast <strong>${data.feelingCount}</strong> Mal Gefühle verortet.</div>`;
-    if (data.dominantQuadrant && quadLabels[data.dominantQuadrant]) {
-      html += `<div class="rueckblick-stat" style="margin-top:6px;">Meistens: <em>${quadLabels[data.dominantQuadrant]}</em>.</div>`;
-    }
-    const zitate = sampleFrom(data.feelingContexts, Math.min(2, data.feelingContexts.length));
-    if (zitate.length) {
-      html += `<div class="rueckblick-zitate">`;
-      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+    // Quadranten-Verteilung
+    const quads = data.quadCounts || {};
+    const totalFeelings = (quads.aa || 0) + (quads.ar || 0) + (quads.ua || 0) + (quads.ur || 0);
+    if (totalFeelings > 0) {
+      html += `<div style="margin-top:10px;padding-left:16px;border-left:2px solid rgba(255, 250, 240, 0.25);">`;
+      ['ar','aa','ur','ua'].forEach(q => {
+        const count = quads[q] || 0;
+        if (count > 0) {
+          html += `<div class="rueckblick-stat" style="margin-bottom:4px;"><em>${quadLabels[q]}</em> · <strong>${count} Mal</strong></div>`;
+        }
+      });
       html += `</div>`;
     }
     html += `</div>`;
