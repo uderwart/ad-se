@@ -3559,6 +3559,13 @@ textarea, input {
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
     </div>
 
+    <!-- Anrede -->
+    <div style="margin-bottom:12px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Anrede:</div>
+      <input type="text" id="kommmit-anrede" placeholder="Hallo" value="Hallo"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
     <!-- Eigener Satz -->
     <div style="margin-bottom:14px;">
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Wenn du magst, ein Satz von dir (optional):</div>
@@ -7839,6 +7846,7 @@ function openKommMit() {
   kommMitSelectedId = null;
   kommMitBildFile = null;
   document.getElementById('kommmit-name').value = '';
+  document.getElementById('kommmit-anrede').value = 'Hallo';
   document.getElementById('kommmit-satz').value = '';
   document.getElementById('kommmit-already-hint').style.display = 'none';
   document.getElementById('kommmit-bild-preview').style.display = 'none';
@@ -7925,15 +7933,17 @@ function selectKommMitMensch(id) {
 
 function doKommMit() {
   const nameField = document.getElementById('kommmit-name');
+  const anredeField = document.getElementById('kommmit-anrede');
   const satzField = document.getElementById('kommmit-satz');
   const name = (nameField?.value || '').trim();
+  const anrede = (anredeField?.value || 'Hallo').trim() || 'Hallo';
   const satz = (satzField?.value || '').trim();
   if (!name) { showToast('An wen möchtest du es geben?'); return; }
 
   const meinName = state.profile?.name || '';
   const appUrl = window.location.href.split('#')[0];
 
-  let message = `Liebe/r ${name},\n\n`;
+  let message = `${anrede} ${name},\n\n`;
   message += `ich dachte gerade an dich — und an etwas, das dir Freude machen könnte.\n\n`;
   message += `Ich habe in den letzten Monaten an einer kleinen App mitgebaut. Sie heißt Ad se — Latein für "zu sich selbst", so hat Mark Aurel seine Selbstbetrachtungen genannt.\n\n`;
   message += `Sie ist aus einer Zeit entstanden, in der ich krank war und Geduld lernen musste. Dabei habe ich gemerkt, wie sehr es mir hilft, still mit mir selbst zu sein. Daraus wurde eine Art leises Tagebuch — ein paar Fragen, die einen zu sich zurückbringen.\n\n`;
@@ -7951,31 +7961,49 @@ function doKommMit() {
   }
   saveState();
 
-  // Share-Daten zusammenstellen — mit Bild, falls gewählt
-  const shareData = {
-    title: 'Ad se',
-    text: message
-  };
-  if (kommMitBildFile && navigator.canShare && navigator.canShare({ files: [kommMitBildFile] })) {
-    shareData.files = [kommMitBildFile];
-  }
+  // Prüfen, ob Bild mit Text zusammen teilbar ist
+  const hasBild = !!kommMitBildFile;
+  const canShareWithBild = hasBild && navigator.canShare && navigator.canShare({ files: [kommMitBildFile] });
 
-  // Web Share API probieren, sonst Fallback auf Clipboard
   if (navigator.share) {
-    navigator.share(shareData).then(() => {
-      closeKommMit();
-      askAddToMenschenIfNew(name);
-    }).catch(err => {
-      // Nutzer hat abgebrochen — kein Problem
-    });
+    // Versuch 1: Text + Bild zusammen
+    if (canShareWithBild) {
+      navigator.share({
+        title: 'Ad se',
+        text: message,
+        files: [kommMitBildFile]
+      }).then(() => {
+        closeKommMit();
+        askAddToMenschenIfNew(name);
+      }).catch(err => {
+        // Falls Share fehlgeschlagen ist (z.B. App unterstützt kein Bild): Text alleine
+        if (err && err.name !== 'AbortError') {
+          shareTextOnlyThenBild(message, name, hasBild);
+        }
+      });
+    } else if (hasBild) {
+      // Bild ist da, aber nicht gemeinsam teilbar: Text zuerst, dann Bild-Hinweis
+      shareTextOnlyThenBild(message, name, true);
+    } else {
+      // Kein Bild: nur Text
+      navigator.share({
+        title: 'Ad se',
+        text: message
+      }).then(() => {
+        closeKommMit();
+        askAddToMenschenIfNew(name);
+      }).catch(err => {
+        // Nutzer hat abgebrochen oder Fehler — nichts tun
+      });
+    }
   } else {
-    // Fallback: In die Zwischenablage kopieren
+    // Fallback: In die Zwischenablage
     try {
       navigator.clipboard.writeText(message);
-      if (kommMitBildFile) {
-        showToast('Nachricht kopiert. Bild kannst du separat teilen.');
+      if (hasBild) {
+        showToast('Text kopiert. Bild bitte separat teilen.');
       } else {
-        showToast('Nachricht kopiert. Füge sie in WhatsApp oder Email ein.');
+        showToast('Nachricht kopiert.');
       }
       closeKommMit();
       askAddToMenschenIfNew(name);
@@ -7985,6 +8013,31 @@ function doKommMit() {
       askAddToMenschenIfNew(name);
     }
   }
+}
+
+// Text teilen, dann Frage nach separatem Bild-Teilen
+function shareTextOnlyThenBild(message, name, hasBild) {
+  navigator.share({
+    title: 'Ad se',
+    text: message
+  }).then(() => {
+    closeKommMit();
+    askAddToMenschenIfNew(name);
+    // Jetzt fragen, ob das Bild noch separat geteilt werden soll
+    if (hasBild && kommMitBildFile) {
+      setTimeout(() => {
+        askConfirm('Der Text ist verschickt. Möchtest du das Bild auch noch teilen?', () => {
+          if (navigator.canShare && navigator.canShare({ files: [kommMitBildFile] })) {
+            navigator.share({ files: [kommMitBildFile] }).catch(() => {});
+          } else {
+            showToast('Teile das Bild bitte direkt aus deiner Galerie.');
+          }
+        }, { title: 'Bild auch teilen?', yesText: 'Ja, jetzt' });
+      }, 400);
+    }
+  }).catch(err => {
+    // Abbruch: kein Problem
+  });
 }
 
 function askAddToMenschenIfNew(name) {
