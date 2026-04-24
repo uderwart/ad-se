@@ -3258,6 +3258,7 @@ textarea, input {
         </div>
       </div>
 
+      <button class="btn full" onclick="openRueckblickPreview()" style="margin-bottom:8px;">Aktuellen Monat ansehen</button>
       <button class="btn secondary full" onclick="showSection('rueckblick-list')">Frühere Rückblicke</button>
     </div>
   </div>
@@ -3571,19 +3572,6 @@ textarea, input {
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Wenn du magst, ein Satz von dir (optional):</div>
       <textarea id="kommmit-satz" rows="2" placeholder="…"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
-    </div>
-
-    <!-- Bild auswählen -->
-    <div style="margin-bottom:14px;">
-      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Ein Bild dazu (optional):</div>
-      <input type="file" id="kommmit-bild" accept="image/*" style="display:none;" onchange="handleKommMitBild(event)">
-      <button class="btn secondary full" onclick="document.getElementById('kommmit-bild').click()" id="kommmit-bild-btn" style="padding:10px;">
-        <span id="kommmit-bild-btn-text">📷 Bild aus Galerie wählen</span>
-      </button>
-      <div id="kommmit-bild-preview" style="display:none;margin-top:10px;position:relative;">
-        <img id="kommmit-bild-img" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;">
-        <button onclick="clearKommMitBild()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;line-height:1;">✕</button>
-      </div>
     </div>
 
     <!-- Hinweis bei bereits beschenkt -->
@@ -7360,6 +7348,25 @@ function openRueckblick(year, month) {
   }
 }
 
+// Vorschau des aktuellen Monats — zeigt den Rückblick, ohne ihn zu speichern
+function openRueckblickPreview() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const data = collectRueckblickData(year, month);
+  const text = renderRueckblickText(data);
+
+  document.getElementById('rueckblick-title').textContent = `${data.monthName} ${year}`;
+  // Vorschau-Hinweis oben dezent einblenden
+  const hint = `<div style="text-align:center;margin-bottom:28px;padding:10px 14px;background:rgba(255,255,255,0.1);border-radius:10px;font-style:italic;font-size:0.92rem;opacity:0.85;">Vorschau — der Monat läuft noch</div>`;
+  document.getElementById('rueckblick-body').innerHTML = hint + text;
+
+  showSection('rueckblick');
+  const closeX = document.getElementById('rueckblick-close-x');
+  if (closeX) closeX.style.display = '';
+  // Nicht speichern!
+}
+
 function closeRueckblick() {
   showSection('home');
 }
@@ -7840,17 +7847,13 @@ function deleteMensch(id) {
 
 /* Komm-mit Dialog */
 let kommMitSelectedId = null;
-let kommMitBildFile = null;
 
 function openKommMit() {
   kommMitSelectedId = null;
-  kommMitBildFile = null;
   document.getElementById('kommmit-name').value = '';
   document.getElementById('kommmit-anrede').value = 'Hallo';
   document.getElementById('kommmit-satz').value = '';
   document.getElementById('kommmit-already-hint').style.display = 'none';
-  document.getElementById('kommmit-bild-preview').style.display = 'none';
-  document.getElementById('kommmit-bild-btn-text').textContent = '📷 Bild aus Galerie wählen';
   renderKommMitMenschenList();
   const ov = document.getElementById('kommmit-overlay');
   ov.classList.add('visible');
@@ -7863,27 +7866,6 @@ function openKommMitForMensch(id) {
   setTimeout(() => {
     selectKommMitMensch(id);
   }, 50);
-}
-
-function handleKommMitBild(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  kommMitBildFile = file;
-  // Vorschau anzeigen
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('kommmit-bild-img').src = e.target.result;
-    document.getElementById('kommmit-bild-preview').style.display = '';
-    document.getElementById('kommmit-bild-btn-text').textContent = '📷 Anderes Bild wählen';
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearKommMitBild() {
-  kommMitBildFile = null;
-  document.getElementById('kommmit-bild').value = '';
-  document.getElementById('kommmit-bild-preview').style.display = 'none';
-  document.getElementById('kommmit-bild-btn-text').textContent = '📷 Bild aus Galerie wählen';
 }
 
 function closeKommMit() {
@@ -7961,50 +7943,22 @@ function doKommMit() {
   }
   saveState();
 
-  // Prüfen, ob Bild mit Text zusammen teilbar ist
-  const hasBild = !!kommMitBildFile;
-  const canShareWithBild = hasBild && navigator.canShare && navigator.canShare({ files: [kommMitBildFile] });
-
+  // Web Share API mit nur Text
   if (navigator.share) {
-    // Versuch 1: Text + Bild zusammen
-    if (canShareWithBild) {
-      navigator.share({
-        title: 'Ad se',
-        text: message,
-        files: [kommMitBildFile]
-      }).then(() => {
-        closeKommMit();
-        askAddToMenschenIfNew(name);
-      }).catch(err => {
-        // Falls Share fehlgeschlagen ist (z.B. App unterstützt kein Bild): Text alleine
-        if (err && err.name !== 'AbortError') {
-          shareTextOnlyThenBild(message, name, hasBild);
-        }
-      });
-    } else if (hasBild) {
-      // Bild ist da, aber nicht gemeinsam teilbar: Text zuerst, dann Bild-Hinweis
-      shareTextOnlyThenBild(message, name, true);
-    } else {
-      // Kein Bild: nur Text
-      navigator.share({
-        title: 'Ad se',
-        text: message
-      }).then(() => {
-        closeKommMit();
-        askAddToMenschenIfNew(name);
-      }).catch(err => {
-        // Nutzer hat abgebrochen oder Fehler — nichts tun
-      });
-    }
+    navigator.share({
+      title: 'Ad se',
+      text: message
+    }).then(() => {
+      closeKommMit();
+      askAddToMenschenIfNew(name);
+    }).catch(err => {
+      // Nutzer hat abgebrochen — kein Problem
+    });
   } else {
-    // Fallback: In die Zwischenablage
+    // Fallback: Zwischenablage
     try {
       navigator.clipboard.writeText(message);
-      if (hasBild) {
-        showToast('Text kopiert. Bild bitte separat teilen.');
-      } else {
-        showToast('Nachricht kopiert.');
-      }
+      showToast('Nachricht kopiert.');
       closeKommMit();
       askAddToMenschenIfNew(name);
     } catch (e) {
@@ -8013,31 +7967,6 @@ function doKommMit() {
       askAddToMenschenIfNew(name);
     }
   }
-}
-
-// Text teilen, dann Frage nach separatem Bild-Teilen
-function shareTextOnlyThenBild(message, name, hasBild) {
-  navigator.share({
-    title: 'Ad se',
-    text: message
-  }).then(() => {
-    closeKommMit();
-    askAddToMenschenIfNew(name);
-    // Jetzt fragen, ob das Bild noch separat geteilt werden soll
-    if (hasBild && kommMitBildFile) {
-      setTimeout(() => {
-        askConfirm('Der Text ist verschickt. Möchtest du das Bild auch noch teilen?', () => {
-          if (navigator.canShare && navigator.canShare({ files: [kommMitBildFile] })) {
-            navigator.share({ files: [kommMitBildFile] }).catch(() => {});
-          } else {
-            showToast('Teile das Bild bitte direkt aus deiner Galerie.');
-          }
-        }, { title: 'Bild auch teilen?', yesText: 'Ja, jetzt' });
-      }, 400);
-    }
-  }).catch(err => {
-    // Abbruch: kein Problem
-  });
 }
 
 function askAddToMenschenIfNew(name) {
