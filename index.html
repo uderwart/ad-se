@@ -1750,6 +1750,187 @@ h3 {
 .mensch-item-btn:hover { color: var(--accent-deep); }
 .mensch-item-btn.danger:hover { color: #a14b38; }
 
+/* ===== MONATSRÜCKBLICK ===== */
+#section-rueckblick {
+  padding: 0;
+  max-width: none;
+}
+.rueckblick-wrap {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: linear-gradient(165deg, #b89464 0%, #8b6a42 100%);
+  color: rgba(255, 250, 240, 0.96);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: calc(env(safe-area-inset-top, 40px) + 20px) 24px 60px;
+}
+.rueckblick-inner {
+  max-width: 580px;
+  width: 100%;
+}
+.rueckblick-eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.65;
+  text-align: center;
+  margin-bottom: 12px;
+  margin-top: 20px;
+}
+.rueckblick-title {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 2rem;
+  text-align: center;
+  line-height: 1.2;
+  margin-bottom: 36px;
+  color: white;
+}
+.rueckblick-body {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: rgba(255, 250, 240, 0.95);
+}
+.rueckblick-body p {
+  margin-bottom: 14px;
+}
+.rueckblick-section {
+  margin-bottom: 28px;
+}
+.rueckblick-section-headline {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: white;
+  letter-spacing: 0.01em;
+}
+.rueckblick-stat {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.08rem;
+  margin-bottom: 6px;
+}
+.rueckblick-zitate {
+  margin-top: 8px;
+  padding-left: 16px;
+  border-left: 2px solid rgba(255, 250, 240, 0.25);
+}
+.rueckblick-zitat {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  margin-bottom: 8px;
+  opacity: 0.92;
+}
+.rueckblick-zitat::before { content: "\201E"; }
+.rueckblick-zitat::after { content: "\201C"; }
+.rueckblick-wortliste {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+}
+.rueckblick-divider {
+  border: none;
+  height: 1px;
+  background: rgba(255, 250, 240, 0.2);
+  margin: 24px 0;
+}
+.rueckblick-foot {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 250, 240, 0.2);
+  text-align: center;
+}
+.rueckblick-signature {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  opacity: 0.65;
+  letter-spacing: 0.06em;
+}
+
+/* Home-Karte: Rückblick wartet */
+.rueckblick-home-card {
+  background: linear-gradient(135deg, #c8a574 0%, #9b7a52 100%);
+  color: rgba(255, 250, 240, 0.96);
+  border-radius: 14px;
+  padding: 18px 20px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.rueckblick-home-label {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: white;
+}
+.rueckblick-home-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  opacity: 0.75;
+  margin-bottom: 14px;
+}
+.rueckblick-home-btn {
+  padding: 9px 20px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  background: transparent;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 8px;
+}
+.rueckblick-home-btn:hover { background: rgba(255,255,255,0.1); }
+.rueckblick-home-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+/* Rückblick-Liste (Archiv) */
+.rueckblick-listitem {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  border-left: 3px solid #9b7a52;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.rueckblick-listitem:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.rueckblick-listitem-title {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.rueckblick-listitem-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
 /* Brücke von Gefühlsmatrix → Gedanken-Werkzeug */
 .gedanken-bridge {
   background: rgba(93, 107, 88, 0.08);
@@ -2165,7 +2346,8 @@ body.ritual-fullscreen { padding-bottom: 0; }
 body.ritual-fullscreen .moment-wrap,
 body.ritual-fullscreen .morning-wrap,
 body.ritual-fullscreen .evening-wrap,
-body.ritual-fullscreen .gedanken-wrap {
+body.ritual-fullscreen .gedanken-wrap,
+body.ritual-fullscreen .rueckblick-wrap {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 30px);
 }
 .nav-icon { font-size: 1.35rem; line-height: 1; }
@@ -2308,6 +2490,16 @@ textarea, input {
       <div class="gedanken-card-sub">Wenn dir etwas nachgeht.</div>
     </div>
     <span class="gedanken-card-link" id="gedanken-log-link" style="display:none;" onclick="event.stopPropagation(); showSection('gedanken-log');">Frühere ansehen →</span>
+  </div>
+
+  <!-- Monatsrückblick — erscheint am Monatsanfang -->
+  <div class="rueckblick-home-card" id="rueckblick-home-card" style="display:none;">
+    <div class="rueckblick-home-label" id="rueckblick-home-label"></div>
+    <div class="rueckblick-home-sub">Möchtest du zurückblicken?</div>
+    <div style="display:flex;align-items:center;">
+      <button class="rueckblick-home-btn" onclick="openRueckblickFromHome()">Lesen</button>
+      <button class="rueckblick-home-dismiss" onclick="dismissRueckblickHome()">Später</button>
+    </div>
   </div>
 
   <!-- Gefühls-Matrix -->
@@ -2581,6 +2773,34 @@ textarea, input {
     Noch nichts untersucht.<br>Wenn dir ein Gedanke nachgeht, findest du ihn später hier wieder.
   </p>
 
+</div>
+
+<!-- ====== MONATSRÜCKBLICK ====== -->
+<div id="section-rueckblick" class="section">
+  <div class="rueckblick-wrap">
+    <button class="fullscreen-close" id="rueckblick-close-x" onclick="closeRueckblick()" title="Schließen">✕</button>
+    <div class="rueckblick-inner">
+      <div class="rueckblick-eyebrow">Rückblick</div>
+      <h1 class="rueckblick-title" id="rueckblick-title"></h1>
+      <div class="rueckblick-body" id="rueckblick-body"></div>
+      <div class="rueckblick-foot">
+        <div class="rueckblick-signature">Ad se</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== RÜCKBLICK-LISTE (Archiv) ====== -->
+<div id="section-rueckblick-list" class="section">
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
+  <div class="greeting-block">
+    <h1>Rückblicke</h1>
+    <div class="greeting-sub">Deine früheren Monatsbriefe.</div>
+  </div>
+  <div id="rueckblick-list-container"></div>
+  <p class="muted-note" id="rueckblick-list-empty" style="display:none;text-align:center;padding:40px 20px;font-style:italic;line-height:1.6;">
+    Noch kein Rückblick.<br>Der erste kommt am Anfang des nächsten Monats.
+  </p>
 </div>
 
 <!-- ====== WOCHENSTUNDE ====== -->
@@ -2984,7 +3204,7 @@ textarea, input {
 
   <!-- Menschen — einklappbar -->
   <div class="card collapsible" id="menschen-collapsible">
-    <div class="collapsible-header" onclick="toggleSettingsCard('menschen')">
+    <div class="collapsible-header" onclick="toggleSettingsCard('menschen','rueckblicke')">
       <div style="flex:1;">
         <h2 style="margin-bottom:2px;">Menschen</h2>
         <p class="muted-note" id="menschen-summary" style="margin:0;font-size:0.85rem;"></p>
@@ -2997,6 +3217,41 @@ textarea, input {
       </p>
       <div id="menschen-list" style="margin-bottom:10px;"></div>
       <button class="btn secondary full" onclick="openMenschEditor()">Jemanden hinzufügen</button>
+    </div>
+  </div>
+
+  <!-- Monatsrückblick — einklappbar -->
+  <div class="card collapsible" id="rueckblick-settings-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('rueckblick-settings')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Monatsrückblick</h2>
+        <p class="muted-note" id="rueckblick-settings-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="rueckblick-settings-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:16px;line-height:1.55;">
+        Am Anfang jedes Monats erscheint ein stiller Brief an dich — mit dem, was sich im letzten Monat gezeigt hat. Mit deinen eigenen Worten.
+      </p>
+
+      <div style="margin-bottom:16px;">
+        <div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Was soll darin stehen?</div>
+        <div id="rueckblick-toggles" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;">Worte, auf die du achten möchtest</div>
+        <p class="muted-note" style="margin-bottom:10px;font-size:0.85rem;line-height:1.5;">Namen, Orte, Themen — der Rückblick zählt, wie oft sie in deinen Einträgen vorkamen.</p>
+        <div id="watchwords-list" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="new-watchword" placeholder="z.B. Sabine"
+            style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+            onkeydown="if(event.key==='Enter'){addWatchword();}">
+          <button class="btn small" onclick="addWatchword()">+</button>
+        </div>
+      </div>
+
+      <button class="btn secondary full" onclick="showSection('rueckblick-list')">Frühere Rückblicke</button>
     </div>
   </div>
 
@@ -3172,11 +3427,24 @@ textarea, input {
       <em>Ad se ipsum</em> — zu sich selbst. So hat Mark Aurel seine Selbstbetrachtungen genannt.
     </p>
     <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;">
-      Diese App ist kein Trainer und kein Coach. Sie misst nicht, sie belohnt nicht, sie drängt nicht.
+      Ad se ist aus einer persönlichen Erfahrung entstanden. Durch eine Krankheit kam eine Zeit des Innehaltens — und daraus die Erkenntnis, dass Selbstreflexion ein guter Begleiter sein kann. Für das Schwere ebenso wie für das Schöne.
     </p>
-    <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;">
-      Sie ist ein Ort, an dem du bei dir sein kannst. Mehr nicht.
+
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;margin-top:18px;">Was Ad se ist</h3>
+    <p style="font-family:'EB Garamond',serif;font-size:1rem;line-height:1.65;color:var(--ink);margin-bottom:14px;">
+      Ein stilles Tagebuch. Ein Ort zum Innehalten. Ein paar Fragen, die einen bei sich selbst ankommen lassen.
     </p>
+
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;">Was Ad se nicht ist</h3>
+    <p style="font-family:'EB Garamond',serif;font-size:1rem;line-height:1.65;color:var(--ink);margin-bottom:14px;">
+      Keine Therapie. Kein Coach. Kein Tracker. Keine Medizin-App.
+    </p>
+
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;">Für wen</h3>
+    <p style="font-family:'EB Garamond',serif;font-size:1rem;line-height:1.65;color:var(--ink);margin-bottom:18px;">
+      Für Menschen, die reflektiert mit sich selbst arbeiten wollen.
+    </p>
+
     <p style="font-family:'EB Garamond',serif;font-size:1.02rem;line-height:1.65;color:var(--ink);margin-bottom:12px;font-style:italic;">
       Bewusstsein schlägt Kontrolle. Kontinuität schlägt Perfektion.
     </p>
@@ -3184,14 +3452,14 @@ textarea, input {
       Wenn du nichts einträgst, ist das auch ein Eintrag.
     </p>
 
-    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;margin-top:4px;">Wer ist Claude?</h3>
-    <p style="font-family:'EB Garamond',serif;font-size:0.98rem;line-height:1.6;color:var(--ink);margin-bottom:16px;">
-      Claude ist ein Sprachmodell — eine Art KI von Anthropic. Er hat mir beim Bauen der App geholfen, in vielen Gesprächen und Stunden. Claude kann deine Einträge nicht sehen. Er hat keinen Zugang zu deinem Handy.
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;">Datenschutz</h3>
+    <p style="font-family:'EB Garamond',serif;font-size:0.98rem;line-height:1.6;color:var(--ink);margin-bottom:14px;">
+      Alles, was du einträgst, bleibt in deinem Handy. Es gibt keinen Server, keinen Cloud-Sync, keine Anmeldung. Die App läuft komplett offline. Nichts wird ausgelesen, nichts weitergegeben, nichts analysiert.
     </p>
 
-    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;">Datenschutz</h3>
+    <h3 style="font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:8px;">Zur Technik</h3>
     <p style="font-family:'EB Garamond',serif;font-size:0.98rem;line-height:1.6;color:var(--ink);">
-      Alles, was du einträgst, bleibt in deinem Handy. Es gibt keinen Server, keinen Cloud-Sync, keine Anmeldung. Die App läuft komplett offline. Nichts wird ausgelesen, nichts weitergegeben, nichts analysiert.
+      Beim Bau der App hat ein KI-Sprachmodell (Claude von Anthropic) als Werkzeug geholfen. Es hat keinen Zugang zu deinen Einträgen — die App läuft rein lokal auf deinem Gerät.
     </p>
   </div>
 
@@ -3289,6 +3557,19 @@ textarea, input {
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Wenn du magst, ein Satz von dir (optional):</div>
       <textarea id="kommmit-satz" rows="2" placeholder="…"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <!-- Bild auswählen -->
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Ein Bild dazu (optional):</div>
+      <input type="file" id="kommmit-bild" accept="image/*" style="display:none;" onchange="handleKommMitBild(event)">
+      <button class="btn secondary full" onclick="document.getElementById('kommmit-bild').click()" id="kommmit-bild-btn" style="padding:10px;">
+        <span id="kommmit-bild-btn-text">📷 Bild aus Galerie wählen</span>
+      </button>
+      <div id="kommmit-bild-preview" style="display:none;margin-top:10px;position:relative;">
+        <img id="kommmit-bild-img" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;">
+        <button onclick="clearKommMitBild()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;line-height:1;">✕</button>
+      </div>
     </div>
 
     <!-- Hinweis bei bereits beschenkt -->
@@ -3484,6 +3765,20 @@ function loadState() {
     gedankenLog: [],
     gedankenEnabled: false,
     menschen: [],
+    rueckblicke: [],
+    rueckblickSettings: {
+      showMorning: true,
+      showEvening: true,
+      showActivities: true,
+      showGratitude: true,
+      showMoments: true,
+      showFeelings: false,
+      showBody: false,
+      showGedanken: true,
+      showHighlights: true,
+      watchWords: []
+    },
+    lastRueckblickPrompt: null,
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
@@ -3504,7 +3799,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen','rueckblicke'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -3660,7 +3955,7 @@ function showSection(id) {
   const navBtn = document.getElementById('nav-' + id);
   if (navBtn) navBtn.classList.add('active');
   // Bottom-Nav in Vollbild-Ritualen ausblenden
-  const isRitual = (id === 'moment' || id === 'morning' || id === 'evening' || id === 'gedanken');
+  const isRitual = (id === 'moment' || id === 'morning' || id === 'evening' || id === 'gedanken' || id === 'rueckblick');
   document.body.classList.toggle('ritual-fullscreen', isRitual);
   if (id === 'settings') renderSettings();
   if (id === 'home') renderHome();
@@ -3668,6 +3963,7 @@ function showSection(id) {
   if (id === 'verlauf') { renderHeatmap(); renderVerlaufList(); }
   if (id === 'weekly') renderWeekly();
   if (id === 'gedanken-log') renderGedankenLog();
+  if (id === 'rueckblick-list') renderRueckblickList();
   window.scrollTo(0, 0);
 }
 
@@ -3749,6 +4045,7 @@ function renderHome() {
   renderMorningHomeCard();
   renderGedankenHomeCard();
   renderGedankenBridge();
+  renderRueckblickHomeCard();
   updateCollapsibleSummaries();
 }
 
@@ -6701,6 +6998,512 @@ function deleteGedankenEntry(idx) {
   }, { title: 'Eintrag löschen?', yesText: 'Löschen' });
 }
 
+/* ===== MONATSRÜCKBLICK ===== */
+
+const MONATE_DE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+// Hilfsfunktion: Einträge aus einem Monat filtern
+function entriesInMonth(list, year, month) {
+  if (!Array.isArray(list)) return [];
+  return list.filter(e => {
+    const d = new Date(e.ts);
+    return d.getFullYear() === year && d.getMonth() === month;
+  });
+}
+
+// Hilfsfunktion: häufige Wörter aus Texten extrahieren
+function topWords(texts, n = 3, minLen = 4) {
+  const counts = {};
+  const stopWords = new Set(['und','oder','aber','dass','wenn','weil','auch','noch','mich','sich','mein','dein','sein','ihre','ihrer','einem','einer','eines','nicht','sehr','kein','mehr','werden','haben','hatte','hatten','wurde','wurden','können','konnte','machen','machte','immer','schon','heute','gestern','gerade','etwas','jemand','alles','nichts','schön','schönen','daran','damit','dafür','davon','dabei','durch','dann','mitte','vielleicht']);
+  texts.forEach(t => {
+    if (!t) return;
+    const words = t.toLowerCase().match(/[a-zäöüß]+/g) || [];
+    words.forEach(w => {
+      if (w.length < minLen) return;
+      if (stopWords.has(w)) return;
+      counts[w] = (counts[w] || 0) + 1;
+    });
+  });
+  return Object.entries(counts)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, n)
+    .map(([w,c]) => ({ word: w, count: c }));
+}
+
+// Hilfsfunktion: zufällige Auswahl (ohne Wiederholung)
+function sampleFrom(arr, n) {
+  if (!Array.isArray(arr) || !arr.length) return [];
+  const copy = [...arr];
+  const result = [];
+  while (copy.length && result.length < n) {
+    const i = Math.floor(Math.random() * copy.length);
+    result.push(copy[i]);
+    copy.splice(i, 1);
+  }
+  return result;
+}
+
+// Daten für Rückblick sammeln — trennt Datenextraktion von Textgenerierung
+// So bleibt später eine API-Anbindung möglich
+function collectRueckblickData(year, month) {
+  const data = {
+    year: year,
+    month: month,
+    monthName: MONATE_DE[month],
+    daysInMonth: new Date(year, month + 1, 0).getDate()
+  };
+
+  // Morgen
+  const morning = entriesInMonth(state.morningLog, year, month);
+  data.morningCount = morning.length;
+  data.morningHaltungen = morning
+    .map(e => (e.answers && e.answers[0]) ? e.answers[0].trim() : '')
+    .filter(Boolean);
+
+  // Abend
+  const evening = entriesInMonth(state.eveningLog, year, month);
+  data.eveningCount = evening.length;
+  data.eveningTexts = evening
+    .flatMap(e => Array.isArray(e.answers) ? e.answers : [])
+    .filter(t => t && t.trim())
+    .map(t => t.trim());
+
+  // Aktivitäten — nach Name gruppiert
+  const activities = entriesInMonth(state.activityLog, year, month);
+  const actCounts = {};
+  const actNotes = {};
+  activities.forEach(a => {
+    const name = (a.activity || '').trim();
+    if (!name) return;
+    actCounts[name] = (actCounts[name] || 0) + 1;
+    if (a.note && a.note.trim()) {
+      if (!actNotes[name]) actNotes[name] = [];
+      actNotes[name].push(a.note.trim());
+    }
+  });
+  data.activities = Object.entries(actCounts)
+    .sort((a,b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count, notes: actNotes[name] || [] }));
+
+  // Dankbarkeit
+  const gratitude = entriesInMonth(state.gratitudeLog, year, month);
+  data.gratitudeCount = gratitude.length;
+  data.gratitudeTexts = gratitude
+    .map(g => (g.text || '').trim())
+    .filter(Boolean);
+
+  // Momente
+  const moments = entriesInMonth(state.momentLog, year, month);
+  data.momentCount = moments.length;
+  data.momentTexts = moments
+    .map(m => (m.note || '').trim())
+    .filter(Boolean);
+
+  // Gefühle
+  const feelings = entriesInMonth(state.feelingLog, year, month);
+  data.feelingCount = feelings.length;
+  const quadCounts = { aa: 0, ar: 0, ua: 0, ur: 0 };
+  feelings.forEach(e => {
+    (e.feelings || []).forEach(f => {
+      if (f.quadrant && quadCounts.hasOwnProperty(f.quadrant)) quadCounts[f.quadrant]++;
+    });
+  });
+  const quadMax = Math.max(...Object.values(quadCounts));
+  data.dominantQuadrant = quadMax > 0
+    ? Object.entries(quadCounts).find(([q,c]) => c === quadMax)[0]
+    : null;
+  data.feelingContexts = feelings
+    .map(e => (e.context || '').trim())
+    .filter(Boolean);
+
+  // Körper
+  const body = entriesInMonth(state.bodyLog, year, month);
+  data.bodyCount = body.length;
+  data.bodyTexts = body
+    .map(b => (b.note || '').trim())
+    .filter(Boolean);
+
+  // Gedanken untersucht
+  const gedanken = entriesInMonth(state.gedankenLog, year, month);
+  data.gedankenCount = gedanken.length;
+  data.gedankenSituations = gedanken
+    .map(g => (g.answers && g.answers[0]) ? g.answers[0].trim() : '')
+    .filter(Boolean);
+
+  // Watchwords
+  const watchWords = (state.rueckblickSettings?.watchWords) || [];
+  data.watchWordHits = watchWords.map(word => {
+    const allTexts = [
+      ...data.morningHaltungen,
+      ...data.eveningTexts,
+      ...data.gratitudeTexts,
+      ...data.momentTexts,
+      ...data.feelingContexts,
+      ...data.bodyTexts,
+      ...Object.values(actNotes).flat(),
+      ...data.gedankenSituations
+    ];
+    const pattern = new RegExp('\\b' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+    const count = allTexts.filter(t => pattern.test(t)).length;
+    return { word, count };
+  }).filter(w => w.count > 0);
+
+  return data;
+}
+
+// Textbausteine aus den Daten bauen (bei API-Anbindung später austauschbar)
+function renderRueckblickText(data) {
+  const s = state.rueckblickSettings || {};
+  const parts = [];
+
+  // Morgenstunden
+  if (s.showMorning && data.morningCount > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Deine Morgen</div>
+      <div class="rueckblick-stat">An <strong>${data.morningCount}</strong> Morgen warst du bei dir.</div>`;
+    const topHaltungen = topWords(data.morningHaltungen, 3, 3);
+    if (topHaltungen.length) {
+      html += `<div class="rueckblick-stat" style="margin-top:6px;">Häufig wolltest du sein: <em>${topHaltungen.map(h => h.word).join(', ')}</em>.</div>`;
+    }
+    const zitate = sampleFrom(data.morningHaltungen, Math.min(3, data.morningHaltungen.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Abendstunden
+  if (s.showEvening && data.eveningCount > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Deine Abende</div>
+      <div class="rueckblick-stat">Du hast <strong>${data.eveningCount}</strong> Abendstunden gemacht.</div>`;
+    const zitate = sampleFrom(data.eveningTexts, Math.min(3, data.eveningTexts.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Aktivitäten
+  if (s.showActivities && data.activities.length > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Was du getan hast</div>`;
+    data.activities.slice(0, 8).forEach(a => {
+      html += `<div class="rueckblick-stat">Du warst <strong>${a.count} Mal</strong> ${escapeHtml(a.name)}.</div>`;
+    });
+    // Kommentare zu Aktivitäten
+    const allActNotes = data.activities.flatMap(a => a.notes);
+    if (allActNotes.length) {
+      const zitate = sampleFrom(allActNotes, Math.min(2, allActNotes.length));
+      if (zitate.length) {
+        html += `<div class="rueckblick-zitate">`;
+        zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+        html += `</div>`;
+      }
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Dankbarkeit
+  if (s.showGratitude && data.gratitudeCount > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Dankbarkeit</div>
+      <div class="rueckblick-stat">Du hast an <strong>${data.gratitudeCount}</strong> Tagen gedankt.</div>`;
+    const zitate = sampleFrom(data.gratitudeTexts, Math.min(4, data.gratitudeTexts.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Momente
+  if (s.showMoments && data.momentCount > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Momente mit dir</div>
+      <div class="rueckblick-stat">Du hast <strong>${data.momentCount}</strong> Mal innegehalten.</div>`;
+    const zitate = sampleFrom(data.momentTexts, Math.min(3, data.momentTexts.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Gefühle
+  if (s.showFeelings && data.feelingCount > 0) {
+    const quadLabels = {
+      aa: 'aktiviert und angenehm',
+      ar: 'ruhig und angenehm',
+      ua: 'aktiviert und unangenehm',
+      ur: 'ruhig und unangenehm'
+    };
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Deine Gefühle</div>
+      <div class="rueckblick-stat">Du hast <strong>${data.feelingCount}</strong> Mal Gefühle verortet.</div>`;
+    if (data.dominantQuadrant && quadLabels[data.dominantQuadrant]) {
+      html += `<div class="rueckblick-stat" style="margin-top:6px;">Meistens: <em>${quadLabels[data.dominantQuadrant]}</em>.</div>`;
+    }
+    const zitate = sampleFrom(data.feelingContexts, Math.min(2, data.feelingContexts.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Körper
+  if (s.showBody && data.bodyCount > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Dein Körper</div>
+      <div class="rueckblick-stat">Du hast <strong>${data.bodyCount}</strong> Empfindungen notiert.</div>`;
+    const zitate = sampleFrom(data.bodyTexts, Math.min(2, data.bodyTexts.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Untersuchte Gedanken
+  if (s.showGedanken && data.gedankenCount > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Gedanken, denen du nachgegangen bist</div>
+      <div class="rueckblick-stat">Du hast <strong>${data.gedankenCount}</strong> Gedanken untersucht.</div>`;
+    const zitate = sampleFrom(data.gedankenSituations, Math.min(2, data.gedankenSituations.length));
+    if (zitate.length) {
+      html += `<div class="rueckblick-zitate">`;
+      zitate.forEach(z => html += `<div class="rueckblick-zitat">${escapeHtml(z)}</div>`);
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Watchwords
+  if (data.watchWordHits.length > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Worte, auf die du geachtet hast</div>`;
+    data.watchWordHits.forEach(w => {
+      html += `<div class="rueckblick-stat"><em>${escapeHtml(w.word)}</em> · <strong>${w.count} Mal</strong> erwähnt.</div>`;
+    });
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Falls leer
+  if (!parts.length) {
+    return `<div class="rueckblick-section">
+      <p style="font-style:italic;opacity:0.8;">In diesem Monat hast du nichts eingetragen. Das ist auch ein Eintrag.</p>
+    </div>`;
+  }
+
+  return parts.join('<hr class="rueckblick-divider">');
+}
+
+// Rückblick erstellen und anzeigen
+function openRueckblick(year, month) {
+  const data = collectRueckblickData(year, month);
+  const text = renderRueckblickText(data);
+
+  document.getElementById('rueckblick-title').textContent = `${data.monthName} ${year}`;
+  document.getElementById('rueckblick-body').innerHTML = text;
+
+  showSection('rueckblick');
+  const closeX = document.getElementById('rueckblick-close-x');
+  if (closeX) closeX.style.display = '';
+
+  // Falls noch nicht gespeichert: speichern
+  const id = `${year}-${String(month + 1).padStart(2,'0')}`;
+  if (!Array.isArray(state.rueckblicke)) state.rueckblicke = [];
+  const existing = state.rueckblicke.find(r => r.id === id);
+  if (!existing) {
+    state.rueckblicke.unshift({
+      id: id,
+      year: year,
+      month: month,
+      monthName: data.monthName,
+      createdAt: new Date().toISOString(),
+      data: data  // Roh-Daten mitspeichern für Wieder-Lesen und API-Zukunft
+    });
+    if (state.rueckblicke.length > 120) state.rueckblicke.pop();  // max 10 Jahre
+    saveState();
+  }
+}
+
+function closeRueckblick() {
+  showSection('home');
+}
+
+// Home-Karte anzeigen, wenn neuer Monat ansteht und Nutzer noch nicht gefragt wurde
+function renderRueckblickHomeCard() {
+  const card = document.getElementById('rueckblick-home-card');
+  if (!card) return;
+
+  const now = new Date();
+  const thisMonthId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`;
+
+  // Welcher Monat wäre "letzter Monat"?
+  const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastYear = last.getFullYear();
+  const lastMonth = last.getMonth();
+  const lastId = `${lastYear}-${String(lastMonth + 1).padStart(2,'0')}`;
+
+  // Bereits gelesen?
+  const alreadyRead = (state.rueckblicke || []).some(r => r.id === lastId);
+  if (alreadyRead) { card.style.display = 'none'; return; }
+
+  // Bereits in diesem Monat für letzten Monat gefragt und weggeklickt?
+  if (state.lastRueckblickPrompt === lastId + ':dismissed:' + thisMonthId) {
+    card.style.display = 'none';
+    return;
+  }
+
+  // Gab's überhaupt Einträge im letzten Monat?
+  const data = collectRueckblickData(lastYear, lastMonth);
+  const hasAnything = (
+    data.morningCount + data.eveningCount + data.gratitudeCount +
+    data.momentCount + data.feelingCount + data.bodyCount +
+    data.gedankenCount + data.activities.length
+  ) > 0;
+  if (!hasAnything) { card.style.display = 'none'; return; }
+
+  card.style.display = '';
+  document.getElementById('rueckblick-home-label').textContent = `Dein ${data.monthName} ist zu Ende.`;
+  // Daten für Buttons merken
+  card.dataset.year = lastYear;
+  card.dataset.month = lastMonth;
+  card.dataset.id = lastId;
+}
+
+function openRueckblickFromHome() {
+  const card = document.getElementById('rueckblick-home-card');
+  if (!card) return;
+  const y = parseInt(card.dataset.year);
+  const m = parseInt(card.dataset.month);
+  openRueckblick(y, m);
+}
+
+function dismissRueckblickHome() {
+  const card = document.getElementById('rueckblick-home-card');
+  if (!card) return;
+  const now = new Date();
+  const thisMonthId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,'0')}`;
+  state.lastRueckblickPrompt = card.dataset.id + ':dismissed:' + thisMonthId;
+  saveState();
+  card.style.display = 'none';
+}
+
+// Rückblick-Archiv-Liste
+function renderRueckblickList() {
+  const container = document.getElementById('rueckblick-list-container');
+  const empty = document.getElementById('rueckblick-list-empty');
+  if (!container) return;
+  const rueckblicke = Array.isArray(state.rueckblicke) ? state.rueckblicke : [];
+  if (!rueckblicke.length) {
+    container.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  container.innerHTML = rueckblicke.map(r => {
+    const d = new Date(r.createdAt);
+    return `<div class="rueckblick-listitem" onclick="openRueckblick(${r.year}, ${r.month})">
+      <div class="rueckblick-listitem-title">${escapeHtml(r.monthName)} ${r.year}</div>
+      <div class="rueckblick-listitem-sub">Gelesen am ${d.getDate()}. ${MONATE_DE[d.getMonth()]} ${d.getFullYear()}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ===== RÜCKBLICK-EINSTELLUNGEN ===== */
+const RUECKBLICK_BAUSTEINE = [
+  { key: 'showMorning', label: 'Morgenstunden' },
+  { key: 'showEvening', label: 'Abendstunden' },
+  { key: 'showActivities', label: 'Aktivitäten' },
+  { key: 'showGratitude', label: 'Dankbarkeit' },
+  { key: 'showMoments', label: 'Momente mit mir' },
+  { key: 'showFeelings', label: 'Gefühle' },
+  { key: 'showBody', label: 'Körper' },
+  { key: 'showGedanken', label: 'Untersuchte Gedanken' }
+];
+
+function renderRueckblickToggles() {
+  const container = document.getElementById('rueckblick-toggles');
+  if (!container) return;
+  const s = state.rueckblickSettings || {};
+  container.innerHTML = RUECKBLICK_BAUSTEINE.map(b => {
+    const checked = s[b.key] ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 0;">
+      <input type="checkbox" ${checked} onchange="toggleRueckblickBaustein('${b.key}', this.checked)"
+        style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">
+      <span style="font-family:'EB Garamond',serif;font-size:1rem;">${b.label}</span>
+    </label>`;
+  }).join('');
+}
+
+function toggleRueckblickBaustein(key, value) {
+  if (!state.rueckblickSettings) state.rueckblickSettings = {};
+  state.rueckblickSettings[key] = value;
+  saveState();
+  updateSettingsSummaries();
+}
+
+function renderWatchwords() {
+  const container = document.getElementById('watchwords-list');
+  if (!container) return;
+  const words = (state.rueckblickSettings?.watchWords) || [];
+  if (!words.length) {
+    container.innerHTML = '<span class="muted-note" style="font-style:italic;font-size:0.88rem;">Noch keine Worte.</span>';
+    return;
+  }
+  container.innerHTML = words.map((w, idx) => `
+    <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 12px;background:var(--accent-soft);border-radius:16px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;color:var(--ink);">
+      ${escapeHtml(w)}
+      <button onclick="removeWatchword(${idx})" style="background:none;border:none;color:var(--muted);font-size:0.9rem;cursor:pointer;padding:0 2px;" title="Entfernen">✕</button>
+    </span>
+  `).join('');
+}
+
+function addWatchword() {
+  const input = document.getElementById('new-watchword');
+  if (!input) return;
+  const w = (input.value || '').trim();
+  if (!w) return;
+  if (!state.rueckblickSettings) state.rueckblickSettings = { watchWords: [] };
+  if (!Array.isArray(state.rueckblickSettings.watchWords)) state.rueckblickSettings.watchWords = [];
+  if (state.rueckblickSettings.watchWords.some(x => x.toLowerCase() === w.toLowerCase())) {
+    showToast('Wort existiert schon.');
+    input.value = '';
+    return;
+  }
+  state.rueckblickSettings.watchWords.push(w);
+  saveState();
+  input.value = '';
+  renderWatchwords();
+}
+
+function removeWatchword(idx) {
+  if (!state.rueckblickSettings?.watchWords) return;
+  state.rueckblickSettings.watchWords.splice(idx, 1);
+  saveState();
+  renderWatchwords();
+}
+
 /* ===== SETTINGS ===== */
 function renderSettings() {
   const nameEl = document.getElementById('settings-name');
@@ -6813,12 +7616,27 @@ function updateSettingsSummaries() {
     menschenSum.textContent = n === 0 ? 'Noch niemand notiert' : (n === 1 ? '1 notiert' : `${n} notiert`);
   }
 
+  // Monatsrückblick: wie viele Bausteine + watchwords
+  const rbSum = document.getElementById('rueckblick-settings-summary');
+  if (rbSum) {
+    const s = state.rueckblickSettings || {};
+    const activeCount = RUECKBLICK_BAUSTEINE.filter(b => s[b.key]).length;
+    const totalCount = RUECKBLICK_BAUSTEINE.length;
+    const words = (s.watchWords || []).length;
+    const parts = [`${activeCount} von ${totalCount} Bausteinen`];
+    if (words > 0) parts.push(`${words} ${words === 1 ? 'Wort' : 'Worte'}`);
+    rbSum.textContent = parts.join(' · ');
+  }
+
   // Rituale: Buttons rendern
   renderRitualControls();
   // Gedanken: Toggle rendern
   renderGedankenToggle();
   // Menschen: Liste rendern
   renderMenschenList();
+  // Monatsrückblick: Toggles und Watchwords
+  renderRueckblickToggles();
+  renderWatchwords();
 }
 
 /* ===== RITUALE: Override-Schalter ===== */
@@ -6995,15 +7813,40 @@ function deleteMensch(id) {
 
 /* Komm-mit Dialog */
 let kommMitSelectedId = null;
+let kommMitBildFile = null;
 
 function openKommMit() {
   kommMitSelectedId = null;
+  kommMitBildFile = null;
   document.getElementById('kommmit-name').value = '';
   document.getElementById('kommmit-satz').value = '';
   document.getElementById('kommmit-already-hint').style.display = 'none';
+  document.getElementById('kommmit-bild-preview').style.display = 'none';
+  document.getElementById('kommmit-bild-btn-text').textContent = '📷 Bild aus Galerie wählen';
   renderKommMitMenschenList();
   const ov = document.getElementById('kommmit-overlay');
   ov.classList.add('visible');
+}
+
+function handleKommMitBild(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  kommMitBildFile = file;
+  // Vorschau anzeigen
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('kommmit-bild-img').src = e.target.result;
+    document.getElementById('kommmit-bild-preview').style.display = '';
+    document.getElementById('kommmit-bild-btn-text').textContent = '📷 Anderes Bild wählen';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearKommMitBild() {
+  kommMitBildFile = null;
+  document.getElementById('kommmit-bild').value = '';
+  document.getElementById('kommmit-bild-preview').style.display = 'none';
+  document.getElementById('kommmit-bild-btn-text').textContent = '📷 Bild aus Galerie wählen';
 }
 
 function closeKommMit() {
@@ -7062,10 +7905,11 @@ function doKommMit() {
   const appUrl = window.location.href.split('#')[0];
 
   let message = `Liebe/r ${name},\n\n`;
-  message += `mein Freund Claude und ich haben an einer kleinen App mitgebaut. Sie heißt Ad se — Latein für "zu sich selbst", so nannte Mark Aurel seine Selbstbetrachtungen.\n\n`;
-  message += `Sie misst nichts, sie zählt nichts, sie sendet nichts. Alles bleibt in deinem Handy. Niemand sieht es — auch ich nicht, auch Claude nicht. Dafür stehe ich mit meinem Namen.\n\n`;
-  message += `Sie ist einfach nur ein stiller Ort. Ein Geschenk ohne Absicht.\n\n`;
-  message += `Du brauchst mir nicht zu antworten. Vielleicht magst du einfach mal testen, ob sie dir gut tut.\n\n`;
+  message += `ich dachte gerade an dich — und an etwas, das dir Freude machen könnte.\n\n`;
+  message += `Ich habe in den letzten Monaten an einer kleinen App mitgebaut. Sie heißt Ad se — Latein für "zu sich selbst", so hat Mark Aurel seine Selbstbetrachtungen genannt.\n\n`;
+  message += `Sie ist aus einer Zeit entstanden, in der ich krank war und Geduld lernen musste. Dabei habe ich gemerkt, wie sehr es mir hilft, still mit mir selbst zu sein. Daraus wurde eine Art leises Tagebuch — ein paar Fragen, die einen zu sich zurückbringen.\n\n`;
+  message += `Keine Therapie, kein Coach, nichts wird gemessen. Alles bleibt in deinem Handy. Dafür stehe ich mit meinem Namen.\n\n`;
+  message += `Schau es dir an, wenn du magst. Oder leg es weg. Beides ist gut.\n\n`;
   if (satz) message += satz + '\n\n';
   message += `Herzlich,\n${meinName || '—'}\n\n→ ${appUrl}`;
 
@@ -7075,18 +7919,21 @@ function doKommMit() {
     if (m) {
       m.giftedAt = new Date().toISOString();
     }
-  } else if (name) {
-    // Falls freier Name eingegeben: fragen, ob zu Menschen hinzugefügt werden soll
-    // Das machen wir NACH dem Teilen — siehe unten
   }
   saveState();
 
+  // Share-Daten zusammenstellen — mit Bild, falls gewählt
+  const shareData = {
+    title: 'Ad se',
+    text: message
+  };
+  if (kommMitBildFile && navigator.canShare && navigator.canShare({ files: [kommMitBildFile] })) {
+    shareData.files = [kommMitBildFile];
+  }
+
   // Web Share API probieren, sonst Fallback auf Clipboard
   if (navigator.share) {
-    navigator.share({
-      title: 'Ad se',
-      text: message
-    }).then(() => {
+    navigator.share(shareData).then(() => {
       closeKommMit();
       askAddToMenschenIfNew(name);
     }).catch(err => {
@@ -7096,11 +7943,14 @@ function doKommMit() {
     // Fallback: In die Zwischenablage kopieren
     try {
       navigator.clipboard.writeText(message);
-      showToast('Nachricht kopiert. Füge sie in WhatsApp oder Email ein.');
+      if (kommMitBildFile) {
+        showToast('Nachricht kopiert. Bild kannst du separat teilen.');
+      } else {
+        showToast('Nachricht kopiert. Füge sie in WhatsApp oder Email ein.');
+      }
       closeKommMit();
       askAddToMenschenIfNew(name);
     } catch (e) {
-      // Letzter Fallback: Toast mit Hinweis
       showToast('Teilen nicht möglich — bitte manuell kopieren.');
       closeKommMit();
       askAddToMenschenIfNew(name);
@@ -7254,6 +8104,20 @@ function replaceStateFromImport(imported) {
     gedankenLog: [],
     gedankenEnabled: false,
     menschen: [],
+    rueckblicke: [],
+    rueckblickSettings: {
+      showMorning: true,
+      showEvening: true,
+      showActivities: true,
+      showGratitude: true,
+      showMoments: true,
+      showFeelings: false,
+      showBody: false,
+      showGedanken: true,
+      showHighlights: true,
+      watchWords: []
+    },
+    lastRueckblickPrompt: null,
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
@@ -7273,7 +8137,7 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen','rueckblicke'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
