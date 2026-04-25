@@ -1757,6 +1757,42 @@ h3 {
   color: var(--ink);
 }
 
+/* Vorschlags-Chips für wiederkehrende Eingaben */
+.suggestion-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+}
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.suggestion-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.suggestion-chip:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
 /* ===== MONATSRÜCKBLICK ===== */
 #section-rueckblick {
   padding: 0;
@@ -3056,7 +3092,8 @@ textarea, input {
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;">
 
     <textarea id="activity-note" placeholder="Notiz (optional)" rows="2"
-      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;"></textarea>
+    <div id="activity-note-suggestions" style="display:none;margin-bottom:14px;"></div>
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;" onclick="closeEntry('activity')">Abbrechen</button>
       <button class="btn" style="flex:1;" onclick="logActivity()">Notieren</button>
@@ -3091,6 +3128,7 @@ textarea, input {
       <div id="body-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
       <input type="text" id="body-type-custom" placeholder="Eigene Beschreibung… (optional)"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      <div id="body-type-suggestions" style="display:none;margin-top:8px;"></div>
     </div>
 
     <div style="margin-bottom:14px;">
@@ -3112,7 +3150,8 @@ textarea, input {
     </div>
 
     <textarea id="body-note" placeholder="Notiz (optional)" rows="2"
-      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;"></textarea>
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;"></textarea>
+    <div id="body-note-suggestions" style="display:none;margin-bottom:14px;"></div>
 
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;" onclick="closeEntry('body')">Abbrechen</button>
@@ -4555,10 +4594,40 @@ function openQuickEntry(type) {
     document.getElementById('activity-duration').value = '';
     document.getElementById('activity-note').value = '';
     renderActivitySuggestionChips();
+    // Vorschläge für Notiz aus History (alle Notizen)
+    renderActivityNoteSuggestions('');
+    // Listener: wenn Name geändert wird, Vorschläge nach Aktivität filtern
+    const nameInput = document.getElementById('activity-name');
+    if (nameInput && !nameInput._suggestionListener) {
+      nameInput.addEventListener('input', () => {
+        renderActivityNoteSuggestions(nameInput.value.trim());
+      });
+      nameInput._suggestionListener = true;
+    }
   }
   if (type === 'gratitude') {
     document.getElementById('gratitude-text').value = '';
   }
+}
+
+// Vorschläge für Aktivitäts-Notizen — gefiltert nach Aktivitätsname
+function renderActivityNoteSuggestions(activityName) {
+  const log = Array.isArray(state.activityLog) ? state.activityLog : [];
+  let notes;
+  if (activityName) {
+    // Nur Notizen zur passenden Aktivität
+    notes = log
+      .filter(e => (e.activity || '').trim().toLowerCase() === activityName.toLowerCase() && e.note && e.note.trim())
+      .map(e => e.note.trim());
+  } else {
+    // Wenn noch kein Aktivitätsname: alle Notizen
+    notes = log
+      .filter(e => e.note && e.note.trim())
+      .map(e => e.note.trim());
+  }
+  renderSuggestionsInto('activity-note-suggestions', notes, (txt) => {
+    document.getElementById('activity-note').value = txt;
+  });
 }
 
 function closeEntry(type) {
@@ -4586,6 +4655,8 @@ function renderActivitySuggestionChips() {
 // Bei Namenseingabe: ggf. gespeicherte Dauer vorfüllen (wenn Dauer-Feld noch leer)
 function onActivityNameInput() {
   const name = (document.getElementById('activity-name').value || '').trim();
+  // Notiz-Vorschläge passend zum Namen aktualisieren
+  renderActivityNoteSuggestions(name);
   const durInput = document.getElementById('activity-duration');
   if (!durInput) return;
   if (durInput.value) return;  // Nutzer hat schon etwas eingegeben — nicht überschreiben
@@ -4658,7 +4729,77 @@ function openBodyEntry(zone) {
   updateSleepBlockVisibility();
   document.querySelectorAll('input[name="body-sleep"]').forEach(r => r.checked = false);
   renderBodyTypeChips();
+  // Vorschläge aus History für diese Zone
+  renderBodySuggestions(zone);
   document.getElementById('entry-body').classList.add('visible');
+}
+
+// Vorschläge für Körper-Notizen aus früheren Einträgen
+function renderBodySuggestions(zone) {
+  const log = Array.isArray(state.bodyLog) ? state.bodyLog : [];
+  // Standardchip-Wörter, die wir aus den Vorschlägen ausschließen
+  const standardTypes = new Set([...BODY_TYPES_LOCAL, ...BODY_TYPES_GENERAL]);
+
+  // Eigene Beschreibungen (aus types-Array, ohne Standard-Chips): pro Zone
+  const customs = [];
+  log.forEach(e => {
+    if (e.zone !== zone) return;
+    if (!Array.isArray(e.types)) return;
+    e.types.forEach(t => {
+      if (t && !standardTypes.has(t) && t.trim()) customs.push(t.trim());
+    });
+  });
+
+  const noteTexts = log
+    .filter(e => e.zone === zone && e.note && e.note.trim())
+    .map(e => e.note.trim());
+
+  renderSuggestionsInto('body-type-suggestions', customs, (txt) => {
+    document.getElementById('body-type-custom').value = txt;
+  });
+  renderSuggestionsInto('body-note-suggestions', noteTexts, (txt) => {
+    document.getElementById('body-note').value = txt;
+  });
+}
+
+// Vorschläge generisch rendern: nur Texte mit ≥2 Vorkommen, Top 5
+function renderSuggestionsInto(containerId, allTexts, onPick) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  // Häufigkeit zählen (case-insensitive)
+  const counts = {};
+  const originals = {};  // Original-Schreibweise behalten (zuletzt gesehen)
+  allTexts.forEach(t => {
+    const key = t.toLowerCase();
+    counts[key] = (counts[key] || 0) + 1;
+    originals[key] = t;
+  });
+  // Mindestens 1 Vorkommen, sortiert nach Häufigkeit, max 5
+  const top = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([k, c]) => originals[k]);
+
+  if (!top.length) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  container.style.display = '';
+  // Eindeutige ID-Funktion erstellen (für onclick-Closure)
+  let chipsHtml = '<div class="suggestion-label">Schon mal eingetragen:</div><div class="suggestion-chips">';
+  top.forEach((txt, idx) => {
+    const escaped = txt.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+    chipsHtml += `<span class="suggestion-chip" data-suggestion-text="${escaped}">${escapeHtml(txt)}</span>`;
+  });
+  chipsHtml += '</div>';
+  container.innerHTML = chipsHtml;
+  // Click-Handler an Chips binden
+  container.querySelectorAll('.suggestion-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      onPick(chip.dataset.suggestionText);
+    });
+  });
 }
 
 function openBodyGeneralEntry() {
@@ -7250,10 +7391,6 @@ function renderRueckblickText(data) {
     let html = `<div class="rueckblick-section">
       <div class="rueckblick-section-headline">Deine Morgen</div>
       <div class="rueckblick-stat">An <strong>${data.morningCount}</strong> Morgen warst du bei dir.</div>`;
-    const topHaltungen = topWords(data.morningHaltungen, 3, 4);
-    if (topHaltungen.length) {
-      html += `<div class="rueckblick-stat" style="margin-top:6px;">Häufig wolltest du sein: <em>${topHaltungen.map(h => h.word).join(', ')}</em>.</div>`;
-    }
     const zitate = sampleFrom(data.morningHaltungen, Math.min(3, data.morningHaltungen.length));
     if (zitate.length) {
       html += `<div class="rueckblick-zitate">`;
