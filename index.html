@@ -1271,6 +1271,59 @@ h3 {
   color: #3a1f1a;
   text-align: center;
 }
+.morning-story-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.18rem;
+  line-height: 1.6;
+  color: #3a1f1a;
+  margin-bottom: 18px;
+  margin-top: 8px;
+  text-align: left;
+}
+.morning-story-source {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: rgba(58, 31, 26, 0.6);
+  margin-bottom: 28px;
+  text-align: right;
+  letter-spacing: 0.02em;
+}
+.morning-story-reflection {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(74,47,42,0.2);
+  border-radius: 12px;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  line-height: 1.5;
+  resize: none;
+  background: rgba(255, 255, 255, 0.4);
+  color: #3a1f1a;
+  outline: none;
+  margin-bottom: 18px;
+}
+.morning-story-reflection::placeholder {
+  color: rgba(58, 31, 26, 0.4);
+  font-style: italic;
+}
+
+/* Zurück zur Geschichte — dezent oben in der Haltungsfrage */
+.morning-back {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: rgba(58, 31, 26, 0.5);
+  cursor: pointer;
+  margin-bottom: 18px;
+  display: inline-block;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.morning-back:hover {
+  color: rgba(58, 31, 26, 0.85);
+}
 .morning-q-sub {
   font-family: 'EB Garamond', serif;
   font-style: italic;
@@ -2713,8 +2766,20 @@ textarea, input {
     <button class="fullscreen-close" onclick="morningClose()" title="Schließen">✕</button>
     <div class="morning-inner">
 
+      <!-- Stufe 0: Eine kurze Geschichte zum Tagesbeginn -->
+      <div id="morning-story" style="display:none;">
+        <div class="morning-step">Zum Anfang</div>
+        <div class="morning-story-text" id="morning-story-text"></div>
+        <div class="morning-story-source" id="morning-story-source"></div>
+        <textarea id="morning-story-reflection" rows="2" placeholder="Was bleibt dir davon? (optional)" class="morning-story-reflection"></textarea>
+        <div class="morning-actions">
+          <button class="morning-next" onclick="morningStoryNext()">Weiter</button>
+        </div>
+      </div>
+
       <!-- Laufende Frage -->
       <div id="morning-question" style="display:none;">
+        <div class="morning-back" onclick="morningBackToStory()">← Zur Geschichte</div>
         <div class="morning-step" id="morning-step-label"></div>
         <h2 class="morning-q-title" id="morning-q-title"></h2>
         <p class="morning-q-sub" id="morning-q-sub"></p>
@@ -3064,6 +3129,7 @@ textarea, input {
       <button class="chip" id="vf-evening" onclick="setVerlaufFilter('evening')">Abendstunde</button>
       <button class="chip" id="vf-gedanken" onclick="setVerlaufFilter('gedanken')">Gedanken</button>
       <button class="chip" id="vf-moment" onclick="setVerlaufFilter('moment')">Moment</button>
+      <button class="chip" id="vf-story" onclick="setVerlaufFilter('story')">Geschichten</button>
       <button class="chip" id="vf-today" onclick="setVerlaufFilter('today')">Vorhaben</button>
     </div>
     <div id="verlauf-list"></div>
@@ -3817,6 +3883,7 @@ function loadState() {
       showBody: false,
       showGedanken: true,
       showHighlights: true,
+      showStoryComments: true,
       watchWords: []
     },
     lastRueckblickPrompt: null,
@@ -3825,6 +3892,8 @@ function loadState() {
     momentQuestionsSeen: [],
     morningGifts: null,
     morningGiftsSeen: [],
+    morningStorySeen: [],
+    storyReflectionLog: [],
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     lastDurations: {},
@@ -3840,13 +3909,23 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen','rueckblicke'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
     if (typeof saved.momentSettings !== 'object' || saved.momentSettings === null) saved.momentSettings = defaults.momentSettings;
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.ritualOverrides !== 'object' || saved.ritualOverrides === null) saved.ritualOverrides = { morning: null, evening: null };
+    // Migration: rueckblickSettings — fehlende Schlüssel mit Defaults füllen
+    if (typeof saved.rueckblickSettings !== 'object' || saved.rueckblickSettings === null) {
+      saved.rueckblickSettings = defaults.rueckblickSettings;
+    } else {
+      Object.keys(defaults.rueckblickSettings).forEach(k => {
+        if (saved.rueckblickSettings[k] === undefined) {
+          saved.rueckblickSettings[k] = defaults.rueckblickSettings[k];
+        }
+      });
+    }
     return saved;
   } catch(e) { return defaults; }
 }
@@ -4962,6 +5041,7 @@ function getAllEntries() {
   (state.morningLog || []).forEach(e => out.push({ type: 'morning', ts: e.ts, data: e }));
   (state.gedankenLog || []).forEach(e => out.push({ type: 'gedanken', ts: e.ts, data: e }));
   (state.momentLog || []).forEach(e => out.push({ type: 'moment', ts: e.ts, data: e }));
+  (state.storyReflectionLog || []).forEach(e => out.push({ type: 'story', ts: e.ts, data: e }));
   // Today-Items (abgehakt und offen)
   Object.keys(state.todayItems).forEach(dk => {
     (state.todayItems[dk] || []).forEach(it => {
@@ -5004,7 +5084,10 @@ function summarizeDay(entries) {
     water:     { one: 'Wasser',    many: 'Wasser' },
     gratitude: { one: 'Dankbarkeit', many: 'Dankbarkeiten' },
     evening:   { one: 'Abendstunde', many: 'Abendstunden' },
+    morning:   { one: 'Morgenstunde', many: 'Morgenstunden' },
     moment:    { one: 'Moment',    many: 'Momente' },
+    gedanken:  { one: 'Gedanke',   many: 'Gedanken' },
+    story:     { one: 'Geschichte', many: 'Geschichten' },
     today:     { one: 'Vorhaben',  many: 'Vorhaben' }
   };
   return Object.keys(counts).map(k => {
@@ -5288,6 +5371,12 @@ function makeVerlaufEntry(e) {
       body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;font-style:italic;">${escapeHtml(dat.question)}</div>`;
     }
     body += `<div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.text)}"</div>`;
+  } else if (e.type === 'story') {
+    body = `<strong>Gedanke zu einer Geschichte</strong>`;
+    if (dat.storySource) {
+      body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;font-style:italic;">zu ${escapeHtml(dat.storySource.split(',')[0])}</div>`;
+    }
+    body += `<div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.comment || '')}"</div>`;
   }
 
   // Lösch-Button (dezent, rechts)
@@ -5350,6 +5439,9 @@ function deleteVerlaufEntry(e) {
   } else if (e.type === 'moment') {
     const i = state.momentLog.findIndex(x => x.ts === e.ts);
     if (i >= 0) state.momentLog.splice(i, 1);
+  } else if (e.type === 'story') {
+    const i = (state.storyReflectionLog || []).findIndex(x => x.ts === e.ts);
+    if (i >= 0) state.storyReflectionLog.splice(i, 1);
   } else if (e.type === 'today') {
     const dk = e.dayKey;
     if (state.todayItems[dk]) {
@@ -6725,6 +6817,160 @@ const MORNING_QUESTIONS = [
   }
 ];
 
+// Morgen-Geschichten — kurze literarische Texte zum Tagesbeginn
+const MORNING_STORIES = [
+  {
+    "id": "ma-01",
+    "text": "Wenn du dich am Morgen schwer aus dem Bett erhebst, halte dir vor Augen: Ich erwache, um meine Arbeit als Mensch zu tun. Soll ich missmutig sein dabei, das zu tun, wozu ich geboren wurde? Bin ich dazu da, mich warm unter Decken zu halten? — Aber das ist angenehmer. — Bist du also geboren, um es angenehm zu haben? Und nicht, um zu wirken, um zu leben?",
+    "source": "Mark Aurel, Selbstbetrachtungen V,1"
+  },
+  {
+    "id": "ma-02",
+    "text": "Du hast Macht über deinen Geist — nicht über äußere Dinge. Erkenne das, und du wirst Stärke finden.",
+    "source": "Mark Aurel"
+  },
+  {
+    "id": "ma-03",
+    "text": "Sage am Morgen zu dir selbst: Ich werde heute Menschen begegnen, die sich einmischen, undankbar sind, hochmütig, hinterhältig. All das geschieht, weil sie nicht zwischen Gut und Böse unterscheiden können. Ich aber, der das Wesen des Guten und des Schlechten kennt, kann von keinem Schaden nehmen — denn niemand kann mich in Hässlichkeit verwickeln.",
+    "source": "Mark Aurel, Selbstbetrachtungen II,1"
+  },
+  {
+    "id": "ma-04",
+    "text": "Werde nicht müde, dir selbst zu helfen, wenn du Hilfe brauchst — wie ein Soldat, der im Kampf von einem Kameraden aufgerichtet wird. Schäme dich nicht der Hilfe. Es geht darum, deine Aufgabe zu vollenden, wie ein Soldat im Kampf.",
+    "source": "Mark Aurel"
+  },
+  {
+    "id": "ma-05",
+    "text": "Verschwende keine weitere Zeit damit, darüber zu streiten, was ein guter Mensch sein sollte. Sei einer.",
+    "source": "Mark Aurel"
+  },
+  {
+    "id": "ma-06",
+    "text": "Schau nach innen. Dort, im Inneren, ist die Quelle des Guten — eine Quelle, die nie versiegt, wenn du sie nur immer wieder ausgräbst.",
+    "source": "Mark Aurel, Selbstbetrachtungen VII,59"
+  },
+  {
+    "id": "ma-07",
+    "text": "Alles, was wir hören, ist eine Meinung — keine Tatsache. Alles, was wir sehen, ist eine Sicht — nicht die Wahrheit.",
+    "source": "Mark Aurel"
+  },
+  {
+    "id": "lao-01",
+    "text": "Wer andere kennt, ist klug. Wer sich selbst kennt, ist weise. Wer andere besiegt, hat Kraft. Wer sich selbst besiegt, ist stark.",
+    "source": "Lao Tse, Tao Te King 33"
+  },
+  {
+    "id": "lao-02",
+    "text": "Eine Reise von tausend Meilen beginnt mit einem einzigen Schritt.",
+    "source": "Lao Tse, Tao Te King 64"
+  },
+  {
+    "id": "lao-03",
+    "text": "Wasser ist das weichste, schwächste Wesen der Welt — und doch besiegt es das Harte und Starke. Es gibt nichts, was es ersetzen könnte. Das Schwache besiegt das Starke. Das Sanfte besiegt das Harte. Das weiß jeder, doch niemand handelt danach.",
+    "source": "Lao Tse, Tao Te King 78"
+  },
+  {
+    "id": "lao-04",
+    "text": "Wer wenig sich nimmt, dem wird viel gegeben. Wer viel sich nimmt, der gerät in Verwirrung.",
+    "source": "Lao Tse, Tao Te King 22"
+  },
+  {
+    "id": "hesse-05",
+    "text": "Wir müssen das Werdende ehren — auch in uns selbst. Was heute morgen in dir aufstehen will, das ist nicht klein. Es ist der nächste Schritt. Achte darauf, gib ihm Raum.",
+    "source": "Frei nach Hermann Hesse"
+  },
+  {
+    "id": "tolstoj-02",
+    "text": "Es gab drei Fragen, die einen König beschäftigten: Wann ist der wichtigste Augenblick? Wer ist der wichtigste Mensch? Was ist die wichtigste Tat? Ein Eremit antwortete ihm schließlich: Der wichtigste Augenblick ist der jetzige — nur über ihn hast du Macht. Der wichtigste Mensch ist der, mit dem du gerade zu tun hast — denn ob du je einem anderen begegnest, weißt du nicht. Die wichtigste Tat ist, ihm Gutes zu tun — denn dazu allein ist der Mensch ins Leben geschickt worden.",
+    "source": "Lew Tolstoj, Drei Fragen"
+  },
+  {
+    "id": "ma-08",
+    "text": "Dieser Augenblick ist alles, was du hast. Lebe ihn so, als wärst du gerade erst geboren — denn auf eine Weise bist du es. Jeder Morgen ist ein neuer Beginn, und das Vergangene ist nicht mehr deine Last.",
+    "source": "Frei nach Mark Aurel"
+  },
+  {
+    "id": "tolstoj-04",
+    "text": "Wenn du suchst, was Menschen gut leben lässt, suche es nicht in dem, was sie haben, sondern in dem, was sie geben.",
+    "source": "Lew Tolstoj"
+  },
+  {
+    "id": "hesse-01",
+    "text": "Jedem Anfang wohnt ein Zauber inne, der uns beschützt und der uns hilft, zu leben. Wir sollen heiter Raum um Raum durchschreiten, an keinem wie an einer Heimat hängen. Der Weltgeist will nicht fesseln uns und engen, er will uns Stuf um Stufe heben, weiten.",
+    "source": "Hermann Hesse, Stufen"
+  },
+  {
+    "id": "hesse-02",
+    "text": "Glück ist nicht ein Ding zum Haben, sondern eine Art zu sein. Es liegt nicht im Erreichten, sondern im Gehen. Wer aufhört zu gehen, weil er meint, angekommen zu sein, hat das Glück verfehlt.",
+    "source": "Hermann Hesse, frei nach Briefen"
+  },
+  {
+    "id": "hesse-03",
+    "text": "Bäume sind für mich immer die eindringlichsten Prediger gewesen. Wer mit Bäumen umzugehen weiß, wer ihnen zu lauschen versteht, der erfährt die Wahrheit. Sie predigen nicht Lehren, sie predigen das Urgesetz des Lebens.",
+    "source": "Hermann Hesse, Bäume"
+  },
+  {
+    "id": "hesse-04",
+    "text": "Es gibt keinen Weg zum Frieden — der Frieden ist der Weg.",
+    "source": "Hermann Hesse, frei nach späten Schriften"
+  },
+  {
+    "id": "gibran-01",
+    "text": "Eure Kinder sind nicht eure Kinder. Sie sind die Söhne und Töchter der Sehnsucht des Lebens nach sich selbst. Sie kommen durch euch, aber nicht von euch. Und obwohl sie bei euch sind, gehören sie euch nicht.",
+    "source": "Khalil Gibran, Der Prophet"
+  },
+  {
+    "id": "gibran-02",
+    "text": "Wer mit der Sonne aufsteht und die Erde mit gerechten Schritten betritt, wer dem anderen begegnet wie einem Bruder oder einer Schwester — der hat keinen Tempel mehr nötig. Sein Leben selbst ist der Tempel.",
+    "source": "Khalil Gibran, Der Prophet, frei nach"
+  },
+  {
+    "id": "lao-05",
+    "text": "Das Tao, das gegangen werden kann, ist nicht das ewige Tao. Doch jeder Schritt, den du heute tust, ist ein Schritt im Tao. Du musst nicht wissen, wohin der Weg führt — nur dass du gehst.",
+    "source": "Frei nach Lao Tse"
+  },
+  {
+    "id": "zen-01",
+    "text": "Ein Bauer hatte ein Pferd. Eines Tages lief es davon. Die Nachbarn kamen: Was für ein Unglück! Der Bauer sagte: Vielleicht. Am nächsten Tag kam das Pferd zurück, mit zwei Wildpferden im Schlepptau. Die Nachbarn: Was für ein Glück! Der Bauer: Vielleicht. Sein Sohn versuchte eines der Wildpferde zu reiten und brach sich das Bein. Die Nachbarn: Was für ein Unglück! Der Bauer: Vielleicht. Tags darauf kamen Soldaten, junge Männer für den Krieg auszuheben. Den Sohn nahmen sie wegen des gebrochenen Beins nicht mit. Die Nachbarn: Was für ein Glück!",
+    "source": "Zen-Erzählung, traditionell"
+  },
+  {
+    "id": "zen-02",
+    "text": "Ein Gelehrter besuchte einen Zen-Meister, um über Zen zu sprechen. Der Meister bot ihm Tee an und begann einzugießen. Die Tasse füllte sich, und der Meister goss weiter, bis der Tee überlief. Halt! rief der Gelehrte. Sehen Sie nicht, dass die Tasse voll ist? Genau wie diese Tasse, sagte der Meister, sind Sie voll mit eigenen Meinungen. Wie soll ich Ihnen Zen zeigen, wenn Sie nicht erst Ihre Tasse leeren?",
+    "source": "Zen-Erzählung, traditionell"
+  },
+  {
+    "id": "zen-03",
+    "text": "Zwei Mönche wanderten und kamen an einen Fluss. Eine junge Frau stand am Ufer und konnte nicht hinüber. Der ältere Mönch hob sie auf und trug sie ans andere Ufer, dann gingen die Mönche weiter. Stunden später sagte der jüngere: Wir Mönche sollen Frauen nicht berühren! Warum hast du sie getragen? Der ältere antwortete: Ich habe sie am Ufer abgesetzt. Du trägst sie immer noch.",
+    "source": "Zen-Erzählung, traditionell"
+  },
+  {
+    "id": "zen-04",
+    "text": "Ein Schüler fragte: Meister, wie finde ich Frieden? Der Meister fragte zurück: Wo ist gerade dein Geist? Beim Mittagessen, das ich verpassen werde, antwortete der Schüler. Dann sei beim Mittagessen, sagte der Meister. Wenn du isst, iss. Wenn du gehst, gehe. Wenn du schläfst, schlafe. Aber tu nicht zwei Dinge gleichzeitig — denn wer zwei Dinge tut, tut keines wirklich.",
+    "source": "Zen-Erzählung, frei nach"
+  },
+  {
+    "id": "stoa-morgen-01",
+    "text": "Wenn du am Morgen aufstehst, sage dir: Heute werde ich Menschen begegnen, die mich brauchen, und Aufgaben, die auf mich warten. Heute werde ich auch mir selbst begegnen — in jedem Atemzug, in jedem Blick, in jeder Entscheidung. Lass das genug sein.",
+    "source": "Frei nach den Stoikern"
+  },
+  {
+    "id": "zen-05",
+    "text": "Ein Schüler fragte: Was ist Erleuchtung? Der Meister antwortete: Ich esse, wenn ich hungrig bin. Ich schlafe, wenn ich müde bin. Aber das tust du doch auch! sagte der Schüler. Nein, sagte der Meister. Wenn du isst, denkst du an tausend Dinge. Wenn du schläfst, träumst du von tausend Dingen. Ich tue, was ich tue.",
+    "source": "Zen-Erzählung, traditionell"
+  },
+  {
+    "id": "rilke-02",
+    "text": "Wenn dein Alltag dir arm scheint, klage ihn nicht an. Klage dich an, dass du nicht stark genug bist, seine Reichtümer zu rufen. Denn für den Schaffenden gibt es keine Armut.",
+    "source": "Rainer Maria Rilke, Briefe an einen jungen Dichter"
+  },
+  {
+    "id": "epiktet-01",
+    "text": "Es sind nicht die Dinge, die uns beunruhigen, sondern die Meinungen, die wir über die Dinge haben. Wenn wir also unglücklich sind, sollten wir nicht andere beschuldigen, sondern uns selbst — das heißt: unsere Meinungen.",
+    "source": "Epiktet, Handbüchlein der Moral"
+  }
+];
+
 // Morgengaben — Sätze, die der Tag dir zuspricht. Verwaltbar in Einstellungen.
 const DEFAULT_MORNING_GIFTS = [
   'Ich bin heute bei dir.',
@@ -6782,11 +7028,115 @@ function pickNextMorningGift() {
 let morningStep = 0;
 let morningAnswers = [''];
 
+// Bag-Shuffle für Morgen-Geschichten: jede Geschichte einmal pro Runde
+// Pro Tag wird nur eine Story gezogen — bei mehrfachem Öffnen am gleichen Tag dieselbe.
+function pickNextMorningStory() {
+  if (!Array.isArray(state.morningStorySeen)) state.morningStorySeen = [];
+  const today = dayKey();
+
+  // Falls heute schon eine Story gezogen wurde, dieselbe wiederverwenden
+  if (state.todayStoryId && state.todayStoryDate === today) {
+    const cached = MORNING_STORIES.find(s => s.id === state.todayStoryId);
+    if (cached) return cached;
+  }
+
+  const allIds = MORNING_STORIES.map(s => s.id);
+  let unseen = allIds.filter(id => !state.morningStorySeen.includes(id));
+  if (unseen.length === 0) {
+    state.morningStorySeen = [];
+    unseen = allIds;
+  }
+  const pickedId = unseen[Math.floor(Math.random() * unseen.length)];
+  state.morningStorySeen.push(pickedId);
+  state.todayStoryId = pickedId;
+  state.todayStoryDate = today;
+  saveState();
+  return MORNING_STORIES.find(s => s.id === pickedId);
+}
+
 function openMorning() {
   morningStep = 0;
   morningAnswers = [''];
   showSection('morning');
+  showMorningStory();
+}
+
+let currentMorningStory = null;
+
+function showMorningStory() {
+  // Story-Block einblenden, Frage und Abschluss verstecken
+  document.getElementById('morning-story').style.display = '';
+  document.getElementById('morning-question').style.display = 'none';
+  document.getElementById('morning-finish').style.display = 'none';
+
+  const story = pickNextMorningStory();
+  if (!story) {
+    // Falls keine Geschichte verfügbar: direkt zur Frage
+    morningStoryNext();
+    return;
+  }
+  document.getElementById('morning-story-text').textContent = story.text;
+  document.getElementById('morning-story-source').textContent = '— ' + story.source;
+  // Reflection-Feld zurücksetzen, Story als aktive merken
+  const refl = document.getElementById('morning-story-reflection');
+  if (refl) refl.value = '';
+  currentMorningStory = story;
+}
+
+function morningStoryNext() {
+  // Reflection speichern, falls etwas eingetragen
+  const refl = document.getElementById('morning-story-reflection');
+  const comment = refl ? (refl.value || '').trim() : '';
+  if (currentMorningStory) {
+    if (!Array.isArray(state.storyReflectionLog)) state.storyReflectionLog = [];
+    // Schauen, ob es heute schon einen Eintrag zu dieser Geschichte gibt
+    const today = dayKey();
+    const existingIndex = state.storyReflectionLog.findIndex(r => {
+      if (!r.ts) return false;
+      return dayKey(new Date(r.ts)) === today && r.storyId === currentMorningStory.id;
+    });
+    if (comment) {
+      if (existingIndex >= 0) {
+        // Bestehenden Eintrag aktualisieren
+        state.storyReflectionLog[existingIndex].comment = comment;
+        state.storyReflectionLog[existingIndex].ts = new Date().toISOString();
+      } else {
+        // Neuen Eintrag anlegen
+        state.storyReflectionLog.unshift({
+          ts: new Date().toISOString(),
+          storyId: currentMorningStory.id,
+          storySource: currentMorningStory.source,
+          comment: comment
+        });
+        if (state.storyReflectionLog.length > 500) state.storyReflectionLog.pop();
+      }
+      saveState();
+    } else if (existingIndex >= 0) {
+      // Kommentar wurde geleert — bestehenden Eintrag entfernen
+      state.storyReflectionLog.splice(existingIndex, 1);
+      saveState();
+    }
+  }
+  document.getElementById('morning-story').style.display = 'none';
   showMorningQuestion();
+}
+
+// Zurück von der Haltungsfrage zur Geschichte (z.B. wenn man doch noch etwas zur Story schreiben will)
+function morningBackToStory() {
+  document.getElementById('morning-question').style.display = 'none';
+  // Story wieder zeigen — Text und Reflection sind noch da, weil wir sie nicht gelöscht haben
+  document.getElementById('morning-story').style.display = '';
+  // Bereits gespeicherte Reflection für heutige Story zurückholen, falls schon eingetragen
+  const refl = document.getElementById('morning-story-reflection');
+  if (refl && currentMorningStory && Array.isArray(state.storyReflectionLog)) {
+    const today = dayKey();
+    const existing = state.storyReflectionLog.find(r => {
+      if (!r.ts) return false;
+      const rDay = dayKey(new Date(r.ts));
+      return rDay === today && r.storyId === currentMorningStory.id;
+    });
+    if (existing && !refl.value) refl.value = existing.comment || '';
+  }
 }
 
 function showMorningQuestion() {
@@ -6882,7 +7232,8 @@ function renderMorningHomeCard() {
   const openDiv = document.getElementById('morning-card-open');
   const doneDiv = document.getElementById('morning-card-done');
   const haltungText = document.getElementById('morning-haltung-text');
-  if (haltung) {
+  // Beim Override (manueller Wunsch) immer den Beginnen-Modus zeigen
+  if (haltung && !overrideActive) {
     if (openDiv) openDiv.style.display = 'none';
     if (doneDiv) doneDiv.style.display = '';
     if (haltungText) haltungText.textContent = haltung;
@@ -7325,7 +7676,7 @@ function collectRueckblickData(year, month) {
   const moments = entriesInMonth(state.momentLog, year, month);
   data.momentCount = moments.length;
   data.momentTexts = moments
-    .map(m => (m.note || '').trim())
+    .map(m => ((m.text || m.note) || '').trim())
     .filter(Boolean);
 
   // Gefühle
@@ -7359,6 +7710,13 @@ function collectRueckblickData(year, month) {
   data.gedankenSituations = gedanken
     .map(g => (g.answers && g.answers[0]) ? g.answers[0].trim() : '')
     .filter(Boolean);
+
+  // Story-Reflexionen — Kommentare zu Morgengeschichten
+  const storyRefs = entriesInMonth(state.storyReflectionLog, year, month);
+  data.storyComments = storyRefs.map(r => ({
+    storySource: r.storySource || '',
+    comment: (r.comment || '').trim()
+  })).filter(r => r.comment);
 
   // Watchwords
   const watchWords = (state.rueckblickSettings?.watchWords) || [];
@@ -7533,6 +7891,29 @@ function renderRueckblickText(data) {
     parts.push(html);
   }
 
+  // Gedanken zu den Morgen-Geschichten
+  if (s.showStoryComments && data.storyComments && data.storyComments.length > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Was die Geschichten in dir ausgelöst haben</div>
+      <div class="rueckblick-stat">Du hast zu <strong>${data.storyComments.length}</strong> ${data.storyComments.length === 1 ? 'Geschichte' : 'Geschichten'} etwas geschrieben.</div>`;
+    // Bis zu 5 Reflexionen anzeigen, jeweils mit Quelle als kleine Voranzeile
+    const ausgewaehlt = sampleFrom(data.storyComments, Math.min(5, data.storyComments.length));
+    if (ausgewaehlt.length) {
+      html += `<div class="rueckblick-zitate" style="margin-top:14px;">`;
+      ausgewaehlt.forEach(r => {
+        html += `<div style="margin-bottom:14px;">`;
+        if (r.storySource) {
+          html += `<div style="font-family:'Inter',sans-serif;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;opacity:0.6;margin-bottom:4px;">zu ${escapeHtml(r.storySource.split(',')[0])}</div>`;
+        }
+        html += `<div class="rueckblick-zitat" style="margin-bottom:0;">${escapeHtml(r.comment)}</div>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+    parts.push(html);
+  }
+
   // Watchwords
   if (data.watchWordHits.length > 0) {
     let html = `<div class="rueckblick-section">
@@ -7696,7 +8077,8 @@ const RUECKBLICK_BAUSTEINE = [
   { key: 'showMoments', label: 'Momente mit mir' },
   { key: 'showFeelings', label: 'Gefühle' },
   { key: 'showBody', label: 'Körper' },
-  { key: 'showGedanken', label: 'Untersuchte Gedanken' }
+  { key: 'showGedanken', label: 'Untersuchte Gedanken' },
+  { key: 'showStoryComments', label: 'Gedanken zu Geschichten' }
 ];
 
 function renderRueckblickToggles() {
@@ -8362,6 +8744,7 @@ function replaceStateFromImport(imported) {
       showBody: false,
       showGedanken: true,
       showHighlights: true,
+      showStoryComments: true,
       watchWords: []
     },
     lastRueckblickPrompt: null,
@@ -8370,6 +8753,8 @@ function replaceStateFromImport(imported) {
     momentQuestionsSeen: [],
     morningGifts: null,
     morningGiftsSeen: [],
+    morningStorySeen: [],
+    storyReflectionLog: [],
     todayItems: {},
     todaySuggestions: [],
     lastDurations: {},
@@ -8384,7 +8769,7 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','gedankenLog','menschen','rueckblicke'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
