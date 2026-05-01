@@ -1802,6 +1802,153 @@ h3 {
 }
 .mensch-item-btn:hover { color: var(--accent-deep); }
 .mensch-item-btn.danger:hover { color: #a14b38; }
+
+/* ===== WEGE (große Ziele) ===== */
+.goal-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 18px 20px 20px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  border-left: 3px solid #5a8a7a;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.goal-card:hover, .goal-card:active {
+  transform: translateY(-1px);
+}
+.goal-card-title {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.3rem;
+  color: var(--ink);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.goal-card-wish {
+  font-family: 'EB Garamond', serif;
+  font-size: 0.98rem;
+  color: var(--ink);
+  opacity: 0.8;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.goal-card-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* Detail-Ansicht eines Weges */
+.goal-detail-header {
+  background: linear-gradient(135deg, rgba(90, 138, 122, 0.18) 0%, rgba(90, 138, 122, 0.08) 100%);
+  border-radius: 14px;
+  padding: 22px 22px 20px;
+  margin-bottom: 18px;
+  border-left: 3px solid #5a8a7a;
+}
+.goal-detail-title {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.65rem;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+.goal-detail-section {
+  margin-bottom: 14px;
+}
+.goal-detail-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a6f63;
+  margin-bottom: 4px;
+}
+.goal-detail-text {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.goal-detail-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.goal-detail-action-btn {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+.goal-detail-action-btn:hover { color: var(--accent-deep); }
+.goal-detail-action-btn.danger:hover { color: #a14b38; }
+
+/* Listen in der Detail-Ansicht: Hindernisse, Pläne, Spuren */
+.goal-obstacles-list, .goal-plans-list, .goal-traces-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.goal-obstacle-item, .goal-plan-item, .goal-trace-item {
+  background: rgba(90, 138, 122, 0.06);
+  border-left: 2px solid rgba(90, 138, 122, 0.4);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.goal-obstacle-text, .goal-plan-text, .goal-trace-text {
+  flex: 1;
+  font-family: 'EB Garamond', serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.goal-plan-text em {
+  font-style: italic;
+  color: #4a6f63;
+  font-weight: 500;
+}
+.goal-trace-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-right: 4px;
+  align-self: flex-start;
+  padding-top: 3px;
+}
+.goal-mini-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+.goal-mini-btn:hover {
+  color: #a14b38;
+  background: rgba(161, 75, 56, 0.08);
+}
 .mensch-item-btn.primary {
   color: var(--accent-deep);
   font-weight: 600;
@@ -1895,6 +2042,31 @@ h3 {
 }
 .rueckblick-body p {
   margin-bottom: 14px;
+}
+
+/* Erzählerischer Brief */
+.rueckblick-narrative {
+  font-family: 'EB Garamond', serif;
+  line-height: 1.7;
+  color: rgba(255, 250, 240, 0.95);
+}
+.rueckblick-narrative-anrede {
+  font-size: 1.15rem;
+  font-style: italic;
+  margin-bottom: 22px;
+  color: white;
+}
+.rueckblick-narrative-p {
+  font-size: 1.08rem;
+  margin-bottom: 16px;
+  text-align: left;
+}
+.rueckblick-narrative-bye {
+  font-style: italic;
+  font-size: 1.05rem;
+  margin-top: 24px;
+  opacity: 0.9;
+  color: white;
 }
 .rueckblick-section {
   margin-bottom: 28px;
@@ -3096,6 +3268,99 @@ textarea, input {
 
 </div>
 
+<!-- ====== WEGE / GROSSE ZIELE ====== -->
+<div id="section-goals" class="section">
+
+  <div class="greeting-block">
+    <h1>Deine Wege</h1>
+    <div class="greeting-sub">Was du gehen willst — über die Tage, über die Jahre.</div>
+  </div>
+
+  <div id="goals-list-container"></div>
+
+  <p class="muted-note" id="goals-empty" style="display:none;text-align:center;padding:40px 20px;font-style:italic;line-height:1.6;">
+    Hier kannst du bis zu drei Wege gleichzeitig gehen.<br>Wege, die dir wichtig sind. Größere Wünsche, die über Tage oder Jahre reichen.
+  </p>
+
+  <div id="goals-add-wrap" style="margin-top:20px;">
+    <button class="btn full" id="goals-add-btn" onclick="openGoalEditor()">+ Einen Weg hinzufügen</button>
+  </div>
+
+</div>
+
+<!-- ====== EINZELNER WEG (Detail-Ansicht) ====== -->
+<div id="section-goal-detail" class="section">
+  <button class="back-link" onclick="showSection('goals')">← Wege</button>
+
+  <div id="goal-detail-content"></div>
+
+</div>
+
+<!-- ====== GOAL EDITOR ====== -->
+<div class="entry-overlay" id="goal-editor-overlay">
+  <div class="entry-modal" style="max-width:480px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="goal-editor-title">Einen Weg formulieren</h2>
+      <button onclick="closeGoalEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Titel — kurz und klar</div>
+      <input type="text" id="goal-editor-title-input" placeholder="z.B. AI-Consulting als zweites Standbein"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Was wünschst du dir genau? <span style="opacity:0.6;">(W — Wish)</span></div>
+      <textarea id="goal-editor-wish" rows="3" placeholder="Was willst du erreichen, wer willst du sein?"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Warum ist das wichtig? Wie würde es sich anfühlen? <span style="opacity:0.6;">(O — Outcome)</span></div>
+      <textarea id="goal-editor-outcome" rows="3" placeholder="Was wäre möglich, wenn dieser Weg gelingt? Was würde sich verändern?"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <p class="muted-note" style="margin:14px 0;line-height:1.5;font-size:0.85rem;">
+      <em>Hindernisse und Wenn-Dann-Pläne</em> kommen später dazu — direkt im Weg, wenn du ihn öffnest.
+    </p>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeGoalEditor()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveGoalEditor()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== GOAL INPUT OVERLAY (für Hindernisse, Pläne, Spuren) ====== -->
+<div class="entry-overlay" id="goal-input-overlay">
+  <div class="entry-modal" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2 style="margin:0;" id="goal-input-title">Eintragen</h2>
+      <button onclick="closeGoalInputOverlay()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" id="goal-input-label" style="margin-bottom:14px;line-height:1.55;"></p>
+
+    <div id="goal-input-single-wrap" style="margin-bottom:14px;">
+      <textarea id="goal-input-single" rows="3"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <div id="goal-input-dual-wrap" style="display:none;margin-bottom:14px;">
+      <input type="text" id="goal-input-when"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;">
+      <input type="text" id="goal-input-then"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeGoalInputOverlay()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveGoalInputOverlay()">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <!-- ====== VERLAUF ====== -->
 <div id="section-verlauf" class="section">
 
@@ -3160,6 +3425,15 @@ textarea, input {
     <textarea id="activity-note" placeholder="Notiz (optional)" rows="2"
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;"></textarea>
     <div id="activity-note-suggestions" style="display:none;margin-bottom:14px;"></div>
+
+    <!-- Goal-Verknüpfung -->
+    <div id="activity-goal-link-wrap" style="display:none;margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Auf einem Weg unterwegs? (optional)</div>
+      <select id="activity-goal-link"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+        <option value="">— Kein Weg —</option>
+      </select>
+    </div>
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;" onclick="closeEntry('activity')">Abbrechen</button>
       <button class="btn" style="flex:1;" onclick="logActivity()">Notieren</button>
@@ -3345,6 +3619,15 @@ textarea, input {
       <p class="muted-note" style="margin-bottom:16px;line-height:1.55;">
         Am Anfang jedes Monats erscheint ein stiller Brief an dich — mit dem, was sich im letzten Monat gezeigt hat. Mit deinen eigenen Worten.
       </p>
+
+      <div style="margin-bottom:16px;padding:12px 14px;background:var(--accent-soft);border-radius:10px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="rueckblick-narrative-toggle" onchange="toggleRueckblickNarrative(this.checked)"
+            style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer;">
+          <span style="font-family:'EB Garamond',serif;font-size:1.02rem;">Erzählerischer Brief</span>
+        </label>
+        <p class="muted-note" style="margin:6px 0 0 28px;font-size:0.82rem;line-height:1.4;">Statt einer Aufzählung nach Bereichen schreibt Ad se dir einen kleinen Brief im Fließtext.</p>
+      </div>
 
       <div style="margin-bottom:16px;">
         <div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;">Was soll darin stehen?</div>
@@ -3632,6 +3915,10 @@ textarea, input {
     <span class="nav-icon">◉</span>
     <span>Körper</span>
   </button>
+  <button id="nav-goals" onclick="showSection('goals')">
+    <span class="nav-icon">◇</span>
+    <span>Wege</span>
+  </button>
   <button id="nav-verlauf" onclick="showSection('verlauf')">
     <span class="nav-icon">∴</span>
     <span>Verlauf</span>
@@ -3884,6 +4171,7 @@ function loadState() {
       showGedanken: true,
       showHighlights: true,
       showStoryComments: true,
+      narrative: true,
       watchWords: []
     },
     lastRueckblickPrompt: null,
@@ -3901,6 +4189,7 @@ function loadState() {
     quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
     ritualOverrides: { morning: null, evening: null },  // Override-Tag (dayKey) — aktiv bis Nutzung oder Tageswechsel
     weeklySession: null,
+    goals: [],
     weeklyArchive: [],
     seenQuotes: [],  // IDs der bereits in laufender Runde gezeigten Zitate (Bag-Shuffle)
     theme: 'terracotta',
@@ -3909,7 +4198,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -4084,6 +4373,8 @@ function showSection(id) {
   if (id === 'weekly') renderWeekly();
   if (id === 'gedanken-log') renderGedankenLog();
   if (id === 'rueckblick-list') renderRueckblickList();
+  if (id === 'goals') renderGoalsList();
+  if (id === 'goal-detail') renderGoalDetail();
   window.scrollTo(0, 0);
 }
 
@@ -4291,6 +4582,16 @@ function closeIdentityEditor() {
 function saveIdentity() {
   const val = document.getElementById('identity-input').value.trim();
   if (!state.profile) state.profile = {};
+  // Historie führen — nur wenn sich der Wert tatsächlich geändert hat
+  const oldVal = (state.profile.identity || '').trim();
+  if (val !== oldVal) {
+    if (!Array.isArray(state.profile.identityHistory)) state.profile.identityHistory = [];
+    state.profile.identityHistory.push({
+      value: val,
+      ts: new Date().toISOString()
+    });
+    if (state.profile.identityHistory.length > 100) state.profile.identityHistory.shift();
+  }
   state.profile.identity = val;
   saveState();
   closeIdentityEditor();
@@ -4675,6 +4976,8 @@ function openQuickEntry(type) {
     renderActivitySuggestionChips();
     // Vorschläge für Notiz aus History (alle Notizen)
     renderActivityNoteSuggestions('');
+    // Goal-Dropdown befüllen, falls Wege existieren
+    populateActivityGoalDropdown();
     // Listener: wenn Name geändert wird, Vorschläge nach Aktivität filtern
     const nameInput = document.getElementById('activity-name');
     if (nameInput && !nameInput._suggestionListener) {
@@ -4687,6 +4990,24 @@ function openQuickEntry(type) {
   if (type === 'gratitude') {
     document.getElementById('gratitude-text').value = '';
   }
+}
+
+function populateActivityGoalDropdown() {
+  const wrap = document.getElementById('activity-goal-link-wrap');
+  const select = document.getElementById('activity-goal-link');
+  if (!wrap || !select) return;
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  if (!goals.length) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  let opts = '<option value="">— Kein Weg —</option>';
+  goals.forEach(g => {
+    opts += `<option value="${escapeHtml(g.id)}">${escapeHtml(g.title)}</option>`;
+  });
+  select.innerHTML = opts;
+  select.value = '';
 }
 
 // Vorschläge für Aktivitäts-Notizen — gefiltert nach Aktivitätsname
@@ -4749,13 +5070,15 @@ function logActivity() {
   const name = (document.getElementById('activity-name').value || '').trim();
   const duration = (document.getElementById('activity-duration').value || '').trim();
   const note = (document.getElementById('activity-note').value || '').trim();
+  const goalId = (document.getElementById('activity-goal-link')?.value || '').trim() || null;
   if (!name) { showToast('Bitte Aktivität eingeben.'); return; }
 
   state.activityLog.unshift({
     ts: new Date().toISOString(),
     name,
     duration: duration || null,
-    note: note || null
+    note: note || null,
+    goalId: goalId
   });
   if (state.activityLog.length > 500) state.activityLog.pop();
 
@@ -4790,7 +5113,7 @@ function logGratitude() {
 // Typen für lokale Körperstellen (wenn Zone angeklickt)
 const BODY_TYPES_LOCAL = ['Schmerz','Verspannung','Druck','Kribbeln','Wärme','Kälte','Schweregefühl','Wohlgefühl','Taubheit','Juckreiz'];
 // Typen für Allgemein-Zustand (systemisch)
-const BODY_TYPES_GENERAL = ['Kopfschmerzen','Migräne','Fieber','Erkältung','Übelkeit','Schwindel','Erschöpfung','Schlaf','Herzrasen','Atemnot','Unwohlsein','Wohlbefinden'];
+const BODY_TYPES_GENERAL = ['Kopfschmerzen','Migräne','Fieber','Erkältung','Übelkeit','Schwindel','Erschöpfung','Schlaf','Hungrig','Durstig','Herzrasen','Atemnot','Unwohlsein','Wohlbefinden'];
 
 let bodyActiveZone = null;
 let bodyActiveTypes = [];
@@ -5840,8 +6163,24 @@ function renderWeeklyQuestion() {
 }
 
 function getWeeklyDataFor(key) {
-  const start = weekStart();
-  const inWeek = ts => new Date(ts) >= start;
+  // Wenn eine Session läuft, nutze deren Start-Zeitpunkt als Anker:
+  // Die "Woche" sind dann die 7 Tage VOR dem Sitzungs-Beginn
+  // Sonst: die letzten 7 Tage ab jetzt
+  let start, end;
+  const session = state.weeklySession;
+  if (session && session.startedAt) {
+    end = new Date(session.startedAt);
+    start = new Date(end);
+    start.setDate(start.getDate() - 7);
+  } else {
+    end = new Date();
+    start = new Date();
+    start.setDate(start.getDate() - 7);
+  }
+  const inWeek = ts => {
+    const t = new Date(ts);
+    return t >= start && t <= end;
+  };
 
   const fmtTime = ts => {
     const d = new Date(ts);
@@ -7718,6 +8057,53 @@ function collectRueckblickData(year, month) {
     comment: (r.comment || '').trim()
   })).filter(r => r.comment);
 
+  // Ich bin / Partner — nur Änderungen, die in DIESEM Monat passierten
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 1);
+  const inMonth = ts => {
+    const t = new Date(ts);
+    return t >= monthStart && t < monthEnd;
+  };
+
+  const identityHistory = state.profile?.identityHistory || [];
+  const monthIdentityChanges = identityHistory
+    .filter(h => inMonth(h.ts))
+    .map(h => h.value)
+    .filter(v => v && v.trim());
+  data.identityChangedInMonth = monthIdentityChanges.length > 0;
+  data.identityValues = monthIdentityChanges;
+
+  const partnerHistory = state.partnerHistory || [];
+  const monthPartnerChanges = partnerHistory
+    .filter(h => inMonth(h.ts))
+    .map(h => h.name)
+    .filter(v => v && v.trim());
+  data.partnerChangedInMonth = monthPartnerChanges.length > 0;
+  data.partnerValues = monthPartnerChanges;
+
+  // Wege — was im Monat dazu passierte
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  data.goalsActivity = goals.map(g => {
+    // Aktivitäten dieses Monats, die diesem Weg zugeordnet wurden
+    const acts = (state.activityLog || []).filter(a => {
+      if (a.goalId !== g.id) return false;
+      const t = new Date(a.ts);
+      return t >= monthStart && t < monthEnd;
+    });
+    // Spuren dieses Monats
+    const traces = (g.traces || []).filter(t => {
+      const ts = new Date(t.ts);
+      return ts >= monthStart && ts < monthEnd;
+    });
+    return {
+      id: g.id,
+      title: g.title,
+      activityCount: acts.length,
+      traceCount: traces.length,
+      lastTrace: traces.length ? traces.sort((a,b) => new Date(b.ts) - new Date(a.ts))[0] : null
+    };
+  }).filter(x => x.activityCount > 0 || x.traceCount > 0);
+
   // Watchwords
   const watchWords = (state.rueckblickSettings?.watchWords) || [];
   data.watchWordHits = watchWords.map(word => {
@@ -7741,6 +8127,186 @@ function collectRueckblickData(year, month) {
 
 // Textbausteine aus den Daten bauen (bei API-Anbindung später austauschbar)
 function renderRueckblickText(data) {
+  const s = state.rueckblickSettings || {};
+  // Weiche: erzählerischer Brief oder strukturierte Aufzählung
+  if (s.narrative) {
+    return renderRueckblickNarrative(data);
+  }
+  return renderRueckblickStructured(data);
+}
+
+// Erzählerische Variante: ein zusammenhängender Brief
+function renderRueckblickNarrative(data) {
+  const s = state.rueckblickSettings || {};
+  const meinName = state.profile?.name || '';
+  const anrede = meinName ? `Lieber ${meinName},` : 'Lieber Mensch,';
+
+  const absatz = [];
+
+  // Eröffnung mit Tendenz
+  let eroeffnung = `der ${data.monthName} `;
+  if (s.showFeelings && data.feelingCount > 0) {
+    const tend = buildGefuehlsTendenz(data.quadCounts || {}, data.feelingCount);
+    if (tend) {
+      // Tendenz-Satz beginnt mit "Ein insgesamt..." — wir machen daraus "war ein insgesamt..."
+      const lower = tend.charAt(0).toLowerCase() + tend.slice(1);
+      eroeffnung += `war ${lower.replace(/\.$/, '')}`;
+    } else {
+      eroeffnung += 'ist zu Ende';
+    }
+  } else {
+    eroeffnung += 'ist zu Ende';
+  }
+  eroeffnung += '.';
+  absatz.push(eroeffnung);
+
+  // Ich bin / Partner — wenn im Monat verändert
+  const idParts = [];
+  if (data.identityChangedInMonth && data.identityValues.length) {
+    const last = data.identityValues[data.identityValues.length - 1];
+    if (data.identityValues.length === 1) {
+      idParts.push(`Du hast in diesem Monat einen Satz für dich gefunden: „${last}".`);
+    } else {
+      idParts.push(`Du hast deinen Satz mehrfach verändert. Zuletzt steht: „${last}".`);
+    }
+  }
+  if (data.partnerChangedInMonth && data.partnerValues.length) {
+    const last = data.partnerValues[data.partnerValues.length - 1];
+    if (last) {
+      idParts.push(`Du gehst diesen Monat mit ${last} weiter.`);
+    }
+  }
+  if (idParts.length) absatz.push(idParts.join(' '));
+
+  // Morgenstunden + ggf. Zitat
+  if (s.showMorning && data.morningCount > 0) {
+    let satz = `An ${data.morningCount} Morgen warst du bei dir`;
+    const zitate = sampleFrom(data.morningHaltungen, 1);
+    if (zitate.length) {
+      satz += ` — einer dieser Morgen war: „${zitate[0]}"`;
+    }
+    satz += '.';
+    absatz.push(satz);
+  }
+
+  // Aktivitäten
+  if (s.showActivities && data.activities && data.activities.length > 0) {
+    const top = data.activities.slice(0, 3);
+    if (top.length === 1) {
+      absatz.push(`Du warst ${top[0].count} Mal ${top[0].name}.`);
+    } else {
+      const teile = top.map(a => `${a.count} Mal ${a.name}`);
+      const letztes = teile.pop();
+      absatz.push(`Du warst ${teile.join(', ')} und ${letztes}.`);
+    }
+  }
+
+  // Dankbarkeit
+  if (s.showGratitude && data.gratitudeCount > 0) {
+    let satz = `An ${data.gratitudeCount} Tagen hast du etwas Dankbares notiert`;
+    const zitate = sampleFrom(data.gratitudeTexts, 2);
+    if (zitate.length === 1) {
+      satz += ` — etwa: „${zitate[0]}"`;
+    } else if (zitate.length === 2) {
+      satz += ` — etwa: „${zitate[0]}" oder „${zitate[1]}"`;
+    }
+    satz += '.';
+    absatz.push(satz);
+  }
+
+  // Momente
+  if (s.showMoments && data.momentCount > 0) {
+    let satz = `Du hast ${data.momentCount} Mal innegehalten`;
+    const zitate = sampleFrom(data.momentTexts, 1);
+    if (zitate.length) {
+      satz += ` — und einer dieser Momente brachte dich zu: „${zitate[0]}"`;
+    }
+    satz += '.';
+    absatz.push(satz);
+  }
+
+  // Abendstunden — nur die Anzahl, ohne Zitate (sonst überladen)
+  if (s.showEvening && data.eveningCount > 0) {
+    absatz.push(`An ${data.eveningCount} Abenden hast du den Tag still beschlossen.`);
+  }
+
+  // Körper — nur die Anzahl, falls aktiviert
+  if (s.showBody && data.bodyCount > 0) {
+    absatz.push(`Dein Körper hat dir ${data.bodyCount} Mal etwas mitgeteilt.`);
+  }
+
+  // Untersuchte Gedanken
+  if (s.showGedanken && data.gedankenCount > 0) {
+    if (data.gedankenCount === 1) {
+      absatz.push(`Einem Gedanken bist du nachgegangen.`);
+    } else {
+      absatz.push(`${data.gedankenCount} Gedanken bist du nachgegangen.`);
+    }
+  }
+
+  // Story-Kommentare
+  if (s.showStoryComments && data.storyComments && data.storyComments.length > 0) {
+    let satz = `Zu ${data.storyComments.length} Geschichten hast du etwas geschrieben`;
+    const ausgewaehlt = sampleFrom(data.storyComments, 1);
+    if (ausgewaehlt.length) {
+      satz += ` — etwa zu ${ausgewaehlt[0].storySource.split(',')[0]}: „${ausgewaehlt[0].comment}"`;
+    }
+    satz += '.';
+    absatz.push(satz);
+  }
+
+  // Wege — wie sie sich diesen Monat gezeigt haben
+  if (data.goalsActivity && data.goalsActivity.length > 0) {
+    data.goalsActivity.forEach(ga => {
+      let satz = `Auf deinem Weg zu „${ga.title}"`;
+      const teile = [];
+      if (ga.activityCount > 0) {
+        teile.push(`bist du ${ga.activityCount} Mal gegangen`);
+      }
+      if (ga.traceCount > 0) {
+        teile.push(`hast du ${ga.traceCount} ${ga.traceCount === 1 ? 'Spur' : 'Spuren'} eingetragen`);
+      }
+      if (teile.length) {
+        satz += ' ' + teile.join(' und ');
+      }
+      satz += '.';
+      if (ga.lastTrace && ga.lastTrace.text) {
+        const t = ga.lastTrace.text.length > 100 ? ga.lastTrace.text.slice(0, 100) + '…' : ga.lastTrace.text;
+        satz += ` Zuletzt notiertest du: „${t}"`;
+      }
+      absatz.push(satz);
+    });
+  }
+
+  // Watchwords
+  if (data.watchWordHits && data.watchWordHits.length > 0) {
+    const teile = data.watchWordHits.map(w => `„${w.word}" ${w.count} Mal`);
+    if (teile.length === 1) {
+      absatz.push(`Auffallend: ${teile[0]} erwähnt.`);
+    } else {
+      const letztes = teile.pop();
+      absatz.push(`Auffallend: ${teile.join(', ')} und ${letztes} erwähnt.`);
+    }
+  }
+
+  // Falls fast nichts da war
+  if (absatz.length <= 1) {
+    absatz.push('In diesem Monat hast du wenig eingetragen. Das ist auch ein Eintrag.');
+  }
+
+  // HTML zusammenbauen
+  let html = `<div class="rueckblick-narrative">`;
+  html += `<p class="rueckblick-narrative-anrede">${escapeHtml(anrede)}</p>`;
+  absatz.forEach(p => {
+    html += `<p class="rueckblick-narrative-p">${escapeHtml(p)}</p>`;
+  });
+  html += `<p class="rueckblick-narrative-bye">Bis bald.</p>`;
+  html += `</div>`;
+  return html;
+}
+
+// Strukturierte Variante (die bisherige) — als eigene Funktion behalten
+function renderRueckblickStructured(data) {
   const s = state.rueckblickSettings || {};
   const parts = [];
 
@@ -7910,6 +8476,25 @@ function renderRueckblickText(data) {
       });
       html += `</div>`;
     }
+    html += `</div>`;
+    parts.push(html);
+  }
+
+  // Wege
+  if (data.goalsActivity && data.goalsActivity.length > 0) {
+    let html = `<div class="rueckblick-section">
+      <div class="rueckblick-section-headline">Auf deinen Wegen</div>`;
+    data.goalsActivity.forEach(ga => {
+      html += `<div class="rueckblick-stat" style="margin-bottom:10px;"><strong>${escapeHtml(ga.title)}</strong>`;
+      const teile = [];
+      if (ga.activityCount > 0) teile.push(`<strong>${ga.activityCount}</strong> ${ga.activityCount === 1 ? 'Aktivität' : 'Aktivitäten'}`);
+      if (ga.traceCount > 0) teile.push(`<strong>${ga.traceCount}</strong> ${ga.traceCount === 1 ? 'Spur' : 'Spuren'}`);
+      if (teile.length) html += `<div style="margin-top:3px;">${teile.join(' · ')}</div>`;
+      if (ga.lastTrace && ga.lastTrace.text) {
+        html += `<div class="rueckblick-zitat" style="margin-top:6px;">${escapeHtml(ga.lastTrace.text)}</div>`;
+      }
+      html += `</div>`;
+    });
     html += `</div>`;
     parts.push(html);
   }
@@ -8102,6 +8687,17 @@ function toggleRueckblickBaustein(key, value) {
   updateSettingsSummaries();
 }
 
+function toggleRueckblickNarrative(value) {
+  if (!state.rueckblickSettings) state.rueckblickSettings = {};
+  state.rueckblickSettings.narrative = value;
+  saveState();
+}
+
+function renderRueckblickNarrativeToggle() {
+  const cb = document.getElementById('rueckblick-narrative-toggle');
+  if (cb) cb.checked = !!state.rueckblickSettings?.narrative;
+}
+
 function renderWatchwords() {
   const container = document.getElementById('watchwords-list');
   if (!container) return;
@@ -8275,6 +8871,7 @@ function updateSettingsSummaries() {
   renderMenschenList();
   // Monatsrückblick: Toggles und Watchwords
   renderRueckblickToggles();
+  renderRueckblickNarrativeToggle();
   renderWatchwords();
 }
 
@@ -8335,7 +8932,387 @@ function toggleGedankenEnabled() {
   }
 }
 
-/* ===== MENSCHEN & KOMM MIT ===== */
+/* ===== WEGE / GROSSE ZIELE ===== */
+const MAX_GOALS = 3;
+
+function goalUid() {
+  return 'goal-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+}
+
+function renderGoalsList() {
+  const container = document.getElementById('goals-list-container');
+  const empty = document.getElementById('goals-empty');
+  const addBtn = document.getElementById('goals-add-btn');
+  if (!container) return;
+
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+
+  if (!goals.length) {
+    container.innerHTML = '';
+    if (empty) empty.style.display = '';
+  } else {
+    if (empty) empty.style.display = 'none';
+    container.innerHTML = goals.map(g => {
+      const wishPreview = (g.wish || '').trim();
+      const shortWish = wishPreview.length > 140 ? wishPreview.slice(0, 140) + '…' : wishPreview;
+      const startDate = g.createdAt ? new Date(g.createdAt) : null;
+      const meta = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
+      return `<div class="goal-card" onclick="openGoalDetail('${g.id}')">
+        <div class="goal-card-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
+        ${shortWish ? `<div class="goal-card-wish">${escapeHtml(shortWish)}</div>` : ''}
+        ${meta ? `<div class="goal-card-meta">${escapeHtml(meta)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Add-Button nur sichtbar, wenn weniger als MAX_GOALS
+  if (addBtn) {
+    addBtn.style.display = (goals.length < MAX_GOALS) ? '' : 'none';
+  }
+}
+
+function formatGoalDate(d) {
+  const monate = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  return `${d.getDate()}. ${monate[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+let editingGoalId = null;
+
+function openGoalEditor(existingId) {
+  editingGoalId = existingId || null;
+  const titleEl = document.getElementById('goal-editor-title');
+  const titleInput = document.getElementById('goal-editor-title-input');
+  const wishInput = document.getElementById('goal-editor-wish');
+  const outcomeInput = document.getElementById('goal-editor-outcome');
+
+  if (existingId) {
+    const g = (state.goals || []).find(x => x.id === existingId);
+    if (g) {
+      titleEl.textContent = 'Weg bearbeiten';
+      titleInput.value = g.title || '';
+      wishInput.value = g.wish || '';
+      outcomeInput.value = g.outcome || '';
+    }
+  } else {
+    titleEl.textContent = 'Einen Weg formulieren';
+    titleInput.value = '';
+    wishInput.value = '';
+    outcomeInput.value = '';
+  }
+
+  document.getElementById('goal-editor-overlay').classList.add('visible');
+}
+
+function closeGoalEditor() {
+  document.getElementById('goal-editor-overlay').classList.remove('visible');
+  editingGoalId = null;
+}
+
+function saveGoalEditor() {
+  const title = (document.getElementById('goal-editor-title-input').value || '').trim();
+  const wish = (document.getElementById('goal-editor-wish').value || '').trim();
+  const outcome = (document.getElementById('goal-editor-outcome').value || '').trim();
+
+  if (!title) { showToast('Bitte gib einen Titel ein.'); return; }
+
+  if (!Array.isArray(state.goals)) state.goals = [];
+
+  if (editingGoalId) {
+    const g = state.goals.find(x => x.id === editingGoalId);
+    if (g) {
+      g.title = title;
+      g.wish = wish;
+      g.outcome = outcome;
+      g.updatedAt = new Date().toISOString();
+    }
+  } else {
+    if (state.goals.length >= MAX_GOALS) {
+      showToast(`Maximal ${MAX_GOALS} Wege gleichzeitig.`);
+      return;
+    }
+    state.goals.push({
+      id: goalUid(),
+      title: title,
+      wish: wish,
+      outcome: outcome,
+      obstacles: [],         // Wird in Stufe B gefüllt
+      ifThenPlans: [],       // Wird in Stufe B gefüllt
+      traces: [],            // Wird in Stufe C gefüllt
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+  saveState();
+  closeGoalEditor();
+  renderGoalsList();
+  showToast(editingGoalId ? 'Weg aktualisiert.' : 'Weg angelegt.');
+}
+
+function openGoalDetail(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  currentGoalId = id;
+  showSection('goal-detail');
+  renderGoalDetail();
+}
+
+let currentGoalId = null;
+
+function renderGoalDetail() {
+  const container = document.getElementById('goal-detail-content');
+  if (!container || !currentGoalId) return;
+  const g = (state.goals || []).find(x => x.id === currentGoalId);
+  if (!g) {
+    container.innerHTML = '<p class="muted-note">Weg nicht gefunden.</p>';
+    return;
+  }
+
+  const startDate = g.createdAt ? new Date(g.createdAt) : null;
+  const startInfo = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
+
+  let html = `<div class="goal-detail-header">
+    <div class="goal-detail-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
+    ${startInfo ? `<div class="goal-card-meta">${escapeHtml(startInfo)}</div>` : ''}
+  </div>`;
+
+  if (g.wish) {
+    html += `<div class="goal-detail-section">
+      <div class="goal-detail-label">Wunsch</div>
+      <div class="goal-detail-text">${escapeHtml(g.wish)}</div>
+    </div>`;
+  }
+
+  if (g.outcome) {
+    html += `<div class="goal-detail-section">
+      <div class="goal-detail-label">Wenn es gelingt</div>
+      <div class="goal-detail-text" style="font-style:italic;">${escapeHtml(g.outcome)}</div>
+    </div>`;
+  }
+
+  // Hindernisse
+  const obstacles = Array.isArray(g.obstacles) ? g.obstacles : [];
+  html += `<div class="goal-detail-section" style="margin-top:24px;">
+    <div class="goal-detail-label">Hindernisse <span style="opacity:0.7;text-transform:none;letter-spacing:0;font-weight:400;">(O — was hält dich zurück?)</span></div>`;
+  if (obstacles.length) {
+    html += `<div class="goal-obstacles-list">`;
+    obstacles.forEach(o => {
+      html += `<div class="goal-obstacle-item">
+        <div class="goal-obstacle-text">${escapeHtml(o.text)}</div>
+        <button class="goal-mini-btn" onclick="event.stopPropagation();deleteObstacle('${g.id}','${o.id}')" title="Entfernen">✕</button>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="goal-detail-text" style="opacity:0.6;font-style:italic;font-size:0.95rem;">Noch nichts notiert.</div>`;
+  }
+  html += `<button class="btn secondary" style="margin-top:10px;padding:8px 14px;font-size:0.85rem;" onclick="addObstaclePrompt('${g.id}')">+ Hindernis hinzufügen</button>
+  </div>`;
+
+  // Wenn-Dann-Pläne
+  const plans = Array.isArray(g.ifThenPlans) ? g.ifThenPlans : [];
+  html += `<div class="goal-detail-section" style="margin-top:20px;">
+    <div class="goal-detail-label">Wenn-Dann-Pläne <span style="opacity:0.7;text-transform:none;letter-spacing:0;font-weight:400;">(P — der Plan)</span></div>`;
+  if (plans.length) {
+    html += `<div class="goal-plans-list">`;
+    plans.forEach(p => {
+      html += `<div class="goal-plan-item">
+        <div class="goal-plan-text">
+          <em>Wenn</em> ${escapeHtml(p.when)}<br>
+          <em>dann</em> ${escapeHtml(p.then)}
+        </div>
+        <button class="goal-mini-btn" onclick="event.stopPropagation();deletePlan('${g.id}','${p.id}')" title="Entfernen">✕</button>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="goal-detail-text" style="opacity:0.6;font-style:italic;font-size:0.95rem;">Noch kein Plan formuliert.</div>`;
+  }
+  html += `<button class="btn secondary" style="margin-top:10px;padding:8px 14px;font-size:0.85rem;" onclick="addPlanPrompt('${g.id}')">+ Wenn-Dann-Plan</button>
+  </div>`;
+
+  // Spuren — Zeitleiste
+  const traces = Array.isArray(g.traces) ? g.traces : [];
+  html += `<div class="goal-detail-section" style="margin-top:20px;">
+    <div class="goal-detail-label">Spuren auf dem Weg</div>`;
+  if (traces.length) {
+    // Neueste zuerst
+    const sorted = [...traces].sort((a,b) => new Date(b.ts) - new Date(a.ts));
+    html += `<div class="goal-traces-list">`;
+    sorted.forEach(t => {
+      const dt = t.ts ? formatGoalDate(new Date(t.ts)) : '';
+      html += `<div class="goal-trace-item">
+        <div class="goal-trace-date">${escapeHtml(dt)}</div>
+        <div class="goal-trace-text">${escapeHtml(t.text)}</div>
+        <button class="goal-mini-btn" onclick="event.stopPropagation();deleteTrace('${g.id}','${t.id}')" title="Entfernen">✕</button>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="goal-detail-text" style="opacity:0.6;font-style:italic;font-size:0.95rem;">Noch keine Spur. Mit jedem kleinen Schritt wächst dein Weg.</div>`;
+  }
+  html += `<button class="btn secondary" style="margin-top:10px;padding:8px 14px;font-size:0.85rem;" onclick="addTracePrompt('${g.id}')">+ Spur eintragen</button>
+  </div>`;
+
+  html += `<div class="goal-detail-actions">
+    <button class="goal-detail-action-btn" onclick="openGoalEditor('${g.id}')">Bearbeiten</button>
+    <button class="goal-detail-action-btn danger" onclick="deleteGoal('${g.id}')">Weg beenden</button>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+function deleteGoal(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  askConfirm(`„${g.title}" wirklich beenden?\n\nDieser Weg wird gelöscht — alles, was du dazu eingetragen hast, geht verloren.`, () => {
+    state.goals = state.goals.filter(x => x.id !== id);
+    saveState();
+    showSection('goals');
+    showToast('Weg beendet.');
+  }, { title: 'Weg beenden?', yesText: 'Ja, beenden' });
+}
+
+// ----- Hindernisse -----
+function addObstaclePrompt(goalId) {
+  openGoalInputOverlay({
+    title: 'Ein Hindernis benennen',
+    label: 'Was in dir hält dich zurück? Welche innere Stimme, welche Angst, welche Gewohnheit?',
+    placeholder: 'z.B. „Ich habe Sorge, nicht gut genug zu sein"',
+    multiField: false,
+    onSave: (text) => {
+      const g = (state.goals || []).find(x => x.id === goalId);
+      if (!g) return;
+      if (!Array.isArray(g.obstacles)) g.obstacles = [];
+      g.obstacles.push({ id: goalUid(), text: text, ts: new Date().toISOString() });
+      g.updatedAt = new Date().toISOString();
+      saveState();
+      renderGoalDetail();
+      showToast('Hindernis notiert.');
+    }
+  });
+}
+
+function deleteObstacle(goalId, obstacleId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g || !Array.isArray(g.obstacles)) return;
+  g.obstacles = g.obstacles.filter(o => o.id !== obstacleId);
+  saveState();
+  renderGoalDetail();
+}
+
+// ----- Wenn-Dann-Pläne -----
+function addPlanPrompt(goalId) {
+  openGoalInputOverlay({
+    title: 'Wenn-Dann-Plan',
+    label: 'Wenn dein Hindernis kommt — was tust du dann konkret?',
+    placeholder1: 'Wenn… (z.B. „ich Angst habe vor dem Anruf")',
+    placeholder2: 'dann… (z.B. „atme ich dreimal tief und wähle die Nummer")',
+    multiField: true,
+    onSave: (whenText, thenText) => {
+      const g = (state.goals || []).find(x => x.id === goalId);
+      if (!g) return;
+      if (!Array.isArray(g.ifThenPlans)) g.ifThenPlans = [];
+      g.ifThenPlans.push({
+        id: goalUid(),
+        when: whenText,
+        then: thenText,
+        ts: new Date().toISOString()
+      });
+      g.updatedAt = new Date().toISOString();
+      saveState();
+      renderGoalDetail();
+      showToast('Plan notiert.');
+    }
+  });
+}
+
+function deletePlan(goalId, planId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g || !Array.isArray(g.ifThenPlans)) return;
+  g.ifThenPlans = g.ifThenPlans.filter(p => p.id !== planId);
+  saveState();
+  renderGoalDetail();
+}
+
+// ----- Spuren -----
+function addTracePrompt(goalId) {
+  openGoalInputOverlay({
+    title: 'Eine Spur eintragen',
+    label: 'Ein kleiner Schritt, eine Erkenntnis, ein Erlebnis auf dem Weg.',
+    placeholder: 'Was war heute (oder gerade) wichtig?',
+    multiField: false,
+    onSave: (text) => {
+      const g = (state.goals || []).find(x => x.id === goalId);
+      if (!g) return;
+      if (!Array.isArray(g.traces)) g.traces = [];
+      g.traces.push({ id: goalUid(), text: text, ts: new Date().toISOString() });
+      g.updatedAt = new Date().toISOString();
+      saveState();
+      renderGoalDetail();
+      showToast('Spur eingetragen.');
+    }
+  });
+}
+
+function deleteTrace(goalId, traceId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g || !Array.isArray(g.traces)) return;
+  g.traces = g.traces.filter(t => t.id !== traceId);
+  saveState();
+  renderGoalDetail();
+}
+
+// ----- Eingabe-Overlay (statt prompt) -----
+let _goalInputOverlayConfig = null;
+
+function openGoalInputOverlay(cfg) {
+  _goalInputOverlayConfig = cfg;
+  const ov = document.getElementById('goal-input-overlay');
+  document.getElementById('goal-input-title').textContent = cfg.title;
+  document.getElementById('goal-input-label').textContent = cfg.label;
+  const single = document.getElementById('goal-input-single-wrap');
+  const dual = document.getElementById('goal-input-dual-wrap');
+  if (cfg.multiField) {
+    single.style.display = 'none';
+    dual.style.display = '';
+    document.getElementById('goal-input-when').value = '';
+    document.getElementById('goal-input-then').value = '';
+    document.getElementById('goal-input-when').placeholder = cfg.placeholder1 || '';
+    document.getElementById('goal-input-then').placeholder = cfg.placeholder2 || '';
+    setTimeout(() => document.getElementById('goal-input-when').focus(), 100);
+  } else {
+    single.style.display = '';
+    dual.style.display = 'none';
+    document.getElementById('goal-input-single').value = '';
+    document.getElementById('goal-input-single').placeholder = cfg.placeholder || '';
+    setTimeout(() => document.getElementById('goal-input-single').focus(), 100);
+  }
+  ov.classList.add('visible');
+}
+
+function closeGoalInputOverlay() {
+  document.getElementById('goal-input-overlay').classList.remove('visible');
+  _goalInputOverlayConfig = null;
+}
+
+function saveGoalInputOverlay() {
+  if (!_goalInputOverlayConfig) return;
+  if (_goalInputOverlayConfig.multiField) {
+    const w = (document.getElementById('goal-input-when').value || '').trim();
+    const t = (document.getElementById('goal-input-then').value || '').trim();
+    if (!w || !t) { showToast('Beide Felder ausfüllen.'); return; }
+    const cb = _goalInputOverlayConfig.onSave;
+    closeGoalInputOverlay();
+    cb(w, t);
+  } else {
+    const v = (document.getElementById('goal-input-single').value || '').trim();
+    if (!v) { showToast('Bitte etwas eintragen.'); return; }
+    const cb = _goalInputOverlayConfig.onSave;
+    closeGoalInputOverlay();
+    cb(v);
+  }
+}
+
 function uid() {
   return 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
@@ -8635,6 +9612,16 @@ function saveName() {
 
 function savePartner() {
   const val = (document.getElementById('settings-partner-name')?.value || '').trim();
+  // Historie der Partner-Setzungen führen
+  const oldName = state.partner?.name || '';
+  if (val !== oldName) {
+    if (!Array.isArray(state.partnerHistory)) state.partnerHistory = [];
+    state.partnerHistory.push({
+      name: val,
+      ts: new Date().toISOString()
+    });
+    if (state.partnerHistory.length > 50) state.partnerHistory.shift();
+  }
   state.partner = val ? { name: val } : null;
   saveState();
   renderHome();
@@ -8745,6 +9732,7 @@ function replaceStateFromImport(imported) {
       showGedanken: true,
       showHighlights: true,
       showStoryComments: true,
+      narrative: true,
       watchWords: []
     },
     lastRueckblickPrompt: null,
@@ -8762,6 +9750,7 @@ function replaceStateFromImport(imported) {
     quotes: null,
     ritualOverrides: { morning: null, evening: null },
     weeklySession: null,
+    goals: [],
     weeklyArchive: [],
     seenQuotes: [],
     theme: 'terracotta',
@@ -8769,7 +9758,7 @@ function replaceStateFromImport(imported) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
