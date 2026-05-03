@@ -693,6 +693,10 @@ h3 {
 .heatmap-cell.l3 { background: var(--accent); opacity: 0.8; }
 .heatmap-cell.l4 { background: var(--accent-deep); }
 .heatmap-cell.future { background: transparent; border: 1px dashed var(--border); }
+.heatmap-cell.selected {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: 2px;
+}
 
 /* Körperkarte */
 .body-wrap {
@@ -1933,6 +1937,20 @@ h3 {
   align-self: flex-start;
   padding-top: 3px;
 }
+.goal-trace-type {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: #5a8a7a;
+  margin-bottom: 3px;
+}
+.goal-obstacle-kind {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: #5a8a7a;
+  margin-bottom: 3px;
+}
 .goal-mini-btn {
   background: none;
   border: none;
@@ -1948,6 +1966,48 @@ h3 {
 .goal-mini-btn:hover {
   color: #a14b38;
   background: rgba(161, 75, 56, 0.08);
+}
+
+.goal-editor-hint {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  background: rgba(90, 138, 122, 0.06);
+  border-left: 2px solid rgba(90, 138, 122, 0.3);
+  border-radius: 6px;
+}
+
+/* Spurenart-Auswahl */
+.trace-type-btn {
+  background: rgba(90, 138, 122, 0.06);
+  border: 1.5px solid rgba(90, 138, 122, 0.25);
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  font-family: 'Inter', sans-serif;
+}
+.trace-type-btn:hover, .trace-type-btn:active {
+  background: rgba(90, 138, 122, 0.12);
+  border-color: rgba(90, 138, 122, 0.5);
+}
+.trace-type-label {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.15rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.trace-type-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-style: italic;
 }
 .mensch-item-btn.primary {
   color: var(--accent-deep);
@@ -3314,6 +3374,9 @@ textarea, input {
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Was wünschst du dir genau? <span style="opacity:0.6;">(W — Wish)</span></div>
       <textarea id="goal-editor-wish" rows="3" placeholder="Was willst du erreichen, wer willst du sein?"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+      <p class="goal-editor-hint">
+        Spüre einen Moment hinein: Macht der Wunsch dir leichter ums Herz, oder enger? Wenn er nicht von Herzen kommt, formuliere ihn um — oder lass ihn weg. Und: Schreib, was sein <em>soll</em>, nicht was nicht mehr sein soll.
+      </p>
     </div>
 
     <div style="margin-bottom:14px;">
@@ -3330,6 +3393,34 @@ textarea, input {
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeGoalEditor()">Abbrechen</button>
       <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveGoalEditor()">Speichern</button>
     </div>
+  </div>
+</div>
+
+<!-- ====== TRACE TYPE OVERLAY (Auswahl der Spurenart) ====== -->
+<div class="entry-overlay" id="trace-type-overlay">
+  <div class="entry-modal" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2 style="margin:0;">Welche Spur willst du eintragen?</h2>
+      <button onclick="closeTraceTypeOverlay()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" style="margin-bottom:16px;line-height:1.55;">
+      Spuren sind das Tagebuch deines Weges — keine Aufgaben, sondern was sich gezeigt hat.
+    </p>
+    <div id="trace-type-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</div>
+
+<!-- ====== OBSTACLE KIND OVERLAY (innerlich/äußerlich) ====== -->
+<div class="entry-overlay" id="obstacle-kind-overlay">
+  <div class="entry-modal" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2 style="margin:0;">Was für ein Hindernis ist es?</h2>
+      <button onclick="closeObstacleKindOverlay()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" style="margin-bottom:16px;line-height:1.55;">
+      Innere und äußere Hindernisse brauchen verschiedene Strategien.
+    </p>
+    <div id="obstacle-kind-list" style="display:flex;flex-direction:column;gap:10px;"></div>
   </div>
 </div>
 
@@ -3379,6 +3470,7 @@ textarea, input {
       <span>früher</span>
       <span>heute</span>
     </div>
+    <div id="heatmap-tooltip" class="muted-note" style="margin-top:10px;text-align:center;font-style:italic;min-height:1.2em;font-size:0.88rem;">Tippe eine Zelle für Datum und Anzahl.</div>
   </div>
 
   <!-- Chronologische Einträge -->
@@ -5788,7 +5880,11 @@ function renderHeatmap() {
   const all = [
     ...state.feelingLog, ...state.bodyLog, ...state.activityLog,
     ...state.waterLog, ...state.gratitudeLog,
-    ...(state.eveningLog || []), ...(state.momentLog || [])
+    ...(state.eveningLog || []),
+    ...(state.morningLog || []),
+    ...(state.momentLog || []),
+    ...(state.gedankenLog || []),
+    ...(state.storyReflectionLog || [])
   ];
   all.forEach(e => {
     const dk = dayKey(new Date(e.ts));
@@ -5841,8 +5937,30 @@ function renderHeatmap() {
     else if (c < 8) cell.classList.add('l3');
     else cell.classList.add('l4');
     cell.title = d.toLocaleDateString('de-DE') + ' — ' + c + ' Einträge';
+    cell.dataset.day = dk;
+    cell.dataset.count = String(c);
+    cell.dataset.dateLabel = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    cell.style.cursor = 'pointer';
+    cell.addEventListener('click', onHeatmapCellClick);
     container.appendChild(cell);
   }
+}
+
+function onHeatmapCellClick(e) {
+  const cell = e.currentTarget;
+  const tooltip = document.getElementById('heatmap-tooltip');
+  if (!tooltip) return;
+  const label = cell.dataset.dateLabel || '';
+  const count = parseInt(cell.dataset.count || '0', 10);
+  // Aktive Markierung optisch
+  document.querySelectorAll('.heatmap-cell.selected').forEach(c => c.classList.remove('selected'));
+  cell.classList.add('selected');
+  // Wortwahl
+  let einEintraege;
+  if (count === 0) einEintraege = 'Nichts eingetragen';
+  else if (count === 1) einEintraege = '1 Eintrag';
+  else einEintraege = `${count} Einträge`;
+  tooltip.textContent = `${label} — ${einEintraege}`;
 }
 
 /* ===== WOCHENSTUNDE ===== */
@@ -7648,7 +7766,16 @@ function showGedankenQuestion() {
   document.getElementById('gedanken-q-sub').textContent = q.sub;
 
   const note = document.getElementById('gedanken-q-note');
-  note.value = gedankenAnswers[gedankenStep] || '';
+  // Bei Step 0 (Situation): wenn noch leer und Kontext aus Gefühlsmatrix vorhanden, vorbelegen
+  if (gedankenStep === 0
+      && !gedankenAnswers[0]
+      && gedankenBridgeEchoActive
+      && gedankenBridgeContext) {
+    note.value = gedankenBridgeContext;
+    gedankenAnswers[0] = gedankenBridgeContext;
+  } else {
+    note.value = gedankenAnswers[gedankenStep] || '';
+  }
   note.placeholder = q.placeholder || '…';
   setTimeout(() => note.focus(), 200);
 
@@ -7678,14 +7805,12 @@ function showGedankenQuestion() {
       }
     } else if (gedankenStep === 0 && gedankenBridgeEchoActive && gedankenBridgeFeelings.length) {
       // Brücke von Gefühlsmatrix: eingetragenes Gefühl als Echo zeigen
+      // Hinweis: Der Kontext wird bereits ins Situations-Feld vorgefüllt — daher hier nur das Gefühl
       const feelings = gedankenBridgeFeelings.map(f => `„${escapeHtml(f)}"`).join(', ');
       let html = `
-        <div class="gedanken-echo-label">Du hast gerade eingetragen</div>
+        <div class="gedanken-echo-label">Dein Gefühl gerade</div>
         <div class="gedanken-echo-text">${feelings}</div>
       `;
-      if (gedankenBridgeContext) {
-        html += `<div style="margin-top:8px;font-size:0.9rem;opacity:0.85;">${escapeHtml(gedankenBridgeContext)}</div>`;
-      }
       echoEl.innerHTML = html;
       echoEl.style.display = '';
     } else {
@@ -9045,8 +9170,12 @@ function saveGoalEditor() {
   saveState();
   closeGoalEditor();
   renderGoalsList();
+  // Falls wir gerade in der Detail-Ansicht sind, auch dort neu rendern
+  if (currentGoalId) renderGoalDetail();
   showToast(editingGoalId ? 'Weg aktualisiert.' : 'Weg angelegt.');
 }
+
+let currentGoalId = null;
 
 function openGoalDetail(id) {
   const g = (state.goals || []).find(x => x.id === id);
@@ -9055,8 +9184,6 @@ function openGoalDetail(id) {
   showSection('goal-detail');
   renderGoalDetail();
 }
-
-let currentGoalId = null;
 
 function renderGoalDetail() {
   const container = document.getElementById('goal-detail-content');
@@ -9096,8 +9223,13 @@ function renderGoalDetail() {
   if (obstacles.length) {
     html += `<div class="goal-obstacles-list">`;
     obstacles.forEach(o => {
+      const kindInfo = o.kind ? OBSTACLE_KINDS.find(x => x.key === o.kind) : null;
+      const kindLabel = kindInfo ? `<div class="goal-obstacle-kind">${escapeHtml(kindInfo.label)}</div>` : '';
       html += `<div class="goal-obstacle-item">
-        <div class="goal-obstacle-text">${escapeHtml(o.text)}</div>
+        <div style="flex:1;min-width:0;">
+          ${kindLabel}
+          <div class="goal-obstacle-text">${escapeHtml(o.text)}</div>
+        </div>
         <button class="goal-mini-btn" onclick="event.stopPropagation();deleteObstacle('${g.id}','${o.id}')" title="Entfernen">✕</button>
       </div>`;
     });
@@ -9140,9 +9272,15 @@ function renderGoalDetail() {
     html += `<div class="goal-traces-list">`;
     sorted.forEach(t => {
       const dt = t.ts ? formatGoalDate(new Date(t.ts)) : '';
+      // Art der Spur (falls neu eingetragen — alte Spuren ohne Type bekommen kein Label)
+      const typeInfo = t.type ? TRACE_TYPES.find(x => x.key === t.type) : null;
+      const typeBadge = typeInfo ? `<div class="goal-trace-type">${escapeHtml(typeInfo.label)}</div>` : '';
       html += `<div class="goal-trace-item">
-        <div class="goal-trace-date">${escapeHtml(dt)}</div>
-        <div class="goal-trace-text">${escapeHtml(t.text)}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="goal-trace-date">${escapeHtml(dt)}</div>
+          ${typeBadge}
+          <div class="goal-trace-text">${escapeHtml(t.text)}</div>
+        </div>
         <button class="goal-mini-btn" onclick="event.stopPropagation();deleteTrace('${g.id}','${t.id}')" title="Entfernen">✕</button>
       </div>`;
     });
@@ -9173,17 +9311,63 @@ function deleteGoal(id) {
 }
 
 // ----- Hindernisse -----
+const OBSTACLE_KINDS = [
+  {
+    key: 'innen',
+    label: 'Inneres Hindernis',
+    desc: 'Ein Zweifel, eine Angst, eine alte Gewohnheit.',
+    question: 'Was in dir hält dich zurück?',
+    placeholder: 'z.B. „Ich habe Sorge, nicht gut genug zu sein"'
+  },
+  {
+    key: 'aussen',
+    label: 'Äußeres Hindernis',
+    desc: 'Zeit, Umstände, Menschen, Wetter — etwas außerhalb deiner Kontrolle.',
+    question: 'Was im Außen erschwert es?',
+    placeholder: 'z.B. „Wenn ich abends nach Hause komme, bin ich zu erschöpft"'
+  }
+];
+
 function addObstaclePrompt(goalId) {
+  openObstacleKindOverlay(goalId);
+}
+
+function openObstacleKindOverlay(goalId) {
+  const ov = document.getElementById('obstacle-kind-overlay');
+  const list = document.getElementById('obstacle-kind-list');
+  if (!list) return;
+  list.innerHTML = OBSTACLE_KINDS.map(k => `
+    <button class="trace-type-btn" onclick="chooseObstacleKind('${goalId}','${k.key}')">
+      <div class="trace-type-label">${escapeHtml(k.label)}</div>
+      <div class="trace-type-desc">${escapeHtml(k.desc)}</div>
+    </button>
+  `).join('');
+  ov.classList.add('visible');
+}
+
+function closeObstacleKindOverlay() {
+  document.getElementById('obstacle-kind-overlay').classList.remove('visible');
+}
+
+function chooseObstacleKind(goalId, kindKey) {
+  closeObstacleKindOverlay();
+  const k = OBSTACLE_KINDS.find(x => x.key === kindKey);
+  if (!k) return;
   openGoalInputOverlay({
-    title: 'Ein Hindernis benennen',
-    label: 'Was in dir hält dich zurück? Welche innere Stimme, welche Angst, welche Gewohnheit?',
-    placeholder: 'z.B. „Ich habe Sorge, nicht gut genug zu sein"',
+    title: k.label,
+    label: k.question,
+    placeholder: k.placeholder,
     multiField: false,
     onSave: (text) => {
       const g = (state.goals || []).find(x => x.id === goalId);
       if (!g) return;
       if (!Array.isArray(g.obstacles)) g.obstacles = [];
-      g.obstacles.push({ id: goalUid(), text: text, ts: new Date().toISOString() });
+      g.obstacles.push({
+        id: goalUid(),
+        text: text,
+        kind: kindKey,
+        ts: new Date().toISOString()
+      });
       g.updatedAt = new Date().toISOString();
       saveState();
       renderGoalDetail();
@@ -9236,16 +9420,71 @@ function deletePlan(goalId, planId) {
 
 // ----- Spuren -----
 function addTracePrompt(goalId) {
+  // Erst die Auswahl der Spurenart
+  openTraceTypeOverlay(goalId);
+}
+
+const TRACE_TYPES = [
+  {
+    key: 'gehen',
+    label: 'Spur des Gehens',
+    desc: 'Ein Schritt, den ich getan habe.',
+    question: 'Was hast du heute getan, das deinen Weg betrifft?',
+    placeholder: 'z.B. „Ich habe heute angefangen, mein erstes Angebot zu schreiben — es fühlt sich klein an, aber real."'
+  },
+  {
+    key: 'erkenntnis',
+    label: 'Spur der Erkenntnis',
+    desc: 'Etwas, das mir klar geworden ist.',
+    question: 'Was ist dir heute klar geworden?',
+    placeholder: 'z.B. „Mir wurde klar: Es geht nicht um die perfekte Strategie. Es geht darum, dass ich anfange."'
+  },
+  {
+    key: 'begegnung',
+    label: 'Spur der Begegnung',
+    desc: 'Eine Person, ein Gespräch, das mich berührt hat.',
+    question: 'Wer hat dir heute auf dem Weg geholfen — durch Worte, eine Frage, eine Geste?',
+    placeholder: 'z.B. „Sabine hat gefragt, was ich brauche, um anzufangen. Ich konnte es nicht beantworten. Das ist die richtige Frage."'
+  }
+];
+
+function openTraceTypeOverlay(goalId) {
+  // Modal mit drei Auswahl-Buttons öffnen
+  const ov = document.getElementById('trace-type-overlay');
+  const list = document.getElementById('trace-type-list');
+  if (!list) return;
+  list.innerHTML = TRACE_TYPES.map(t => `
+    <button class="trace-type-btn" onclick="chooseTraceType('${goalId}','${t.key}')">
+      <div class="trace-type-label">${escapeHtml(t.label)}</div>
+      <div class="trace-type-desc">${escapeHtml(t.desc)}</div>
+    </button>
+  `).join('');
+  ov.classList.add('visible');
+}
+
+function closeTraceTypeOverlay() {
+  document.getElementById('trace-type-overlay').classList.remove('visible');
+}
+
+function chooseTraceType(goalId, typeKey) {
+  closeTraceTypeOverlay();
+  const t = TRACE_TYPES.find(x => x.key === typeKey);
+  if (!t) return;
   openGoalInputOverlay({
-    title: 'Eine Spur eintragen',
-    label: 'Ein kleiner Schritt, eine Erkenntnis, ein Erlebnis auf dem Weg.',
-    placeholder: 'Was war heute (oder gerade) wichtig?',
+    title: t.label,
+    label: t.question,
+    placeholder: t.placeholder,
     multiField: false,
     onSave: (text) => {
       const g = (state.goals || []).find(x => x.id === goalId);
       if (!g) return;
       if (!Array.isArray(g.traces)) g.traces = [];
-      g.traces.push({ id: goalUid(), text: text, ts: new Date().toISOString() });
+      g.traces.push({
+        id: goalUid(),
+        text: text,
+        type: typeKey,
+        ts: new Date().toISOString()
+      });
       g.updatedAt = new Date().toISOString();
       saveState();
       renderGoalDetail();
