@@ -1981,6 +1981,53 @@ h3 {
   border-radius: 6px;
 }
 
+/* Hinweis-Bubble bei erkanntem Weg */
+.goal-hint-bubble {
+  background: linear-gradient(135deg, rgba(90, 138, 122, 0.12) 0%, rgba(90, 138, 122, 0.06) 100%);
+  border-left: 2.5px solid #5a8a7a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.goal-hint-text {
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.goal-hint-text strong {
+  font-style: normal;
+  font-weight: 500;
+  color: #4a6f63;
+}
+.goal-hint-actions {
+  display: flex;
+  gap: 8px;
+}
+.goal-hint-btn {
+  background: none;
+  border: 1.5px solid rgba(90, 138, 122, 0.4);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  color: var(--ink);
+}
+.goal-hint-btn.primary {
+  background: rgba(90, 138, 122, 0.2);
+  border-color: rgba(90, 138, 122, 0.6);
+}
+.goal-hint-btn:hover {
+  background: rgba(90, 138, 122, 0.18);
+}
+.goal-hint-btn.primary:hover {
+  background: rgba(90, 138, 122, 0.32);
+}
+
 /* Spurenart-Auswahl */
 .trace-type-btn {
   background: rgba(90, 138, 122, 0.06);
@@ -2920,6 +2967,9 @@ textarea, input {
     </div>
 
     <div id="today-suggestions" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;"></div>
+
+    <!-- Hinweis-Bubble: zeigt sich, wenn ein Vorhaben zu einem Weg passt -->
+    <div id="today-goal-hint" class="goal-hint-bubble" style="display:none;margin-top:12px;"></div>
     </div>
   </div>
 
@@ -3385,6 +3435,15 @@ textarea, input {
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
     </div>
 
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Stichwörter <span style="opacity:0.6;">(damit Vorhaben und Aktivitäten erkannt werden)</span></div>
+      <input type="text" id="goal-editor-keywords" placeholder="z.B. Sport, Fitness, Spaziergang, Walken, Schwimmen"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      <p class="goal-editor-hint" style="margin-top:6px;">
+        Drei bis fünf Wörter genügen. Wenn du später ein Vorhaben oder eine Aktivität einträgst, in der eines dieser Wörter vorkommt, fragt dich Ad se sanft, ob es zu diesem Weg gehört.
+      </p>
+    </div>
+
     <p class="muted-note" style="margin:14px 0;line-height:1.5;font-size:0.85rem;">
       <em>Hindernisse und Wenn-Dann-Pläne</em> kommen später dazu — direkt im Weg, wenn du ihn öffnest.
     </p>
@@ -3518,7 +3577,10 @@ textarea, input {
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;"></textarea>
     <div id="activity-note-suggestions" style="display:none;margin-bottom:14px;"></div>
 
-    <!-- Goal-Verknüpfung -->
+    <!-- Sanfte Erkennung: zeigt sich, wenn ein Stichwort eines Wegs erkannt wird -->
+    <div id="activity-goal-hint" class="goal-hint-bubble" style="display:none;"></div>
+
+    <!-- Goal-Verknüpfung (manuell) -->
     <div id="activity-goal-link-wrap" style="display:none;margin-bottom:14px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Auf einem Weg unterwegs? (optional)</div>
       <select id="activity-goal-link"
@@ -4973,13 +5035,16 @@ function addTodayItem() {
   const input = document.getElementById('today-input');
   const text = (input.value || '').trim();
   if (!text) return;
+  // Goal-Erkennung — falls ein Weg dazu passt, wird die Bubble eingeblendet
+  // (vorher merken, wir schreiben es trotzdem zuerst)
   addTodayItemText(text);
   input.value = '';
+  refreshGoalHintForToday(text);
 }
 
 function addTodayItemText(text) {
   const items = getTodayItems();
-  items.push({ text, done: false, ts: new Date().toISOString() });
+  items.push({ text, done: false, ts: new Date().toISOString(), goalId: null });
   // merken für Vorschläge (wenn neu)
   if (!state.todaySuggestions.some(s => s.toLowerCase() === text.toLowerCase())) {
     state.todaySuggestions.unshift(text);
@@ -4988,6 +5053,45 @@ function addTodayItemText(text) {
   saveState();
   renderTodayItems();
   updateCollapsibleSummaries();
+}
+
+// Hinweis-Bubble: zeigt sich, wenn das gerade angelegte Vorhaben zu einem Weg passt
+function refreshGoalHintForToday(text) {
+  const hint = document.getElementById('today-goal-hint');
+  if (!hint) return;
+  if (!text) { hint.style.display = 'none'; return; }
+  const match = findGoalForText(text);
+  if (!match) { hint.style.display = 'none'; return; }
+  // Index des gerade hinzugefügten Items merken
+  const items = getTodayItems();
+  const lastIdx = items.length - 1;
+  hint.innerHTML = `
+    <div class="goal-hint-text">„${escapeHtml(text)}" klingt wie ein Schritt auf deinem Weg <strong>${escapeHtml(match.goal.title)}</strong>. Möchtest du es so verstehen?</div>
+    <div class="goal-hint-actions">
+      <button class="goal-hint-btn primary" onclick="acceptGoalHintForToday(${lastIdx},'${match.goal.id}')">Ja, gehört dazu</button>
+      <button class="goal-hint-btn" onclick="rejectGoalHintForToday('${match.goal.id}','${escapeHtml(text).replace(/'/g, '&#39;')}')">Nein</button>
+    </div>
+  `;
+  hint.style.display = '';
+}
+
+function acceptGoalHintForToday(itemIndex, goalId) {
+  const items = getTodayItems();
+  if (items[itemIndex]) {
+    items[itemIndex].goalId = goalId;
+    saveState();
+    showToast('Diesem Weg zugeordnet.');
+  }
+  const hint = document.getElementById('today-goal-hint');
+  if (hint) hint.style.display = 'none';
+}
+
+function rejectGoalHintForToday(goalId, text) {
+  // Entkommt HTML-Entities zurück
+  const t = (text || '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  if (t) rememberGoalRejection(goalId, t);
+  const hint = document.getElementById('today-goal-hint');
+  if (hint) hint.style.display = 'none';
 }
 
 function toggleTodayItem(i) {
@@ -5149,6 +5253,8 @@ function onActivityNameInput() {
   const name = (document.getElementById('activity-name').value || '').trim();
   // Notiz-Vorschläge passend zum Namen aktualisieren
   renderActivityNoteSuggestions(name);
+  // Goal-Erkennung: passt der Name zu einem Weg?
+  refreshGoalHintForActivity(name);
   const durInput = document.getElementById('activity-duration');
   if (!durInput) return;
   if (durInput.value) return;  // Nutzer hat schon etwas eingegeben — nicht überschreiben
@@ -5156,6 +5262,51 @@ function onActivityNameInput() {
   const key = name.toLowerCase();
   const remembered = state.lastDurations && state.lastDurations[key];
   if (remembered) durInput.value = remembered;
+}
+
+// Hinweis-Bubble beim Aktivitäts-Eintrag
+function refreshGoalHintForActivity(text) {
+  const hint = document.getElementById('activity-goal-hint');
+  const select = document.getElementById('activity-goal-link');
+  if (!hint) return;
+  // Wenn manuell schon ein Weg gewählt wurde, keine Bubble zeigen
+  if (select && select.value) {
+    hint.style.display = 'none';
+    return;
+  }
+  if (!text) {
+    hint.style.display = 'none';
+    return;
+  }
+  const match = findGoalForText(text);
+  if (!match) {
+    hint.style.display = 'none';
+    return;
+  }
+  hint.innerHTML = `
+    <div class="goal-hint-text">Klingt wie ein Schritt auf deinem Weg <strong>${escapeHtml(match.goal.title)}</strong>. Möchtest du es so verstehen?</div>
+    <div class="goal-hint-actions">
+      <button class="goal-hint-btn primary" onclick="acceptGoalHintForActivity('${match.goal.id}')">Ja, gehört dazu</button>
+      <button class="goal-hint-btn" onclick="rejectGoalHintForActivity('${match.goal.id}')">Nein</button>
+    </div>
+  `;
+  hint.style.display = '';
+}
+
+function acceptGoalHintForActivity(goalId) {
+  const select = document.getElementById('activity-goal-link');
+  if (select) {
+    select.value = goalId;
+  }
+  const hint = document.getElementById('activity-goal-hint');
+  if (hint) hint.style.display = 'none';
+}
+
+function rejectGoalHintForActivity(goalId) {
+  const text = (document.getElementById('activity-name').value || '').trim();
+  if (text) rememberGoalRejection(goalId, text);
+  const hint = document.getElementById('activity-goal-hint');
+  if (hint) hint.style.display = 'none';
 }
 
 function logActivity() {
@@ -8215,6 +8366,19 @@ function collectRueckblickData(year, month) {
       const t = new Date(a.ts);
       return t >= monthStart && t < monthEnd;
     });
+    // Erledigte Vorhaben dieses Monats, die diesem Weg zugeordnet wurden
+    let todoneCount = 0;
+    Object.keys(state.todayItems || {}).forEach(dk => {
+      const items = state.todayItems[dk] || [];
+      items.forEach(it => {
+        if (it.goalId !== g.id) return;
+        if (!it.done) return;
+        const ts = it.doneTs || it.ts;
+        if (!ts) return;
+        const t = new Date(ts);
+        if (t >= monthStart && t < monthEnd) todoneCount++;
+      });
+    });
     // Spuren dieses Monats
     const traces = (g.traces || []).filter(t => {
       const ts = new Date(t.ts);
@@ -8223,7 +8387,7 @@ function collectRueckblickData(year, month) {
     return {
       id: g.id,
       title: g.title,
-      activityCount: acts.length,
+      activityCount: acts.length + todoneCount,  // beides zählt als "Schritt auf dem Weg"
       traceCount: traces.length,
       lastTrace: traces.length ? traces.sort((a,b) => new Date(b.ts) - new Date(a.ts))[0] : null
     };
@@ -9109,6 +9273,7 @@ function openGoalEditor(existingId) {
   const titleInput = document.getElementById('goal-editor-title-input');
   const wishInput = document.getElementById('goal-editor-wish');
   const outcomeInput = document.getElementById('goal-editor-outcome');
+  const keywordsInput = document.getElementById('goal-editor-keywords');
 
   if (existingId) {
     const g = (state.goals || []).find(x => x.id === existingId);
@@ -9117,12 +9282,14 @@ function openGoalEditor(existingId) {
       titleInput.value = g.title || '';
       wishInput.value = g.wish || '';
       outcomeInput.value = g.outcome || '';
+      keywordsInput.value = Array.isArray(g.keywords) ? g.keywords.join(', ') : '';
     }
   } else {
     titleEl.textContent = 'Einen Weg formulieren';
     titleInput.value = '';
     wishInput.value = '';
     outcomeInput.value = '';
+    keywordsInput.value = '';
   }
 
   document.getElementById('goal-editor-overlay').classList.add('visible');
@@ -9137,6 +9304,10 @@ function saveGoalEditor() {
   const title = (document.getElementById('goal-editor-title-input').value || '').trim();
   const wish = (document.getElementById('goal-editor-wish').value || '').trim();
   const outcome = (document.getElementById('goal-editor-outcome').value || '').trim();
+  const keywordsRaw = (document.getElementById('goal-editor-keywords').value || '').trim();
+  const keywords = keywordsRaw
+    ? keywordsRaw.split(',').map(k => k.trim().toLowerCase()).filter(Boolean)
+    : [];
 
   if (!title) { showToast('Bitte gib einen Titel ein.'); return; }
 
@@ -9148,6 +9319,7 @@ function saveGoalEditor() {
       g.title = title;
       g.wish = wish;
       g.outcome = outcome;
+      g.keywords = keywords;
       g.updatedAt = new Date().toISOString();
     }
   } else {
@@ -9160,9 +9332,11 @@ function saveGoalEditor() {
       title: title,
       wish: wish,
       outcome: outcome,
-      obstacles: [],         // Wird in Stufe B gefüllt
-      ifThenPlans: [],       // Wird in Stufe B gefüllt
-      traces: [],            // Wird in Stufe C gefüllt
+      keywords: keywords,
+      obstacles: [],
+      ifThenPlans: [],
+      traces: [],
+      ignoredKeywords: [],   // Begriffe, bei denen "Nein" gesagt wurde — nicht mehr fragen
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
@@ -9499,6 +9673,45 @@ function deleteTrace(goalId, traceId) {
   g.traces = g.traces.filter(t => t.id !== traceId);
   saveState();
   renderGoalDetail();
+}
+
+// ----- Weg-Erkennung über Stichwörter -----
+// Sucht in einem Text nach Stichwörtern eines Wegs.
+// Gibt das gefundene Stichwort und den Weg zurück, oder null.
+// Berücksichtigt: ignoredKeywords (Texte, bei denen "Nein" gesagt wurde)
+function findGoalForText(text) {
+  if (!text || typeof text !== 'string') return null;
+  const lower = text.toLowerCase();
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+
+  for (const g of goals) {
+    if (!Array.isArray(g.keywords) || !g.keywords.length) continue;
+    // Suche nach Stichwort als Wortgrenze, nicht nur Substring
+    for (const kw of g.keywords) {
+      if (!kw) continue;
+      const re = new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+      if (re.test(lower)) {
+        // Wurde dieser Text-Begriff für diesen Weg ignoriert?
+        const ignored = Array.isArray(g.ignoredKeywords) ? g.ignoredKeywords : [];
+        if (ignored.includes(lower.trim())) continue;
+        return { goal: g, keyword: kw };
+      }
+    }
+  }
+  return null;
+}
+
+// Merkt sich, dass ein bestimmter Text NICHT zu einem Weg gehört
+function rememberGoalRejection(goalId, text) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g) return;
+  if (!Array.isArray(g.ignoredKeywords)) g.ignoredKeywords = [];
+  const lower = (text || '').toLowerCase().trim();
+  if (lower && !g.ignoredKeywords.includes(lower)) {
+    g.ignoredKeywords.push(lower);
+    if (g.ignoredKeywords.length > 100) g.ignoredKeywords.shift();
+    saveState();
+  }
 }
 
 // ----- Eingabe-Overlay (statt prompt) -----
