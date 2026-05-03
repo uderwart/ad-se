@@ -1993,6 +1993,29 @@ h3 {
   line-height: 1.55;
   color: var(--ink);
 }
+
+/* Schwebende Variante (für Vorhaben — bleibt oben sichtbar) */
+.goal-hint-floating {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  right: 14px;
+  z-index: 9000;
+  background: linear-gradient(135deg, #d8e4dd 0%, #c5d6cc 100%);
+  border-left: 3px solid #5a8a7a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 20px rgba(58, 31, 26, 0.15);
+  font-family: 'EB Garamond', serif;
+  font-size: 0.97rem;
+  line-height: 1.5;
+  color: var(--ink);
+  animation: goalHintSlideIn 0.25s ease-out;
+}
+@keyframes goalHintSlideIn {
+  from { transform: translateY(-12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
 .goal-hint-text {
   font-style: italic;
   margin-bottom: 8px;
@@ -2806,6 +2829,9 @@ textarea, input {
 </head>
 <body>
 
+<!-- Schwebende Hinweis-Bubble für Vorhaben-Goal-Erkennung -->
+<div id="today-goal-hint" class="goal-hint-floating" style="display:none;"></div>
+
 <!-- ====== ERÖFFNUNGS-KARTE ====== -->
 <div id="opening-overlay">
   <div class="opening-inner">
@@ -2967,9 +2993,6 @@ textarea, input {
     </div>
 
     <div id="today-suggestions" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;"></div>
-
-    <!-- Hinweis-Bubble: zeigt sich, wenn ein Vorhaben zu einem Weg passt -->
-    <div id="today-goal-hint" class="goal-hint-bubble" style="display:none;margin-top:12px;"></div>
     </div>
   </div>
 
