@@ -5979,7 +5979,7 @@ function renderBodyEvalList() {
   if (zonesSorted.length) {
     html += `<div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">Stellen</div>`;
     zonesSorted.forEach(([zone, count]) => {
-      html += `<div class="body-eval-item" onclick="openBodyDetail('zone', ${JSON.stringify(zone)})">
+      html += `<div class="body-eval-item" data-eval-kind="zone" data-eval-key="${escapeHtml(zone)}">
         <span class="body-eval-name">${escapeHtml(zone)}</span>
         <span class="body-eval-meta">${count} ${count === 1 ? 'Eintrag' : 'Einträge'}</span>
       </div>`;
@@ -5991,7 +5991,7 @@ function renderBodyEvalList() {
   if (typesSorted.length) {
     html += `<div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 8px;">Allgemeine Empfindungen</div>`;
     typesSorted.forEach(([t, count]) => {
-      html += `<div class="body-eval-item" onclick="openBodyDetail('general', ${JSON.stringify(t)})">
+      html += `<div class="body-eval-item" data-eval-kind="general" data-eval-key="${escapeHtml(t)}">
         <span class="body-eval-name">${escapeHtml(t)}</span>
         <span class="body-eval-meta">${count}× erwähnt</span>
       </div>`;
@@ -5999,6 +5999,15 @@ function renderBodyEvalList() {
   }
 
   list.innerHTML = html;
+
+  // Click-Handler nachträglich binden — vermeidet HTML-Quoting-Probleme
+  list.querySelectorAll('.body-eval-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const kind = item.dataset.evalKind;
+      const key = item.dataset.evalKey;
+      openBodyDetail(kind, key);
+    });
+  });
 }
 
 // Detail-Overlay: Verlauf einer bestimmten Zone oder Empfindung
@@ -6041,9 +6050,9 @@ function openBodyDetail(kind, key) {
 
   let html = `<div class="body-chart-summary">${escapeHtml(summary)}</div>`;
 
-  // Chart (Punktdiagramm) — nur wenn ≥ 2 Einträge mit Intensität
+  // Chart (Punktdiagramm) — schon ab 1 Eintrag mit Intensität
   const withIntensity = sortedAsc.filter(e => typeof e.intensity === 'number');
-  if (withIntensity.length >= 2) {
+  if (withIntensity.length >= 1) {
     html += renderBodyChart(withIntensity);
   }
 
@@ -6077,7 +6086,7 @@ function closeBodyDetail() {
 function renderBodyChart(entries) {
   if (!entries.length) return '';
 
-  const w = 480;  // Will durch viewBox skaliert
+  const w = 480;
   const h = 180;
   const padL = 30;
   const padR = 12;
@@ -6090,23 +6099,27 @@ function renderBodyChart(entries) {
   const maxTs = new Date(entries[entries.length - 1].ts).getTime();
   const tsRange = Math.max(1, maxTs - minTs);
 
-  const scaleX = ts => padL + ((new Date(ts).getTime() - minTs) / tsRange) * innerW;
+  const scaleX = ts => {
+    if (entries.length === 1) return padL + innerW / 2;  // Mittig bei nur einem Punkt
+    return padL + ((new Date(ts).getTime() - minTs) / tsRange) * innerW;
+  };
   const scaleY = v => padT + (1 - v / 10) * innerH;
 
-  let svg = `<div class="body-chart"><svg class="body-chart-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">`;
+  // Inline-Stile als Fallback, falls CSS-Variablen im SVG nicht greifen
+  let svg = `<div class="body-chart"><svg class="body-chart-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style="background:transparent;">`;
 
   // Gitterlinien (horizontal: 0, 5, 10)
   [0, 5, 10].forEach(y => {
     const yp = scaleY(y);
-    svg += `<line class="body-chart-grid" x1="${padL}" y1="${yp}" x2="${w - padR}" y2="${yp}" />`;
-    svg += `<text class="body-chart-axis-y" x="${padL - 4}" y="${yp + 3}" text-anchor="end">${y}</text>`;
+    svg += `<line x1="${padL}" y1="${yp}" x2="${w - padR}" y2="${yp}" stroke="rgba(74,47,42,0.15)" stroke-width="0.8" />`;
+    svg += `<text x="${padL - 4}" y="${yp + 3}" text-anchor="end" fill="rgba(74,47,42,0.55)" font-family="Inter, sans-serif" font-size="9">${y}</text>`;
   });
 
   // Punkte
   entries.forEach(e => {
     const x = scaleX(e.ts);
     const y = scaleY(e.intensity);
-    svg += `<circle class="body-chart-point" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" />`;
+    svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#a8634c" opacity="0.75" />`;
   });
 
   // X-Achse: Anfang und Ende beschriften
@@ -6114,8 +6127,12 @@ function renderBodyChart(entries) {
     const dd = new Date(d);
     return `${dd.getDate()}.${dd.getMonth()+1}.${String(dd.getFullYear()).slice(2)}`;
   };
-  svg += `<text class="body-chart-axis-x" x="${padL}" y="${h - 8}" text-anchor="start">${fmt(entries[0].ts)}</text>`;
-  svg += `<text class="body-chart-axis-x" x="${w - padR}" y="${h - 8}" text-anchor="end">${fmt(entries[entries.length-1].ts)}</text>`;
+  if (entries.length === 1) {
+    svg += `<text x="${w/2}" y="${h - 8}" text-anchor="middle" fill="rgba(74,47,42,0.55)" font-family="Inter, sans-serif" font-size="9">${fmt(entries[0].ts)}</text>`;
+  } else {
+    svg += `<text x="${padL}" y="${h - 8}" text-anchor="start" fill="rgba(74,47,42,0.55)" font-family="Inter, sans-serif" font-size="9">${fmt(entries[0].ts)}</text>`;
+    svg += `<text x="${w - padR}" y="${h - 8}" text-anchor="end" fill="rgba(74,47,42,0.55)" font-family="Inter, sans-serif" font-size="9">${fmt(entries[entries.length-1].ts)}</text>`;
+  }
 
   svg += `</svg></div>`;
   return svg;
