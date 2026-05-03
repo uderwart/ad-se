@@ -572,6 +572,106 @@ h3 {
   margin-top: 4px;
 }
 
+/* Körper-Auswertung: Liste der Zonen/Empfindungen */
+.body-eval-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  background: var(--accent-soft);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.body-eval-item:hover {
+  background: var(--accent);
+  color: white;
+}
+.body-eval-item:hover .body-eval-meta { color: rgba(255,255,255,0.85); }
+.body-eval-name {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.02rem;
+  font-style: italic;
+}
+.body-eval-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* Punktdiagramm im Detail-Overlay */
+.body-chart {
+  background: var(--accent-soft);
+  border-radius: 10px;
+  padding: 14px 12px 8px;
+  margin-bottom: 14px;
+}
+.body-chart-svg {
+  width: 100%;
+  height: 180px;
+  display: block;
+}
+.body-chart-axis-y {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  fill: var(--muted);
+}
+.body-chart-axis-x {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  fill: var(--muted);
+}
+.body-chart-grid {
+  stroke: var(--border);
+  stroke-width: 0.5;
+}
+.body-chart-point {
+  fill: var(--accent-deep);
+  opacity: 0.7;
+}
+.body-chart-summary {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  background: var(--accent-soft);
+  border-left: 2.5px solid var(--accent);
+  border-radius: 8px;
+}
+.body-detail-list {
+  max-height: 260px;
+  overflow-y: auto;
+}
+.body-detail-entry {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.body-detail-entry:last-child { border-bottom: none; }
+.body-detail-entry-date {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.body-detail-entry-text {
+  font-family: 'EB Garamond', serif;
+  color: var(--ink);
+}
+.body-detail-entry-intensity {
+  display: inline-block;
+  padding: 1px 8px;
+  background: var(--accent);
+  color: white;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  margin-left: 6px;
+}
+
 .fm-needs {
   display: none;
   margin-top: 14px;
@@ -3478,6 +3578,32 @@ textarea, input {
     <p class="muted-note" id="body-today-empty" style="display:none;">Heute noch nichts notiert.</p>
   </div>
 
+  <!-- Auswertung: Verlauf einzelner Zonen oder Empfindungen -->
+  <div class="card collapsible" id="body-eval-collapsible">
+    <div class="collapsible-header" onclick="toggleBodyEval()">
+      <h2 style="margin:0;">Verlauf <span id="body-eval-count" class="muted-note" style="font-weight:normal;font-size:0.85rem;"></span></h2>
+      <span class="collapsible-arrow">▾</span>
+    </div>
+    <div class="collapsible-body" id="body-eval-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">Tippe auf eine Stelle oder Empfindung, um ihren Verlauf zu sehen.</p>
+      <div id="body-eval-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Detail-Overlay: Verlauf einer Zone/Empfindung -->
+<div class="entry-overlay" id="body-detail-overlay">
+  <div class="entry-modal" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="body-detail-title">Verlauf</h2>
+      <button onclick="closeBodyDetail()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div id="body-detail-content"></div>
+    <div style="margin-top:14px;">
+      <button class="btn secondary full" onclick="closeBodyDetail()">Schließen</button>
+    </div>
+  </div>
 </div>
 
 <!-- ====== WEGE / GROSSE ZIELE ====== -->
@@ -5777,10 +5903,222 @@ function saveBodyEntry() {
 function renderBody() {
   renderBodyZones();
   renderBodyToday();
+  renderBodyEvalList();
   // Click-Handler auf SVG-Zonen
   document.querySelectorAll('.sym-zone').forEach(el => {
     el.onclick = () => openBodyEntry(el.getAttribute('data-zone'));
   });
+}
+
+function toggleBodyEval() {
+  const card = document.getElementById('body-eval-collapsible');
+  const body = document.getElementById('body-eval-body');
+  if (!card || !body) return;
+  if (card.classList.contains('open')) {
+    card.classList.remove('open');
+    body.style.display = 'none';
+  } else {
+    card.classList.add('open');
+    body.style.display = '';
+    renderBodyEvalList();
+  }
+}
+
+// Sammelt alle Zonen + Empfindungstypen, die je eingetragen wurden
+// Gruppe 1: Zonen (z.B. "Linker Fuß") → Liste Einträge
+// Gruppe 2: Allgemeine Empfindungstypen (z.B. "Kopfschmerzen", "Hungrig") → Liste Einträge mit jeweiligem Typ
+function getBodyEvalGroups() {
+  const log = Array.isArray(state.bodyLog) ? state.bodyLog : [];
+
+  // Zonen (außer "Allgemein" — das wird typweise aufgeschlüsselt)
+  const zoneCounts = {};
+  // Allgemeine Empfindungs-Typen
+  const generalTypeCounts = {};
+
+  log.forEach(e => {
+    if (e.zone === 'Allgemein') {
+      const types = Array.isArray(e.types) ? e.types : [];
+      types.forEach(t => {
+        if (!t) return;
+        // Nur Standard-Typen aufschlüsseln (also nicht freie Texte)
+        if (BODY_TYPES_GENERAL.includes(t)) {
+          generalTypeCounts[t] = (generalTypeCounts[t] || 0) + 1;
+        }
+      });
+    } else if (e.zone) {
+      zoneCounts[e.zone] = (zoneCounts[e.zone] || 0) + 1;
+    }
+  });
+
+  // Lokale Empfindungstypen über alle Zonen?
+  // Bewusst NICHT — bei lokalen Beschwerden ist die ZONE die wichtige Einheit, nicht der Typ.
+  // Wir wollen wissen: "Wie oft Linker Fuß?" — nicht "Wie oft Schmerz allgemein?"
+
+  return { zoneCounts, generalTypeCounts };
+}
+
+function renderBodyEvalList() {
+  const list = document.getElementById('body-eval-list');
+  const countEl = document.getElementById('body-eval-count');
+  if (!list) return;
+  const { zoneCounts, generalTypeCounts } = getBodyEvalGroups();
+  const totalKeys = Object.keys(zoneCounts).length + Object.keys(generalTypeCounts).length;
+  if (countEl) {
+    countEl.textContent = totalKeys === 0 ? '' : `· ${totalKeys} ${totalKeys === 1 ? 'Bereich' : 'Bereiche'}`;
+  }
+
+  if (totalKeys === 0) {
+    list.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:18px;">Noch keine Einträge.</p>`;
+    return;
+  }
+
+  let html = '';
+
+  // Zonen — sortiert nach Häufigkeit
+  const zonesSorted = Object.entries(zoneCounts).sort((a,b) => b[1] - a[1]);
+  if (zonesSorted.length) {
+    html += `<div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">Stellen</div>`;
+    zonesSorted.forEach(([zone, count]) => {
+      html += `<div class="body-eval-item" onclick="openBodyDetail('zone', ${JSON.stringify(zone)})">
+        <span class="body-eval-name">${escapeHtml(zone)}</span>
+        <span class="body-eval-meta">${count} ${count === 1 ? 'Eintrag' : 'Einträge'}</span>
+      </div>`;
+    });
+  }
+
+  // Allgemeine Empfindungen — sortiert nach Häufigkeit
+  const typesSorted = Object.entries(generalTypeCounts).sort((a,b) => b[1] - a[1]);
+  if (typesSorted.length) {
+    html += `<div class="muted-note" style="font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin:14px 0 8px;">Allgemeine Empfindungen</div>`;
+    typesSorted.forEach(([t, count]) => {
+      html += `<div class="body-eval-item" onclick="openBodyDetail('general', ${JSON.stringify(t)})">
+        <span class="body-eval-name">${escapeHtml(t)}</span>
+        <span class="body-eval-meta">${count}× erwähnt</span>
+      </div>`;
+    });
+  }
+
+  list.innerHTML = html;
+}
+
+// Detail-Overlay: Verlauf einer bestimmten Zone oder Empfindung
+function openBodyDetail(kind, key) {
+  const overlay = document.getElementById('body-detail-overlay');
+  const titleEl = document.getElementById('body-detail-title');
+  const content = document.getElementById('body-detail-content');
+  if (!overlay || !content) return;
+
+  titleEl.textContent = key;
+
+  // Einträge filtern
+  const log = Array.isArray(state.bodyLog) ? state.bodyLog : [];
+  let entries;
+  if (kind === 'zone') {
+    entries = log.filter(e => e.zone === key);
+  } else {
+    // 'general' — Allgemeine Empfindungen
+    entries = log.filter(e => e.zone === 'Allgemein' && Array.isArray(e.types) && e.types.includes(key));
+  }
+  // Älteste zuerst für Chart, neueste zuerst für Liste
+  const sortedAsc = [...entries].sort((a,b) => new Date(a.ts) - new Date(b.ts));
+  const sortedDesc = [...entries].sort((a,b) => new Date(b.ts) - new Date(a.ts));
+
+  // Zusammenfassung
+  let summary = '';
+  if (entries.length === 0) {
+    summary = 'Noch keine Einträge.';
+  } else if (entries.length === 1) {
+    summary = '1 Eintrag insgesamt.';
+  } else {
+    const intensities = entries.filter(e => typeof e.intensity === 'number').map(e => e.intensity);
+    const avg = intensities.length ? (intensities.reduce((a,b) => a+b, 0) / intensities.length).toFixed(1) : null;
+    const first = sortedAsc[0].ts;
+    const last = sortedDesc[0].ts;
+    const days = Math.max(1, Math.round((new Date(last) - new Date(first)) / (24 * 3600 * 1000)));
+    summary = `${entries.length} Einträge über ${days} Tage`;
+    if (avg) summary += ` · Durchschnitt ${avg}/10`;
+  }
+
+  let html = `<div class="body-chart-summary">${escapeHtml(summary)}</div>`;
+
+  // Chart (Punktdiagramm) — nur wenn ≥ 2 Einträge mit Intensität
+  const withIntensity = sortedAsc.filter(e => typeof e.intensity === 'number');
+  if (withIntensity.length >= 2) {
+    html += renderBodyChart(withIntensity);
+  }
+
+  // Liste der Einträge
+  html += `<div class="body-detail-list">`;
+  sortedDesc.forEach(e => {
+    const date = new Date(e.ts);
+    const dateStr = date.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+    const types = Array.isArray(e.types) ? e.types.join(', ') : '';
+    html += `<div class="body-detail-entry">
+      <div class="body-detail-entry-date">${escapeHtml(dateStr)}</div>
+      <div class="body-detail-entry-text">${escapeHtml(types)}`;
+    if (typeof e.intensity === 'number') {
+      html += `<span class="body-detail-entry-intensity">${e.intensity}/10</span>`;
+    }
+    html += `</div>`;
+    if (e.note) html += `<div class="body-detail-entry-text" style="opacity:0.75;font-style:italic;font-size:0.88rem;margin-top:3px;">„${escapeHtml(e.note)}"</div>`;
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  content.innerHTML = html;
+  overlay.classList.add('visible');
+}
+
+function closeBodyDetail() {
+  document.getElementById('body-detail-overlay').classList.remove('visible');
+}
+
+// Punktdiagramm rendern als SVG
+function renderBodyChart(entries) {
+  if (!entries.length) return '';
+
+  const w = 480;  // Will durch viewBox skaliert
+  const h = 180;
+  const padL = 30;
+  const padR = 12;
+  const padT = 12;
+  const padB = 28;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+
+  const minTs = new Date(entries[0].ts).getTime();
+  const maxTs = new Date(entries[entries.length - 1].ts).getTime();
+  const tsRange = Math.max(1, maxTs - minTs);
+
+  const scaleX = ts => padL + ((new Date(ts).getTime() - minTs) / tsRange) * innerW;
+  const scaleY = v => padT + (1 - v / 10) * innerH;
+
+  let svg = `<div class="body-chart"><svg class="body-chart-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">`;
+
+  // Gitterlinien (horizontal: 0, 5, 10)
+  [0, 5, 10].forEach(y => {
+    const yp = scaleY(y);
+    svg += `<line class="body-chart-grid" x1="${padL}" y1="${yp}" x2="${w - padR}" y2="${yp}" />`;
+    svg += `<text class="body-chart-axis-y" x="${padL - 4}" y="${yp + 3}" text-anchor="end">${y}</text>`;
+  });
+
+  // Punkte
+  entries.forEach(e => {
+    const x = scaleX(e.ts);
+    const y = scaleY(e.intensity);
+    svg += `<circle class="body-chart-point" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" />`;
+  });
+
+  // X-Achse: Anfang und Ende beschriften
+  const fmt = d => {
+    const dd = new Date(d);
+    return `${dd.getDate()}.${dd.getMonth()+1}.${String(dd.getFullYear()).slice(2)}`;
+  };
+  svg += `<text class="body-chart-axis-x" x="${padL}" y="${h - 8}" text-anchor="start">${fmt(entries[0].ts)}</text>`;
+  svg += `<text class="body-chart-axis-x" x="${w - padR}" y="${h - 8}" text-anchor="end">${fmt(entries[entries.length-1].ts)}</text>`;
+
+  svg += `</svg></div>`;
+  return svg;
 }
 
 function renderBodyZones() {
