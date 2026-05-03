@@ -502,6 +502,76 @@ h3 {
 }
 .fm-context:focus { border-color: var(--accent); }
 
+/* Aktivitäts-Verknüpfung in Gefühlsmatrix */
+.fm-link-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.fm-activity-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.fm-activity-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.92rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.fm-activity-chip:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.fm-activity-chip.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  font-style: italic;
+}
+.fm-activity-chip-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  margin-left: 6px;
+  opacity: 0.7;
+}
+.fm-activity-chip.add {
+  background: transparent;
+  border: 1px dashed var(--muted);
+  color: var(--muted);
+  font-style: italic;
+}
+.fm-activity-chip.add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.fm-activity-free {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+  margin-top: 4px;
+}
+
 .fm-needs {
   display: none;
   margin-top: 14px;
@@ -2952,6 +3022,15 @@ textarea, input {
       <div class="fm-selection-label">Ausgewählt (<span id="fm-count">0</span>/5):</div>
       <div class="fm-selected-tags" id="fm-selected-tags"></div>
       <textarea class="fm-context" id="fm-context" placeholder="Was hat das ausgelöst? (optional)" rows="2"></textarea>
+
+      <!-- Aktivitäts-Verknüpfung: was hast du in den letzten Stunden getan? -->
+      <div id="fm-activity-link-wrap" style="display:none;margin-top:12px;">
+        <div class="fm-link-label">Aus welchem Erleben kommt das? (optional)</div>
+        <div id="fm-activity-chips" class="fm-activity-chips"></div>
+        <input type="text" id="fm-activity-free" placeholder="…oder etwas anderes"
+          class="fm-activity-free" style="display:none;">
+      </div>
+
       <button class="btn full" style="margin-top:10px;" onclick="saveFeelingMatrix()">Gefühl notieren</button>
     </div>
 
@@ -4649,7 +4728,139 @@ function toggleMatrix() {
   } else {
     card.classList.add('open');
     body.style.display = '';
+    // Aktivitäts-Verknüpfung zurücksetzen und Chips vorbereiten
+    fmLinkedActivity = null;
+    renderFmActivityChips();
   }
+}
+
+let fmLinkedActivity = null;  // {kind: 'activity'|'today'|'free', text, ts?, refId?}
+
+// Sammelt Aktivitäten der letzten 24h aus activityLog und todayItems (abgehakt)
+function getRecentActivitiesForFeeling() {
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const items = [];
+
+  // Aus activityLog
+  (state.activityLog || []).forEach(a => {
+    if (!a.ts) return;
+    const t = new Date(a.ts);
+    if (t < cutoff) return;
+    items.push({
+      kind: 'activity',
+      text: a.name || '',
+      ts: a.ts,
+      refId: a.ts  // Aktivitäten haben keine ID, der Zeitstempel ist eindeutig
+    });
+  });
+
+  // Aus todayItems (nur abgehakte)
+  Object.keys(state.todayItems || {}).forEach(dk => {
+    (state.todayItems[dk] || []).forEach(it => {
+      if (!it.done) return;
+      const ts = it.doneTs || it.ts;
+      if (!ts) return;
+      const t = new Date(ts);
+      if (t < cutoff) return;
+      items.push({
+        kind: 'today',
+        text: it.text || '',
+        ts: ts,
+        refId: ts
+      });
+    });
+  });
+
+  // Doppelte Texte zusammenführen (nur jeweils neuester)
+  const seen = {};
+  items.forEach(it => {
+    const key = (it.text || '').toLowerCase().trim();
+    if (!key) return;
+    if (!seen[key] || new Date(it.ts) > new Date(seen[key].ts)) {
+      seen[key] = it;
+    }
+  });
+
+  // Nach Zeit sortieren (neueste zuerst)
+  return Object.values(seen).sort((a, b) => new Date(b.ts) - new Date(a.ts));
+}
+
+function renderFmActivityChips() {
+  const wrap = document.getElementById('fm-activity-link-wrap');
+  const chipsEl = document.getElementById('fm-activity-chips');
+  const freeInput = document.getElementById('fm-activity-free');
+  if (!wrap || !chipsEl) return;
+
+  // Anzeigen nur, wenn mindestens ein Gefühl gewählt wurde
+  if (!Array.isArray(fmSelected) || fmSelected.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+
+  const recents = getRecentActivitiesForFeeling().slice(0, 6);
+
+  let html = '';
+  recents.forEach(it => {
+    const timeText = formatRelativeTime(new Date(it.ts));
+    const isSelected = fmLinkedActivity
+      && fmLinkedActivity.kind === it.kind
+      && fmLinkedActivity.refId === it.refId;
+    html += `<span class="fm-activity-chip${isSelected ? ' selected' : ''}"
+      onclick="selectFmActivity('${it.kind}', ${JSON.stringify(it.refId)}, ${JSON.stringify(it.text)})">
+      ${escapeHtml(it.text)}<span class="fm-activity-chip-time">${escapeHtml(timeText)}</span>
+    </span>`;
+  });
+
+  // "Etwas anderes"-Chip
+  const isFreeSelected = fmLinkedActivity && fmLinkedActivity.kind === 'free';
+  html += `<span class="fm-activity-chip add${isFreeSelected ? ' selected' : ''}"
+    onclick="toggleFmActivityFree()">+ Etwas anderes</span>`;
+
+  chipsEl.innerHTML = html;
+
+  // Frei-Eingabe nur sichtbar, wenn 'free' gewählt
+  if (freeInput) {
+    if (isFreeSelected) {
+      freeInput.style.display = '';
+      if (!freeInput.value) setTimeout(() => freeInput.focus(), 50);
+    } else {
+      freeInput.style.display = 'none';
+    }
+  }
+}
+
+function selectFmActivity(kind, refId, text) {
+  // Wenn schon dieselbe Aktivität gewählt: abwählen
+  if (fmLinkedActivity
+      && fmLinkedActivity.kind === kind
+      && fmLinkedActivity.refId === refId) {
+    fmLinkedActivity = null;
+  } else {
+    fmLinkedActivity = { kind, refId, text };
+  }
+  renderFmActivityChips();
+}
+
+function toggleFmActivityFree() {
+  if (fmLinkedActivity && fmLinkedActivity.kind === 'free') {
+    fmLinkedActivity = null;
+  } else {
+    fmLinkedActivity = { kind: 'free', text: '' };
+  }
+  renderFmActivityChips();
+}
+
+function formatRelativeTime(d) {
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffH = Math.floor(diffMs / 3600000);
+  if (diffMin < 5) return 'gerade';
+  if (diffMin < 60) return `vor ${diffMin} Min`;
+  if (diffH < 24) return `vor ${diffH}h`;
+  return 'früher';
 }
 
 function toggleVorhaben() {
@@ -4838,6 +5049,7 @@ function toggleFeelingWord(f, quadrant) {
     fmSelected.push({ label: f.label, quadrant, desc: f.desc, gfk: !!f.gfk });
   }
   renderFeelingMatrix();
+  renderFmActivityChips();
 }
 
 function updateFeelingSelection() {
@@ -4869,15 +5081,37 @@ function removeFeelingWord(i) {
 function saveFeelingMatrix() {
   if (!fmSelected.length) { showToast('Bitte mindestens ein Gefühl wählen.'); return; }
   const context = document.getElementById('fm-context').value.trim();
+
+  // Aktivitäts-Verknüpfung erfassen
+  let linkedActivity = null;
+  if (fmLinkedActivity) {
+    if (fmLinkedActivity.kind === 'free') {
+      const freeText = (document.getElementById('fm-activity-free').value || '').trim();
+      if (freeText) {
+        linkedActivity = { kind: 'free', text: freeText };
+      }
+    } else {
+      linkedActivity = {
+        kind: fmLinkedActivity.kind,
+        text: fmLinkedActivity.text,
+        refId: fmLinkedActivity.refId
+      };
+    }
+  }
+
   const entry = {
     ts: new Date().toISOString(),
     feelings: fmSelected.map(s => ({ label: s.label, quadrant: s.quadrant })),
     context: context || null,
+    linkedActivity: linkedActivity,
     needs: null
   };
   state.feelingLog.unshift(entry);
   if (state.feelingLog.length > 500) state.feelingLog.pop();
   saveState();
+  fmLinkedActivity = null;  // Zurücksetzen für nächstes Mal
+  const freeInput = document.getElementById('fm-activity-free');
+  if (freeInput) freeInput.value = '';
   showNeedsReflection(entry, 0);
 }
 
@@ -5895,6 +6129,9 @@ function makeVerlaufEntry(e) {
     const labels = (dat.feelings || []).map(f => escapeHtml(f.label)).join(', ');
     body = `<strong>Gefühl:</strong> ${labels}`;
     if (dat.context) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;">„${escapeHtml(dat.context)}"</div>`;
+    if (dat.linkedActivity && dat.linkedActivity.text) {
+      body += `<div style="margin-top:3px;color:#5a8a7a;font-size:0.82rem;font-style:italic;">aus dem Erleben: ${escapeHtml(dat.linkedActivity.text)}</div>`;
+    }
     if (dat.needs && dat.needs.length) body += `<div style="margin-top:3px;color:var(--accent-deep);font-size:0.78rem;"><em>Bedürfnis:</em> ${dat.needs.map(escapeHtml).join(', ')}</div>`;
     if (dat.needsNote) body += `<div style="margin-top:2px;color:var(--muted);font-size:0.78rem;">${escapeHtml(dat.needsNote)}</div>`;
   } else if (e.type === 'body') {
