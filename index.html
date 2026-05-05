@@ -3834,6 +3834,111 @@ textarea, input {
   </div>
 </div>
 
+<!-- Verlauf-Aktions-Menü (Bearbeiten / Löschen) -->
+<div class="entry-overlay" id="verlauf-action-overlay">
+  <div class="entry-modal" style="max-width:380px;">
+    <h2 style="margin:0 0 8px;" id="verlauf-action-title">Eintrag</h2>
+    <p class="muted-note" id="verlauf-action-sub" style="margin-bottom:18px;line-height:1.5;"></p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn full" id="verlauf-action-edit" onclick="onVerlaufActionEdit()">Bearbeiten</button>
+      <button class="btn secondary full" id="verlauf-action-delete" onclick="onVerlaufActionDelete()" style="color:#a14b38;border-color:#a14b38;">Löschen</button>
+      <button class="btn secondary full" onclick="closeVerlaufAction()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bearbeiten: Aktivität -->
+<div class="entry-overlay" id="edit-activity-overlay">
+  <div class="entry-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Aktivität bearbeiten</h2>
+      <button onclick="closeEditActivity()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was hast du gemacht?</div>
+      <input type="text" id="edit-activity-name" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Dauer (optional)</div>
+      <input type="text" id="edit-activity-duration" placeholder="z.B. 30 min" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Notiz (optional)</div>
+      <textarea id="edit-activity-note" rows="2" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+    <div id="edit-activity-goal-wrap" style="margin-bottom:14px;display:none;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Auf einem Weg unterwegs?</div>
+      <select id="edit-activity-goal" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+        <option value="">— Kein Weg —</option>
+      </select>
+    </div>
+    <button class="btn full" onclick="saveEditActivity()">Speichern</button>
+  </div>
+</div>
+
+<!-- Bearbeiten: Vorhaben (today) -->
+<div class="entry-overlay" id="edit-today-overlay">
+  <div class="entry-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Vorhaben bearbeiten</h2>
+      <button onclick="closeEditToday()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was hast du dir vorgenommen?</div>
+      <input type="text" id="edit-today-text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+    <div id="edit-today-goal-wrap" style="margin-bottom:14px;display:none;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Auf einem Weg unterwegs?</div>
+      <select id="edit-today-goal" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+        <option value="">— Kein Weg —</option>
+      </select>
+    </div>
+    <button class="btn full" onclick="saveEditToday()">Speichern</button>
+  </div>
+</div>
+
+<!-- Bearbeiten: Dankbarkeit -->
+<div class="entry-overlay" id="edit-gratitude-overlay">
+  <div class="entry-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Dankbarkeit bearbeiten</h2>
+      <button onclick="closeEditGratitude()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Wofür bist du dankbar?</div>
+      <textarea id="edit-gratitude-text" rows="3" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+    <button class="btn full" onclick="saveEditGratitude()">Speichern</button>
+  </div>
+</div>
+
+<!-- Bearbeiten: Körper -->
+<div class="entry-overlay" id="edit-body-overlay">
+  <div class="entry-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="edit-body-title">Körper-Eintrag bearbeiten</h2>
+      <button onclick="closeEditBody()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Wo? (Körperteil)</div>
+      <select id="edit-body-zone" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+        <!-- wird dynamisch gefüllt -->
+      </select>
+    </div>
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was?</div>
+      <div id="edit-body-type-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+      <input type="text" id="edit-body-type-custom" placeholder="oder etwas anderes…" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:0.85rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+    <div id="edit-body-intensity-container" style="margin-bottom:12px;"></div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Notiz (optional)</div>
+      <textarea id="edit-body-note" rows="2" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+    <button class="btn full" onclick="saveEditBody()">Speichern</button>
+  </div>
+</div>
+
 <!-- ====== WEGE / GROSSE ZIELE ====== -->
 <div id="section-goals" class="section">
 
@@ -4081,11 +4186,9 @@ textarea, input {
       <div id="body-type-suggestions" style="display:none;margin-top:8px;"></div>
     </div>
 
-    <div style="margin-bottom:14px;">
-      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="body-intensity-val">5</span>/10</div>
-      <input type="range" id="body-intensity" min="1" max="10" value="5"
-        style="width:100%;"
-        oninput="document.getElementById('body-intensity-val').textContent=this.value">
+    <!-- Intensität: ein einziger Schieber bei einem Typ, oder mehrere bei mehreren Typen -->
+    <div id="body-intensity-container" style="margin-bottom:14px;">
+      <!-- Wird dynamisch durch renderBodyIntensitySliders() befüllt -->
     </div>
 
     <!-- Schlaf-Block: nur sichtbar wenn "Schlaf" ausgewählt -->
@@ -5976,15 +6079,21 @@ function openBodyEntry(zone) {
   bodyActiveZone = zone;
   bodyActiveTypes = [];
   document.getElementById('body-entry-title').textContent = zone;
-  document.getElementById('body-intensity').value = 5;
-  document.getElementById('body-intensity-val').textContent = '5';
   document.getElementById('body-note').value = '';
   const custom = document.getElementById('body-type-custom');
-  if (custom) custom.value = '';
+  if (custom) {
+    custom.value = '';
+    // Listener auf Eigene Beschreibung — Intensität-Schieber dazu auffrischen
+    if (!custom._intensityListener) {
+      custom.addEventListener('input', renderBodyIntensitySliders);
+      custom._intensityListener = true;
+    }
+  }
   // Schlaf-Block zurücksetzen
   updateSleepBlockVisibility();
   document.querySelectorAll('input[name="body-sleep"]').forEach(r => r.checked = false);
   renderBodyTypeChips();
+  renderBodyIntensitySliders();   // Initial: ein Default-Schieber
   // Vorschläge aus History für diese Zone
   renderBodySuggestions(zone);
   document.getElementById('entry-body').classList.add('visible');
@@ -6084,9 +6193,63 @@ function renderBodyTypeChips() {
       else bodyActiveTypes.push(t);
       renderBodyTypeChips();
       updateSleepBlockVisibility();
+      renderBodyIntensitySliders();  // Intensität-Schieber neu aufbauen
     };
     c.appendChild(btn);
   });
+}
+
+// Eigene Beschreibung als zusätzlicher "Typ" für die Intensitäts-Schieber
+function getEffectiveTypesForIntensity() {
+  const customText = (document.getElementById('body-type-custom')?.value || '').trim();
+  const all = [...bodyActiveTypes];
+  if (customText) all.push(customText);
+  return all;
+}
+
+// Schieber dynamisch aufbauen — pro Typ einen, oder einen einzigen wenn nichts gewählt
+function renderBodyIntensitySliders() {
+  const container = document.getElementById('body-intensity-container');
+  if (!container) return;
+
+  const types = getEffectiveTypesForIntensity();
+
+  // Vorhandene Werte merken (falls Nutzer schon was geschoben hat)
+  const existing = {};
+  container.querySelectorAll('.body-intensity-slider').forEach(s => {
+    existing[s.dataset.typeKey] = parseInt(s.value, 10);
+  });
+
+  if (types.length === 0) {
+    // Kein Typ gewählt: ein einzelner Default-Schieber
+    container.innerHTML = `
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="body-intensity-val">5</span>/10</div>
+      <input type="range" class="body-intensity-slider" data-type-key="__default__" min="1" max="10" value="5"
+        style="width:100%;"
+        oninput="document.getElementById('body-intensity-val').textContent=this.value">
+    `;
+    return;
+  }
+
+  // Pro Typ einen Schieber
+  let html = '';
+  types.forEach((t, idx) => {
+    const valueId = `body-intensity-val-${idx}`;
+    const initialValue = existing[t] !== undefined ? existing[t] : 5;
+    html += `
+      <div style="${idx > 0 ? 'margin-top:10px;' : ''}">
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;">
+          <span><em>${escapeHtml(t)}</em></span>
+          <span><span id="${valueId}">${initialValue}</span>/10</span>
+        </div>
+        <input type="range" class="body-intensity-slider" data-type-key="${escapeHtml(t)}"
+          min="1" max="10" value="${initialValue}"
+          style="width:100%;"
+          oninput="document.getElementById('${valueId}').textContent=this.value">
+      </div>
+    `;
+  });
+  container.innerHTML = html;
 }
 
 function saveBodyEntry() {
@@ -6100,8 +6263,30 @@ function saveBodyEntry() {
     return;
   }
 
-  const intensity = parseInt(document.getElementById('body-intensity').value) || 5;
   const note = (document.getElementById('body-note').value || '').trim();
+
+  // Intensitäten pro Typ aus Schiebern lesen
+  const intensities = {};
+  let avgIntensity = 5;
+  const sliders = document.querySelectorAll('.body-intensity-slider');
+  if (sliders.length === 1 && sliders[0].dataset.typeKey === '__default__') {
+    // Default-Fall: ein Schieber, gilt für alle Typen
+    avgIntensity = parseInt(sliders[0].value, 10) || 5;
+    allTypes.forEach(t => { intensities[t] = avgIntensity; });
+  } else {
+    // Einzelne Schieber pro Typ
+    let sum = 0, count = 0;
+    sliders.forEach(s => {
+      const key = s.dataset.typeKey;
+      const v = parseInt(s.value, 10) || 5;
+      // Nur Schieber, die zu den aktuellen Typen passen
+      if (allTypes.includes(key)) {
+        intensities[key] = v;
+        sum += v; count++;
+      }
+    });
+    avgIntensity = count > 0 ? Math.round(sum / count) : 5;
+  }
 
   // Schlaf-Qualität, falls Schlaf ausgewählt wurde
   let sleepQuality = null;
@@ -6114,7 +6299,8 @@ function saveBodyEntry() {
     ts: new Date().toISOString(),
     zone: bodyActiveZone,
     types: allTypes,
-    intensity,
+    intensity: avgIntensity,        // Rückwärtskompatibel: Durchschnitt als alter Wert
+    intensities: intensities,        // Neu: pro Typ
     note: note || null,
     sleepQuality: sleepQuality
   });
@@ -6251,10 +6437,8 @@ function openBodyDetail(kind, key) {
   if (kind === 'zone') {
     entries = log.filter(e => e.zone === key);
   } else {
-    // 'general' — Allgemeine Empfindungen
     entries = log.filter(e => e.zone === 'Allgemein' && Array.isArray(e.types) && e.types.includes(key));
   }
-  // Älteste zuerst für Chart, neueste zuerst für Liste
   const sortedAsc = [...entries].sort((a,b) => new Date(a.ts) - new Date(b.ts));
   const sortedDesc = [...entries].sort((a,b) => new Date(b.ts) - new Date(a.ts));
 
@@ -6265,35 +6449,102 @@ function openBodyDetail(kind, key) {
   } else if (entries.length === 1) {
     summary = '1 Eintrag insgesamt.';
   } else {
-    const intensities = entries.filter(e => typeof e.intensity === 'number').map(e => e.intensity);
-    const avg = intensities.length ? (intensities.reduce((a,b) => a+b, 0) / intensities.length).toFixed(1) : null;
     const first = sortedAsc[0].ts;
     const last = sortedDesc[0].ts;
     const days = Math.max(1, Math.round((new Date(last) - new Date(first)) / (24 * 3600 * 1000)));
     summary = `${entries.length} Einträge über ${days} Tage`;
-    if (avg) summary += ` · Durchschnitt ${avg}/10`;
   }
 
   let html = `<div class="body-chart-summary">${escapeHtml(summary)}</div>`;
 
-  // Chart (Punktdiagramm) — schon ab 1 Eintrag mit Intensität
-  const withIntensity = sortedAsc.filter(e => typeof e.intensity === 'number');
-  if (withIntensity.length >= 1) {
-    html += renderBodyChart(withIntensity);
+  // Hilfsfunktion: hole Intensität für einen bestimmten Typ aus einem Eintrag
+  // Wenn intensities-Objekt vorhanden, nimm den Typ-spezifischen Wert
+  // Sonst Fallback auf intensity (Durchschnitt)
+  const getIntensityForType = (entry, type) => {
+    if (entry.intensities && typeof entry.intensities[type] === 'number') {
+      return entry.intensities[type];
+    }
+    if (typeof entry.intensity === 'number') return entry.intensity;
+    return null;
+  };
+
+  if (kind === 'zone') {
+    // Pro Typ ein eigenes Diagramm — nur Standard-Empfindungen, freie Texte werden nicht eigens aufgeschlüsselt
+    // Sammle alle Typen, die in den Einträgen dieser Zone vorkommen
+    const standardTypes = new Set([...BODY_TYPES_LOCAL, ...BODY_TYPES_GENERAL]);
+    const typeFreqs = {};
+    entries.forEach(e => {
+      (e.types || []).forEach(t => {
+        if (!t || !t.trim()) return;
+        // Nur Standard-Typen — freie Texte überspringen, sonst zu viele kleine Diagramme
+        if (!standardTypes.has(t)) return;
+        typeFreqs[t] = (typeFreqs[t] || 0) + 1;
+      });
+    });
+    const typesSorted = Object.entries(typeFreqs).sort((a,b) => b[1] - a[1]).map(([t]) => t);
+
+    if (typesSorted.length === 0) {
+      // Keine Standard-Typen — ein einziges Gesamt-Diagramm wie früher
+      const withIntensity = sortedAsc.filter(e => typeof e.intensity === 'number').map(e => ({ts: e.ts, intensity: e.intensity}));
+      if (withIntensity.length >= 1) html += renderBodyChart(withIntensity);
+    } else {
+      // Pro Typ ein kleines Diagramm
+      typesSorted.forEach(t => {
+        const typeEntries = sortedAsc
+          .filter(e => Array.isArray(e.types) && e.types.includes(t))
+          .map(e => ({ ts: e.ts, intensity: getIntensityForType(e, t) }))
+          .filter(e => typeof e.intensity === 'number');
+        if (typeEntries.length === 0) return;
+        const avg = (typeEntries.reduce((s,x) => s + x.intensity, 0) / typeEntries.length).toFixed(1);
+        html += `<div style="margin-bottom:6px;">
+          <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;color:var(--ink);margin-bottom:4px;display:flex;justify-content:space-between;">
+            <span>${escapeHtml(t)}</span>
+            <span style="font-style:normal;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);">${typeEntries.length}× · ⌀ ${avg}/10</span>
+          </div>
+        </div>`;
+        html += renderBodyChart(typeEntries);
+      });
+    }
+  } else {
+    // Allgemein-Typ: nur ein Diagramm, mit Werten dieses Typs
+    const typeEntries = sortedAsc
+      .map(e => ({ ts: e.ts, intensity: getIntensityForType(e, key) }))
+      .filter(e => typeof e.intensity === 'number');
+    if (typeEntries.length >= 1) {
+      const avg = (typeEntries.reduce((s,x) => s + x.intensity, 0) / typeEntries.length).toFixed(1);
+      html = html.replace('</div>', ` · Durchschnitt ${avg}/10</div>`);  // Summary anreichern
+      html += renderBodyChart(typeEntries);
+    }
   }
 
-  // Liste der Einträge
+  // Liste der Einträge — pro Typ Intensität, falls vorhanden
   html += `<div class="body-detail-list">`;
   sortedDesc.forEach(e => {
     const date = new Date(e.ts);
     const dateStr = date.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-    const types = Array.isArray(e.types) ? e.types.join(', ') : '';
+    const types = Array.isArray(e.types) ? e.types : [];
     html += `<div class="body-detail-entry">
       <div class="body-detail-entry-date">${escapeHtml(dateStr)}</div>
-      <div class="body-detail-entry-text">${escapeHtml(types)}`;
-    if (typeof e.intensity === 'number') {
-      html += `<span class="body-detail-entry-intensity">${e.intensity}/10</span>`;
+      <div class="body-detail-entry-text">`;
+
+    // Pro Typ: Name + Intensität, wenn pro Typ unterschiedlich
+    if (e.intensities && Object.keys(e.intensities).length > 0) {
+      const parts = types.map(t => {
+        const v = e.intensities[t];
+        if (typeof v === 'number') {
+          return `${escapeHtml(t)} <span class="body-detail-entry-intensity">${v}/10</span>`;
+        }
+        return escapeHtml(t);
+      });
+      html += parts.join(' &nbsp;·&nbsp; ');
+    } else {
+      // Alter Eintrag: gemeinsame Intensität
+      html += escapeHtml(types.join(', '));
+      if (typeof e.intensity === 'number') {
+        html += ` <span class="body-detail-entry-intensity">${e.intensity}/10</span>`;
+      }
     }
+
     html += `</div>`;
     if (e.note) html += `<div class="body-detail-entry-text" style="opacity:0.75;font-style:italic;font-size:0.88rem;margin-top:3px;">„${escapeHtml(e.note)}"</div>`;
     html += `</div>`;
@@ -6786,27 +7037,84 @@ function makeVerlaufEntry(e) {
     body += `<div style="margin-top:3px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;">„${escapeHtml(dat.comment || '')}"</div>`;
   }
 
-  // Lösch-Button (dezent, rechts)
-  const deleteData = e.type === 'today'
-    ? `data-type="today" data-daykey="${e.dayKey}" data-ts="${e.ts}"`
-    : `data-type="${e.type}" data-ts="${e.ts}"`;
-
+  // Eintrag wird klickbar — öffnet Aktions-Menü (Bearbeiten/Löschen)
+  div.style.cursor = 'pointer';
   div.innerHTML = `
     <div class="log-entry-time">${t}</div>
     <div class="log-entry-body">${body}</div>
-    <button class="log-entry-delete" ${deleteData} title="Eintrag löschen">✕</button>
   `;
-
-  // Handler
-  const delBtn = div.querySelector('.log-entry-delete');
-  if (delBtn) {
-    delBtn.onclick = (ev) => {
-      ev.stopPropagation();
-      confirmDeleteVerlaufEntry(e);
-    };
-  }
+  div.onclick = (ev) => {
+    ev.stopPropagation();
+    openVerlaufAction(e);
+  };
 
   return div;
+}
+
+// Tatsachen-Typen, die bearbeitet werden dürfen
+const EDITABLE_VERLAUF_TYPES = ['body', 'activity', 'today', 'gratitude'];
+
+let currentVerlaufActionEntry = null;
+
+function openVerlaufAction(e) {
+  currentVerlaufActionEntry = e;
+  const titleEl = document.getElementById('verlauf-action-title');
+  const subEl = document.getElementById('verlauf-action-sub');
+  const editBtn = document.getElementById('verlauf-action-edit');
+  const overlay = document.getElementById('verlauf-action-overlay');
+
+  // Titel je nach Typ
+  const titles = {
+    feeling: 'Gefühl',
+    body: 'Körper-Eintrag',
+    activity: 'Aktivität',
+    water: 'Wasser',
+    gratitude: 'Dankbarkeit',
+    today: 'Vorhaben',
+    evening: 'Abendstunde',
+    moment: 'Moment mit mir',
+    morning: 'Morgenstunde',
+    gedanken: 'Untersuchter Gedanke',
+    story: 'Gedanke zu einer Geschichte'
+  };
+  titleEl.textContent = titles[e.type] || 'Eintrag';
+
+  // Untertitel: Datum/Zeit + kurze Vorschau
+  const d = new Date(e.ts);
+  const dateStr = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+  const timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  subEl.textContent = `${dateStr}, ${timeStr}`;
+
+  // Bearbeiten-Knopf nur für Tatsachen
+  if (EDITABLE_VERLAUF_TYPES.includes(e.type)) {
+    editBtn.style.display = '';
+  } else {
+    editBtn.style.display = 'none';
+  }
+
+  overlay.classList.add('visible');
+}
+
+function closeVerlaufAction() {
+  document.getElementById('verlauf-action-overlay').classList.remove('visible');
+  currentVerlaufActionEntry = null;
+}
+
+function onVerlaufActionDelete() {
+  const e = currentVerlaufActionEntry;
+  if (!e) return;
+  closeVerlaufAction();
+  confirmDeleteVerlaufEntry(e);
+}
+
+function onVerlaufActionEdit() {
+  const e = currentVerlaufActionEntry;
+  if (!e) return;
+  closeVerlaufAction();
+  if (e.type === 'activity') openEditActivity(e);
+  else if (e.type === 'today') openEditToday(e);
+  else if (e.type === 'gratitude') openEditGratitude(e);
+  else if (e.type === 'body') openEditBody(e);
 }
 
 function confirmDeleteVerlaufEntry(e) {
@@ -6859,6 +7167,309 @@ function deleteVerlaufEntry(e) {
     }
   }
   saveState();
+}
+
+// ===== BEARBEITEN =====
+
+let editingEntry = null;
+let editBodyActiveTypes = [];
+
+// --- Aktivität ---
+function openEditActivity(e) {
+  editingEntry = e;
+  const a = state.activityLog.find(x => x.ts === e.ts);
+  if (!a) return;
+  document.getElementById('edit-activity-name').value = a.name || '';
+  document.getElementById('edit-activity-duration').value = a.duration || '';
+  document.getElementById('edit-activity-note').value = a.note || '';
+  const goalWrap = document.getElementById('edit-activity-goal-wrap');
+  const goalSelect = document.getElementById('edit-activity-goal');
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  if (goals.length > 0) {
+    goalWrap.style.display = '';
+    goalSelect.innerHTML = '<option value="">— Kein Weg —</option>' +
+      goals.map(g => `<option value="${escapeHtml(g.id)}"${g.id === a.goalId ? ' selected' : ''}>${escapeHtml(g.title)}</option>`).join('');
+  } else {
+    goalWrap.style.display = 'none';
+  }
+  document.getElementById('edit-activity-overlay').classList.add('visible');
+}
+
+function closeEditActivity() {
+  document.getElementById('edit-activity-overlay').classList.remove('visible');
+  editingEntry = null;
+}
+
+function saveEditActivity() {
+  if (!editingEntry) return;
+  const a = state.activityLog.find(x => x.ts === editingEntry.ts);
+  if (!a) { closeEditActivity(); return; }
+  const newName = (document.getElementById('edit-activity-name').value || '').trim();
+  if (!newName) { showToast('Name darf nicht leer sein.'); return; }
+  a.name = newName;
+  a.duration = (document.getElementById('edit-activity-duration').value || '').trim() || null;
+  a.note = (document.getElementById('edit-activity-note').value || '').trim() || null;
+  const goalId = document.getElementById('edit-activity-goal').value;
+  a.goalId = goalId || null;
+  saveState();
+  closeEditActivity();
+  renderVerlaufList();
+  showToast('Geändert.');
+}
+
+// --- Vorhaben ---
+function openEditToday(e) {
+  editingEntry = e;
+  const dk = e.dayKey;
+  const items = state.todayItems[dk] || [];
+  const it = items.find(x => x.doneTs === e.ts || x.ts === e.ts);
+  if (!it) return;
+  document.getElementById('edit-today-text').value = it.text || '';
+  const goalWrap = document.getElementById('edit-today-goal-wrap');
+  const goalSelect = document.getElementById('edit-today-goal');
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  if (goals.length > 0) {
+    goalWrap.style.display = '';
+    goalSelect.innerHTML = '<option value="">— Kein Weg —</option>' +
+      goals.map(g => `<option value="${escapeHtml(g.id)}"${g.id === it.goalId ? ' selected' : ''}>${escapeHtml(g.title)}</option>`).join('');
+  } else {
+    goalWrap.style.display = 'none';
+  }
+  document.getElementById('edit-today-overlay').classList.add('visible');
+}
+
+function closeEditToday() {
+  document.getElementById('edit-today-overlay').classList.remove('visible');
+  editingEntry = null;
+}
+
+function saveEditToday() {
+  if (!editingEntry) return;
+  const dk = editingEntry.dayKey;
+  const items = state.todayItems[dk] || [];
+  const it = items.find(x => x.doneTs === editingEntry.ts || x.ts === editingEntry.ts);
+  if (!it) { closeEditToday(); return; }
+  const newText = (document.getElementById('edit-today-text').value || '').trim();
+  if (!newText) { showToast('Text darf nicht leer sein.'); return; }
+  it.text = newText;
+  const goalId = document.getElementById('edit-today-goal').value;
+  it.goalId = goalId || null;
+  saveState();
+  closeEditToday();
+  renderVerlaufList();
+  if (typeof renderTodayItems === 'function') renderTodayItems();
+  showToast('Geändert.');
+}
+
+// --- Dankbarkeit ---
+function openEditGratitude(e) {
+  editingEntry = e;
+  const g = state.gratitudeLog.find(x => x.ts === e.ts);
+  if (!g) return;
+  document.getElementById('edit-gratitude-text').value = g.text || '';
+  document.getElementById('edit-gratitude-overlay').classList.add('visible');
+}
+
+function closeEditGratitude() {
+  document.getElementById('edit-gratitude-overlay').classList.remove('visible');
+  editingEntry = null;
+}
+
+function saveEditGratitude() {
+  if (!editingEntry) return;
+  const g = state.gratitudeLog.find(x => x.ts === editingEntry.ts);
+  if (!g) { closeEditGratitude(); return; }
+  const newText = (document.getElementById('edit-gratitude-text').value || '').trim();
+  if (!newText) { showToast('Text darf nicht leer sein.'); return; }
+  g.text = newText;
+  saveState();
+  closeEditGratitude();
+  renderVerlaufList();
+  showToast('Geändert.');
+}
+
+// --- Körper ---
+function openEditBody(e) {
+  editingEntry = e;
+  const b = state.bodyLog.find(x => x.ts === e.ts);
+  if (!b) return;
+
+  const zoneSelect = document.getElementById('edit-body-zone');
+  const knownZones = ['Allgemein', 'Kopf', 'Nacken', 'Schultern', 'Brust', 'Bauch', 'Rücken oben', 'Rücken unten',
+    'Linker Arm', 'Rechter Arm', 'Linke Hand', 'Rechte Hand',
+    'Linkes Bein', 'Rechtes Bein', 'Linker Fuß', 'Rechter Fuß'];
+  if (b.zone && !knownZones.includes(b.zone)) knownZones.push(b.zone);
+  zoneSelect.innerHTML = knownZones.map(z =>
+    `<option value="${escapeHtml(z)}"${z === b.zone ? ' selected' : ''}>${escapeHtml(z)}</option>`
+  ).join('');
+
+  editBodyActiveTypes = Array.isArray(b.types) ? [...b.types] : [];
+  const standardTypes = b.zone === 'Allgemein' ? BODY_TYPES_GENERAL : BODY_TYPES_LOCAL;
+  const customActive = editBodyActiveTypes.filter(t => !standardTypes.includes(t));
+  // editBodyActiveTypes nur Standard behalten
+  editBodyActiveTypes = editBodyActiveTypes.filter(t => standardTypes.includes(t));
+  document.getElementById('edit-body-type-custom').value = customActive.join(', ');
+  renderEditBodyTypeChips();
+
+  document.getElementById('edit-body-note').value = b.note || '';
+
+  renderEditBodyIntensitySliders(b);
+
+  const customInput = document.getElementById('edit-body-type-custom');
+  if (!customInput._listener) {
+    customInput.addEventListener('input', () => renderEditBodyIntensitySliders());
+    customInput._listener = true;
+  }
+  if (!zoneSelect._listener) {
+    zoneSelect.addEventListener('change', () => {
+      const newZone = zoneSelect.value;
+      const newStandardTypes = newZone === 'Allgemein' ? BODY_TYPES_GENERAL : BODY_TYPES_LOCAL;
+      editBodyActiveTypes = editBodyActiveTypes.filter(t => newStandardTypes.includes(t));
+      renderEditBodyTypeChips();
+      renderEditBodyIntensitySliders();
+    });
+    zoneSelect._listener = true;
+  }
+
+  document.getElementById('edit-body-overlay').classList.add('visible');
+}
+
+function renderEditBodyTypeChips() {
+  const c = document.getElementById('edit-body-type-chips');
+  if (!c) return;
+  const zone = document.getElementById('edit-body-zone').value;
+  const types = zone === 'Allgemein' ? BODY_TYPES_GENERAL : BODY_TYPES_LOCAL;
+  c.innerHTML = '';
+  types.forEach(t => {
+    const btn = document.createElement('button');
+    const isActive = editBodyActiveTypes.includes(t);
+    btn.className = 'chip' + (isActive ? ' active' : '');
+    btn.textContent = t;
+    btn.onclick = () => {
+      const i = editBodyActiveTypes.indexOf(t);
+      if (i >= 0) editBodyActiveTypes.splice(i, 1);
+      else editBodyActiveTypes.push(t);
+      renderEditBodyTypeChips();
+      renderEditBodyIntensitySliders();
+    };
+    c.appendChild(btn);
+  });
+}
+
+function getEditBodyEffectiveTypes() {
+  const customText = (document.getElementById('edit-body-type-custom').value || '').trim();
+  const all = [...editBodyActiveTypes];
+  if (customText) {
+    customText.split(',').map(s => s.trim()).filter(Boolean).forEach(t => {
+      if (!all.includes(t)) all.push(t);
+    });
+  }
+  return all;
+}
+
+function renderEditBodyIntensitySliders(originalEntry) {
+  const container = document.getElementById('edit-body-intensity-container');
+  if (!container) return;
+
+  const types = getEditBodyEffectiveTypes();
+
+  const existing = {};
+  container.querySelectorAll('.body-intensity-slider').forEach(s => {
+    existing[s.dataset.typeKey] = parseInt(s.value, 10);
+  });
+
+  if (originalEntry) {
+    types.forEach(t => {
+      if (originalEntry.intensities && typeof originalEntry.intensities[t] === 'number') {
+        existing[t] = originalEntry.intensities[t];
+      } else if (typeof originalEntry.intensity === 'number') {
+        existing[t] = originalEntry.intensity;
+      }
+    });
+  }
+
+  if (types.length === 0) {
+    container.innerHTML = `
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="edit-body-intensity-val">5</span>/10</div>
+      <input type="range" class="body-intensity-slider" data-type-key="__default__" min="1" max="10" value="${(originalEntry && originalEntry.intensity) || 5}"
+        style="width:100%;"
+        oninput="document.getElementById('edit-body-intensity-val').textContent=this.value">
+    `;
+    return;
+  }
+
+  let html = '';
+  types.forEach((t, idx) => {
+    const valueId = `edit-body-intensity-val-${idx}`;
+    const initialValue = existing[t] !== undefined ? existing[t] : 5;
+    html += `
+      <div style="${idx > 0 ? 'margin-top:10px;' : ''}">
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;">
+          <span><em>${escapeHtml(t)}</em></span>
+          <span><span id="${valueId}">${initialValue}</span>/10</span>
+        </div>
+        <input type="range" class="body-intensity-slider" data-type-key="${escapeHtml(t)}"
+          min="1" max="10" value="${initialValue}"
+          style="width:100%;"
+          oninput="document.getElementById('${valueId}').textContent=this.value">
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function closeEditBody() {
+  document.getElementById('edit-body-overlay').classList.remove('visible');
+  editingEntry = null;
+  editBodyActiveTypes = [];
+}
+
+function saveEditBody() {
+  if (!editingEntry) return;
+  const b = state.bodyLog.find(x => x.ts === editingEntry.ts);
+  if (!b) { closeEditBody(); return; }
+
+  const newZone = document.getElementById('edit-body-zone').value;
+  const customText = (document.getElementById('edit-body-type-custom').value || '').trim();
+  const customParts = customText ? customText.split(',').map(s => s.trim()).filter(Boolean) : [];
+  let allTypes = [...editBodyActiveTypes];
+  customParts.forEach(t => { if (!allTypes.includes(t)) allTypes.push(t); });
+
+  if (!allTypes.length) {
+    showToast('Bitte mindestens eine Art wählen oder eintragen.');
+    return;
+  }
+
+  const intensities = {};
+  let avgIntensity = 5;
+  const sliders = document.querySelectorAll('#edit-body-intensity-container .body-intensity-slider');
+  if (sliders.length === 1 && sliders[0].dataset.typeKey === '__default__') {
+    avgIntensity = parseInt(sliders[0].value, 10) || 5;
+    allTypes.forEach(t => { intensities[t] = avgIntensity; });
+  } else {
+    let sum = 0, count = 0;
+    sliders.forEach(s => {
+      const key = s.dataset.typeKey;
+      const v = parseInt(s.value, 10) || 5;
+      if (allTypes.includes(key)) {
+        intensities[key] = v;
+        sum += v; count++;
+      }
+    });
+    avgIntensity = count > 0 ? Math.round(sum / count) : 5;
+  }
+
+  b.zone = newZone;
+  b.types = allTypes;
+  b.intensity = avgIntensity;
+  b.intensities = intensities;
+  b.note = (document.getElementById('edit-body-note').value || '').trim() || null;
+
+  saveState();
+  closeEditBody();
+  renderVerlaufList();
+  if (typeof renderBody === 'function') renderBody();
+  showToast('Geändert.');
 }
 
 /* ===== HEATMAP ===== */
