@@ -711,6 +711,65 @@ h3 {
   color: white;
   font-weight: 600;
 }
+/* Eigene Bedürfnisse: dezente Markierung */
+.fm-need-chip.personal {
+  border-color: #5a8a7a;
+  color: #4a6f63;
+  font-style: italic;
+}
+.fm-need-chip.personal::before {
+  content: '· ';
+  opacity: 0.6;
+}
+.fm-need-chip.personal.active {
+  background: #5a8a7a;
+  color: white;
+  font-style: italic;
+}
+
+/* Bedürfnis-Block: Gefühl + Vorschläge */
+.fm-need-block {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: rgba(168, 99, 76, 0.04);
+  border-radius: 10px;
+  border-left: 2px solid rgba(168, 99, 76, 0.25);
+}
+.fm-need-intro {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.fm-need-intro strong {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--accent-deep);
+}
+.fm-need-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Eigenes Bedürfnis eingeben */
+.fm-needs-own-wrap {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(90, 138, 122, 0.06);
+  border-radius: 10px;
+  border-left: 2.5px solid rgba(90, 138, 122, 0.4);
+}
+.fm-needs-own-label {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--ink);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
 
 .fm-hint {
   margin-top: 8px;
@@ -2292,6 +2351,85 @@ h3 {
   opacity: 0.75;
 }
 
+/* Minimieren-Button im Vollbild (▾) */
+.hourglass-minimize {
+  position: absolute;
+  top: 16px;
+  right: 64px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(168, 99, 76, 0.12);
+  color: #5a3a25;
+  font-size: 1.1rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.hourglass-minimize:hover {
+  background: rgba(168, 99, 76, 0.22);
+}
+
+/* Mini-Streifen über der Bottom-Nav */
+#hourglass-mini {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  z-index: 8500;
+  background: linear-gradient(135deg, #f4ead8 0%, #e8d4b8 100%);
+  border: 1.5px solid rgba(168, 99, 76, 0.25);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 6px 18px rgba(58, 31, 26, 0.15);
+  animation: hourglassMiniSlideIn 0.25s ease-out;
+}
+@keyframes hourglassMiniSlideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.hourglass-mini-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+}
+.hourglass-mini-svg {
+  width: 28px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.hourglass-mini-time {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.15rem;
+  color: #5a3a25;
+  letter-spacing: 0.04em;
+}
+.hourglass-mini-close {
+  background: none;
+  border: none;
+  color: #8b5a3c;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.hourglass-mini-close:hover {
+  opacity: 1;
+}
+
 .goal-editor-hint {
   font-family: 'EB Garamond', serif;
   font-style: italic;
@@ -3123,6 +3261,7 @@ h3 {
 /* Bottom-Nav in Vollbild-Ritualen ausblenden — Stille bewahren */
 body.ritual-fullscreen #bottom-nav { display: none; }
 body.ritual-fullscreen { padding-bottom: 0; }
+body.ritual-fullscreen #hourglass-mini { display: none !important; }
 body.ritual-fullscreen .moment-wrap,
 body.ritual-fullscreen .morning-wrap,
 body.ritual-fullscreen .evening-wrap,
@@ -3214,6 +3353,32 @@ textarea, input {
 
 <!-- Schwebende Hinweis-Bubble für Vorhaben-Goal-Erkennung -->
 <div id="today-goal-hint" class="goal-hint-floating" style="display:none;"></div>
+
+<!-- Mini-Sanduhr-Streifen, läuft, während du in der App arbeitest -->
+<div id="hourglass-mini" style="display:none;">
+  <div class="hourglass-mini-content" onclick="restoreHourglass()">
+    <svg class="hourglass-mini-svg" viewBox="0 0 40 64" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="0" width="32" height="3" rx="1" fill="#a8634c" opacity="0.5"/>
+      <rect x="4" y="61" width="32" height="3" rx="1" fill="#a8634c" opacity="0.5"/>
+      <path d="M 6 3 L 34 3 L 20 32 L 34 61 L 6 61 L 20 32 Z"
+            fill="rgba(255,255,255,0.3)" stroke="#a8634c" stroke-width="1" opacity="0.7"/>
+      <defs>
+        <clipPath id="hg-mini-top-clip">
+          <path d="M 7 4 L 33 4 L 20 31 Z"/>
+        </clipPath>
+        <clipPath id="hg-mini-bottom-clip">
+          <path d="M 20 33 L 33 60 L 7 60 Z"/>
+        </clipPath>
+      </defs>
+      <rect id="hg-mini-sand-top" x="7" y="4" width="26" height="27"
+            fill="#d4a373" clip-path="url(#hg-mini-top-clip)"/>
+      <rect id="hg-mini-sand-bottom" x="7" y="60" width="26" height="0"
+            fill="#d4a373" clip-path="url(#hg-mini-bottom-clip)"/>
+    </svg>
+    <span class="hourglass-mini-time" id="hourglass-mini-time">3:00</span>
+  </div>
+  <button class="hourglass-mini-close" onclick="closeHourglass()" title="Beenden">✕</button>
+</div>
 
 <!-- ====== ERÖFFNUNGS-KARTE ====== -->
 <div id="opening-overlay">
@@ -3439,6 +3604,7 @@ textarea, input {
 <div id="section-hourglass" class="section">
   <div class="hourglass-wrap">
     <button class="fullscreen-close" onclick="closeHourglass()" title="Schließen">✕</button>
+    <button class="hourglass-minimize" onclick="minimizeHourglass()" title="Klein machen">▾</button>
 
     <div class="hourglass-inner">
       <div class="hourglass-svg-wrap" onclick="toggleHourglassPause()">
@@ -5022,6 +5188,7 @@ function loadState() {
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
+    personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
     lastDurations: {},
     favoriteQuotes: [],
     quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
@@ -5043,6 +5210,7 @@ function loadState() {
     if (typeof saved.momentSettings !== 'object' || saved.momentSettings === null) saved.momentSettings = defaults.momentSettings;
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
+    if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
     if (typeof saved.ritualOverrides !== 'object' || saved.ritualOverrides === null) saved.ritualOverrides = { morning: null, evening: null };
     // Migration: rueckblickSettings — fehlende Schlüssel mit Defaults füllen
     if (typeof saved.rueckblickSettings !== 'object' || saved.rueckblickSettings === null) {
@@ -5700,33 +5868,90 @@ function saveFeelingMatrix() {
 
 function showNeedsReflection(entry, logIndex) {
   const isAllPositive = entry.feelings.every(f => f.quadrant === 'aa' || f.quadrant === 'ar');
-  const subtitle = isAllPositive
-    ? 'Welche Bedürfnisse sind gerade genährt?'
-    : 'Was könnte dahinterstecken?';
+  const isMixed = !isAllPositive && entry.feelings.some(f => f.quadrant === 'aa' || f.quadrant === 'ar');
+  let title;
+  if (isAllPositive) {
+    title = 'Welches Bedürfnis ist gerade genährt?';
+  } else if (isMixed) {
+    title = 'Welches Bedürfnis meldet sich gerade?';
+  } else {
+    title = 'Welches Bedürfnis könnte verletzt sein?';
+  }
+  const explanation = 'Diese Wörter sind keine Lösung — sie sind eine Spur, der du folgen kannst.';
+  const introVerb = isAllPositive
+    ? 'Bei <strong>{label}</strong> sind oft genährt:'
+    : 'Bei <strong>{label}</strong> melden sich oft:';
   document.getElementById('fm-selection').classList.remove('visible');
   const needsDiv = document.getElementById('fm-needs');
   needsDiv.classList.add('visible');
-  let html = `<div class="fm-needs-title">Was steckt dahinter?</div>
-              <div class="fm-needs-sub">${subtitle}</div>`;
+
+  const personal = Array.isArray(state.personalNeeds) ? state.personalNeeds : [];
+
+  let html = `<div class="fm-needs-title">${title}</div>
+              <div class="fm-needs-sub" style="margin-bottom:14px;line-height:1.5;">${explanation}</div>`;
+
   entry.feelings.forEach(f => {
-    const needs = FEELING_NEEDS[f.label] || [];
-    html += `<div style="margin-bottom:10px;">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-        <span style="padding:3px 10px;border-radius:10px;font-size:0.78rem;font-weight:600;background:var(--q-${f.quadrant}-sel);color:white;">${f.label}</span>
-        <span style="font-size:0.78rem;color:var(--muted);">→</span>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px;">
-        ${needs.map(n => `<span class="fm-need-chip" data-need="${n}" onclick="toggleNeedChip(this)">${n}</span>`).join('')}
-      </div>
-    </div>`;
+    const standardNeeds = FEELING_NEEDS[f.label] || [];
+    // Eigene Bedürfnisse zuerst, dann Standard (ohne Duplikate)
+    const personalLower = personal.map(p => p.toLowerCase());
+    const standardFiltered = standardNeeds.filter(n => !personalLower.includes(n.toLowerCase()));
+    const intro = introVerb.replace('{label}', escapeHtml(f.label));
+
+    html += `<div class="fm-need-block">
+      <div class="fm-need-intro">${intro}</div>
+      <div class="fm-need-chips-wrap">`;
+    // Eigene zuerst, mit kleiner Markierung
+    personal.forEach(n => {
+      html += `<span class="fm-need-chip personal" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
+    });
+    standardFiltered.forEach(n => {
+      html += `<span class="fm-need-chip" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
+    });
+    html += `</div></div>`;
   });
-  html += `<textarea id="fm-needs-note" placeholder="Eigener Gedanke... (optional)" rows="1"
-    style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.82rem;resize:none;background:var(--card);color:var(--ink);margin-bottom:10px;outline:none;"></textarea>
-    <div style="display:flex;gap:8px;">
+
+  html += `<div class="fm-needs-own-wrap">
+    <div class="fm-needs-own-label">Trifft keines? Welches Wort wäre näher an deinem Bedürfnis?</div>
+    <input type="text" id="fm-needs-own" placeholder="z.B. Atem, Geborgenheit, bei mir sein…"
+      style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;background:var(--card);color:var(--ink);outline:none;">
+  </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
       <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="skipNeedsReflection()">Überspringen</button>
     </div>`;
   needsDiv.innerHTML = html;
+
+  // Long-Press auf eigene Bedürfnisse → entfernen
+  needsDiv.querySelectorAll('.fm-need-chip.personal').forEach(chip => {
+    const text = chip.dataset.need;
+    attachLongPressDeletePersonalNeed(chip, text, logIndex, entry);
+  });
+}
+
+function attachLongPressDeletePersonalNeed(chip, needText, logIndex, entry) {
+  let timer = null;
+  const start = (e) => {
+    timer = setTimeout(() => {
+      timer = null;
+      askConfirm(`„${needText}" aus deinen persönlichen Bedürfnissen entfernen?`, () => {
+        if (!Array.isArray(state.personalNeeds)) return;
+        const idx = state.personalNeeds.findIndex(n => n.toLowerCase() === needText.toLowerCase());
+        if (idx >= 0) {
+          state.personalNeeds.splice(idx, 1);
+          saveState();
+          showNeedsReflection(entry, logIndex);  // neu zeichnen
+          showToast('Entfernt.');
+        }
+      });
+    }, 600);
+  };
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  chip.addEventListener('touchstart', start, { passive: true });
+  chip.addEventListener('mousedown', start);
+  chip.addEventListener('touchend', cancel);
+  chip.addEventListener('touchcancel', cancel);
+  chip.addEventListener('mouseup', cancel);
+  chip.addEventListener('mouseleave', cancel);
 }
 
 function toggleNeedChip(el) {
@@ -5737,14 +5962,25 @@ function saveNeedsReflection(logIndex) {
   const chips = document.querySelectorAll('#fm-needs .fm-need-chip');
   const selected = [];
   chips.forEach(c => { if (c.classList.contains('active')) selected.push(c.dataset.need); });
-  const note = (document.getElementById('fm-needs-note')?.value || '').trim();
-  if (selected.length || note) {
+  const ownText = (document.getElementById('fm-needs-own')?.value || '').trim();
+  // Eigenes Wort dazu (auch in selected aufnehmen + dauerhaft merken)
+  if (ownText) {
+    selected.push(ownText);
+    if (!Array.isArray(state.personalNeeds)) state.personalNeeds = [];
+    const exists = state.personalNeeds.some(n => n.toLowerCase() === ownText.toLowerCase());
+    if (!exists) {
+      state.personalNeeds.unshift(ownText);
+      if (state.personalNeeds.length > 30) state.personalNeeds.pop();
+    }
+  }
+  if (selected.length) {
     const entry = state.feelingLog[logIndex];
     if (entry) {
-      entry.needs = selected.length ? [...new Set(selected)] : null;
-      if (note) entry.needsNote = note;
+      entry.needs = [...new Set(selected)];
       saveState();
     }
+  } else {
+    saveState();  // Auch ohne Auswahl speichern (falls eigenes Wort hinzugefügt)
   }
   finishNeedsReflection();
   const unique = [...new Set(selected)];
@@ -11669,50 +11905,67 @@ function hourglassTick() {
 }
 
 function updateHourglassDisplay() {
-  // Zeit-Anzeige
+  // Zeit-Anzeige (Vollbild)
   const totalSec = Math.ceil(hourglassState.remainingMs / 1000);
   const min = Math.floor(totalSec / 60);
   const sec = totalSec % 60;
-  document.getElementById('hourglass-time').textContent = `${min}:${String(sec).padStart(2, '0')}`;
+  const timeStr = `${min}:${String(sec).padStart(2, '0')}`;
+  const timeEl = document.getElementById('hourglass-time');
+  if (timeEl) timeEl.textContent = timeStr;
+  const miniTimeEl = document.getElementById('hourglass-mini-time');
+  if (miniTimeEl) miniTimeEl.textContent = timeStr;
 
   // Anteil verstrichen (0 = Anfang, 1 = Ende)
   const progress = hourglassState.totalMs > 0
     ? 1 - (hourglassState.remainingMs / hourglassState.totalMs)
     : 0;
 
-  // Sand oben: schrumpft von oben her
+  // Vollbild-Sanduhr: Sand-Animation
   const topRect = document.getElementById('hg-sand-top');
   const bottomRect = document.getElementById('hg-sand-bottom');
   const stream = document.getElementById('hg-stream');
 
   if (topRect && bottomRect) {
-    // Oben: yStart wandert nach unten, Höhe schrumpft entsprechend
-    // Ursprünglich: y=16, height=142 (16 bis 158)
     const topHeightStart = 142;
     const newY = 16 + topHeightStart * progress;
     const newHeight = topHeightStart * (1 - progress);
     topRect.setAttribute('y', newY.toFixed(1));
     topRect.setAttribute('height', newHeight.toFixed(1));
 
-    // Unten: yStart wandert nach oben, Höhe wächst
-    // Ursprünglich: y=304, height=0 (also nach oben wachsen)
-    const bottomHeightTotal = 142;  // 162 bis 304
+    const bottomHeightTotal = 142;
     const newBottomHeight = bottomHeightTotal * progress;
     const newBottomY = 304 - newBottomHeight;
     bottomRect.setAttribute('y', newBottomY.toFixed(1));
     bottomRect.setAttribute('height', newBottomHeight.toFixed(1));
   }
 
-  // Sand-Strahl: nur sichtbar während Lauf, nicht bei Pause oder Ende
   if (stream) {
     if (hourglassState.paused || progress >= 1 || progress <= 0) {
       stream.setAttribute('opacity', '0');
     } else {
       stream.setAttribute('opacity', '0.85');
-      // Strahl beginnt am Engpass (y=160), endet etwa beim aktuellen Sandstand unten
       const streamEnd = 304 - (142 * progress);
       stream.setAttribute('y2', streamEnd.toFixed(1));
     }
+  }
+
+  // Mini-Sanduhr: gleiche Animation, andere Maße
+  const miniTop = document.getElementById('hg-mini-sand-top');
+  const miniBottom = document.getElementById('hg-mini-sand-bottom');
+  if (miniTop && miniBottom) {
+    // Oben: y=4, height=27 (4 bis 31)
+    const miniTopHeight = 27;
+    const miniNewY = 4 + miniTopHeight * progress;
+    const miniNewHeight = miniTopHeight * (1 - progress);
+    miniTop.setAttribute('y', miniNewY.toFixed(1));
+    miniTop.setAttribute('height', miniNewHeight.toFixed(1));
+
+    // Unten: y=60, height=0
+    const miniBottomTotal = 27;  // 33 bis 60
+    const miniBottomHeight = miniBottomTotal * progress;
+    const miniBottomY = 60 - miniBottomHeight;
+    miniBottom.setAttribute('y', miniBottomY.toFixed(1));
+    miniBottom.setAttribute('height', miniBottomHeight.toFixed(1));
   }
 }
 
@@ -11740,7 +11993,19 @@ function hourglassFinished() {
   hourglassState.paused = true;
   if (hourglassState.rafId) cancelAnimationFrame(hourglassState.rafId);
   updateHourglassDisplay();
-  document.getElementById('hourglass-state').textContent = 'die Zeit ist um';
+  const stateEl = document.getElementById('hourglass-state');
+  if (stateEl) stateEl.textContent = 'die Zeit ist um';
+  // Mini-Streifen: wenn er sichtbar ist, Text auf "fertig" und nach kurzer Zeit ausblenden
+  const mini = document.getElementById('hourglass-mini');
+  if (mini && mini.style.display !== 'none') {
+    const miniTime = document.getElementById('hourglass-mini-time');
+    if (miniTime) miniTime.textContent = '✓ fertig';
+    setTimeout(() => {
+      if (hourglassState.remainingMs <= 0) {
+        mini.style.display = 'none';
+      }
+    }, 4500);
+  }
   // Leises akustisches Signal — sehr dezent
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -11748,7 +12013,7 @@ function hourglassFinished() {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.frequency.value = 528;  // Sanfter Ton
+    osc.frequency.value = 528;
     osc.type = 'sine';
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.05);
@@ -11761,7 +12026,30 @@ function hourglassFinished() {
 function closeHourglass() {
   if (hourglassState.rafId) cancelAnimationFrame(hourglassState.rafId);
   hourglassState.paused = true;
+  hourglassState.totalMs = 0;
+  hourglassState.remainingMs = 0;
+  // Mini-Streifen verstecken
+  const mini = document.getElementById('hourglass-mini');
+  if (mini) mini.style.display = 'none';
   showSection('home');
+}
+
+function minimizeHourglass() {
+  // Mini-Streifen einblenden
+  const mini = document.getElementById('hourglass-mini');
+  if (mini) mini.style.display = '';
+  // Vollbild verlassen, zurück zu Home
+  showSection('home');
+  // Sanduhr läuft im Hintergrund weiter (rafId bleibt aktiv)
+}
+
+function restoreHourglass() {
+  // Mini-Streifen verstecken
+  const mini = document.getElementById('hourglass-mini');
+  if (mini) mini.style.display = 'none';
+  // Vollbild zeigen
+  showSection('hourglass');
+  updateHourglassDisplay();
 }
 
 // ----- Weg-Erkennung über Stichwörter -----
