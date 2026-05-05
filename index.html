@@ -3322,6 +3322,7 @@ textarea, input {
     <div style="display:flex;gap:8px;">
       <input type="text" id="today-input" placeholder="z.B. Meditation, Gitarre, Rad zur Arbeit…"
         style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+        oninput="renderTodayItems();"
         onkeydown="if(event.key==='Enter'){addTodayItem();}">
       <button class="btn small" onclick="addTodayItem()">+</button>
     </div>
@@ -4041,6 +4042,57 @@ textarea, input {
       Innere und äußere Hindernisse brauchen verschiedene Strategien.
     </p>
     <div id="obstacle-kind-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</div>
+
+<!-- ====== GOAL ITEM AKTIONS-MENÜ (Hindernis/Plan/Spur bearbeiten oder löschen) ====== -->
+<div class="entry-overlay" id="goal-item-action-overlay">
+  <div class="entry-modal" style="max-width:380px;">
+    <h2 style="margin:0 0 8px;" id="goal-item-action-title">Eintrag</h2>
+    <p class="muted-note" id="goal-item-action-sub" style="margin-bottom:18px;line-height:1.5;"></p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn full" onclick="onGoalItemActionEdit()">Bearbeiten</button>
+      <button class="btn secondary full" onclick="onGoalItemActionDelete()" style="color:#a14b38;border-color:#a14b38;">Löschen</button>
+      <button class="btn secondary full" onclick="closeGoalItemAction()">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== HINDERNIS BEARBEITEN (mit Typ-Auswahl) ====== -->
+<div class="entry-overlay" id="edit-obstacle-overlay">
+  <div class="entry-modal" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Hindernis bearbeiten</h2>
+      <button onclick="closeEditObstacle()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Art des Hindernisses</div>
+      <div id="edit-obstacle-kind-chips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Hindernis</div>
+      <textarea id="edit-obstacle-text" rows="3" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+    <button class="btn full" onclick="saveEditObstacle()">Speichern</button>
+  </div>
+</div>
+
+<!-- ====== SPUR BEARBEITEN (mit Typ-Auswahl) ====== -->
+<div class="entry-overlay" id="edit-trace-overlay">
+  <div class="entry-modal" style="max-width:440px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Spur bearbeiten</h2>
+      <button onclick="closeEditTrace()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Art der Spur</div>
+      <div id="edit-trace-type-chips" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Spur</div>
+      <textarea id="edit-trace-text" rows="3" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+    <button class="btn full" onclick="saveEditTrace()">Speichern</button>
   </div>
 </div>
 
@@ -4897,6 +4949,7 @@ function loadState() {
     storyReflectionLog: [],
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
+    suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
     lastDurations: {},
     favoriteQuotes: [],
     quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
@@ -4917,6 +4970,7 @@ function loadState() {
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
     if (typeof saved.momentSettings !== 'object' || saved.momentSettings === null) saved.momentSettings = defaults.momentSettings;
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
+    if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
     if (typeof saved.ritualOverrides !== 'object' || saved.ritualOverrides === null) saved.ritualOverrides = { morning: null, evening: null };
     // Migration: rueckblickSettings — fehlende Schlüssel mit Defaults füllen
     if (typeof saved.rueckblickSettings !== 'object' || saved.rueckblickSettings === null) {
@@ -5734,15 +5788,79 @@ function renderTodayItems() {
   if (sugg) {
     sugg.innerHTML = '';
     const existing = new Set(items.map(i => i.text.toLowerCase()));
-    state.todaySuggestions.forEach(s => {
+    const inputEl = document.getElementById('today-input');
+    const filterText = inputEl ? (inputEl.value || '').trim() : '';
+    const filtered = getSortedFilteredSuggestions(state.todaySuggestions || [], filterText);
+    filtered.forEach(s => {
       if (existing.has(s.toLowerCase())) return;
       const btn = document.createElement('button');
       btn.className = 'today-suggestion';
       btn.textContent = '+ ' + s;
       btn.onclick = () => addTodayItemText(s);
+      attachLongPressDelete(btn, s, 'todaySuggestions', renderTodayItems);
       sugg.appendChild(btn);
     });
+    // Kleiner Hinweis am Ende, wenn nichts passt
+    if (filtered.filter(s => !existing.has(s.toLowerCase())).length === 0 && filterText) {
+      const hint = document.createElement('span');
+      hint.className = 'muted-note';
+      hint.style.cssText = 'font-style:italic;font-size:0.78rem;padding:6px 10px;';
+      hint.textContent = 'Kein passender Vorschlag. Tippe Enter, um neu anzulegen.';
+      sugg.appendChild(hint);
+    }
   }
+}
+
+function bumpSuggestionUseCount(text) {
+  if (!state.suggestionUseCounts) state.suggestionUseCounts = {};
+  const k = (text || '').toLowerCase().trim();
+  if (!k) return;
+  state.suggestionUseCounts[k] = (state.suggestionUseCounts[k] || 0) + 1;
+}
+
+// Sortiert Vorschlagsliste nach Häufigkeit (oft genutzte zuerst), filtert nach Eingabetext
+function getSortedFilteredSuggestions(list, filterText) {
+  const counts = state.suggestionUseCounts || {};
+  const filter = (filterText || '').toLowerCase().trim();
+  return list
+    .filter(s => {
+      if (!filter) return true;
+      return s.toLowerCase().includes(filter);
+    })
+    .sort((a, b) => {
+      const ca = counts[a.toLowerCase()] || 0;
+      const cb = counts[b.toLowerCase()] || 0;
+      if (ca !== cb) return cb - ca;
+      return a.localeCompare(b, 'de');
+    });
+}
+
+// Long-Press: Vorschlag aus Liste entfernen
+function attachLongPressDelete(chip, suggestionText, listKey, rerenderFn) {
+  let timer = null;
+  const start = (e) => {
+    timer = setTimeout(() => {
+      timer = null;
+      askConfirm(`„${suggestionText}" aus den Vorschlägen entfernen?`, () => {
+        const list = state[listKey];
+        if (!Array.isArray(list)) return;
+        const idx = list.findIndex(s => s.toLowerCase() === suggestionText.toLowerCase());
+        if (idx >= 0) {
+          list.splice(idx, 1);
+          saveState();
+          if (rerenderFn) rerenderFn();
+          showToast('Aus Vorschlägen entfernt.');
+        }
+      });
+    }, 600);
+  };
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  chip.addEventListener('touchstart', start, { passive: true });
+  chip.addEventListener('mousedown', start);
+  chip.addEventListener('touchend', cancel);
+  chip.addEventListener('touchcancel', cancel);
+  chip.addEventListener('mouseup', cancel);
+  chip.addEventListener('mouseleave', cancel);
 }
 
 function addTodayItem() {
@@ -5762,8 +5880,9 @@ function addTodayItemText(text) {
   // merken für Vorschläge (wenn neu)
   if (!state.todaySuggestions.some(s => s.toLowerCase() === text.toLowerCase())) {
     state.todaySuggestions.unshift(text);
-    if (state.todaySuggestions.length > 20) state.todaySuggestions.pop();
+    if (state.todaySuggestions.length > 50) state.todaySuggestions.pop();
   }
+  bumpSuggestionUseCount(text);
   saveState();
   renderTodayItems();
   updateCollapsibleSummaries();
@@ -5950,7 +6069,10 @@ function renderActivitySuggestionChips() {
   if (!c) return;
   c.innerHTML = '';
   const list = Array.isArray(state.todaySuggestions) ? state.todaySuggestions : [];
-  list.slice(0, 10).forEach(s => {
+  const nameInput = document.getElementById('activity-name');
+  const filterText = nameInput ? (nameInput.value || '').trim() : '';
+  const filtered = getSortedFilteredSuggestions(list, filterText).slice(0, 12);
+  filtered.forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'chip';
     btn.textContent = s;
@@ -5958,6 +6080,7 @@ function renderActivitySuggestionChips() {
       document.getElementById('activity-name').value = s;
       onActivityNameInput();
     };
+    attachLongPressDelete(btn, s, 'todaySuggestions', renderActivitySuggestionChips);
     c.appendChild(btn);
   });
 }
@@ -5967,11 +6090,13 @@ function onActivityNameInput() {
   const name = (document.getElementById('activity-name').value || '').trim();
   // Notiz-Vorschläge passend zum Namen aktualisieren
   renderActivityNoteSuggestions(name);
+  // Suggestion-Chips live filtern
+  renderActivitySuggestionChips();
   // Goal-Erkennung: passt der Name zu einem Weg?
   refreshGoalHintForActivity(name);
   const durInput = document.getElementById('activity-duration');
   if (!durInput) return;
-  if (durInput.value) return;  // Nutzer hat schon etwas eingegeben — nicht überschreiben
+  if (durInput.value) return;
   if (!name) return;
   const key = name.toLowerCase();
   const remembered = state.lastDurations && state.lastDurations[key];
@@ -6042,8 +6167,9 @@ function logActivity() {
   // Aktivität auch in gemeinsame Vorschlagsliste übernehmen (wenn neu)
   if (!state.todaySuggestions.some(s => s.toLowerCase() === name.toLowerCase())) {
     state.todaySuggestions.unshift(name);
-    if (state.todaySuggestions.length > 20) state.todaySuggestions.pop();
+    if (state.todaySuggestions.length > 50) state.todaySuggestions.pop();
   }
+  bumpSuggestionUseCount(name);
 
   // Dauer pro Aktivität merken (nur wenn tatsächlich eingegeben)
   if (duration) {
@@ -10851,12 +10977,11 @@ function renderGoalDetail() {
     obstacles.forEach(o => {
       const kindInfo = o.kind ? OBSTACLE_KINDS.find(x => x.key === o.kind) : null;
       const kindLabel = kindInfo ? `<div class="goal-obstacle-kind">${escapeHtml(kindInfo.label)}</div>` : '';
-      html += `<div class="goal-obstacle-item">
+      html += `<div class="goal-obstacle-item" style="cursor:pointer;" onclick="openGoalItemAction('obstacle','${g.id}','${o.id}')">
         <div style="flex:1;min-width:0;">
           ${kindLabel}
           <div class="goal-obstacle-text">${escapeHtml(o.text)}</div>
         </div>
-        <button class="goal-mini-btn" onclick="event.stopPropagation();deleteObstacle('${g.id}','${o.id}')" title="Entfernen">✕</button>
       </div>`;
     });
     html += `</div>`;
@@ -10873,12 +10998,11 @@ function renderGoalDetail() {
   if (plans.length) {
     html += `<div class="goal-plans-list">`;
     plans.forEach(p => {
-      html += `<div class="goal-plan-item">
+      html += `<div class="goal-plan-item" style="cursor:pointer;" onclick="openGoalItemAction('plan','${g.id}','${p.id}')">
         <div class="goal-plan-text">
           <em>Wenn</em> ${escapeHtml(p.when)}<br>
           <em>dann</em> ${escapeHtml(p.then)}
         </div>
-        <button class="goal-mini-btn" onclick="event.stopPropagation();deletePlan('${g.id}','${p.id}')" title="Entfernen">✕</button>
       </div>`;
     });
     html += `</div>`;
@@ -10941,13 +11065,12 @@ function renderGoalDetail() {
       // Art der Spur (falls neu eingetragen — alte Spuren ohne Type bekommen kein Label)
       const typeInfo = t.type ? TRACE_TYPES.find(x => x.key === t.type) : null;
       const typeBadge = typeInfo ? `<div class="goal-trace-type">${escapeHtml(typeInfo.label)}</div>` : '';
-      html += `<div class="goal-trace-item">
+      html += `<div class="goal-trace-item" style="cursor:pointer;" onclick="openGoalItemAction('trace','${g.id}','${t.id}')">
         <div style="flex:1;min-width:0;">
           <div class="goal-trace-date">${escapeHtml(dt)}</div>
           ${typeBadge}
           <div class="goal-trace-text">${escapeHtml(t.text)}</div>
         </div>
-        <button class="goal-mini-btn" onclick="event.stopPropagation();deleteTrace('${g.id}','${t.id}')" title="Entfernen">✕</button>
       </div>`;
     });
     html += `</div>`;
@@ -11165,6 +11288,198 @@ function deleteTrace(goalId, traceId) {
   g.traces = g.traces.filter(t => t.id !== traceId);
   saveState();
   renderGoalDetail();
+}
+
+// ===== GOAL-ITEM AKTIONS-MENÜ (Hindernis/Plan/Spur) =====
+let _goalItemActionContext = null;  // { kind: 'obstacle'|'plan'|'trace', goalId, itemId }
+
+function openGoalItemAction(kind, goalId, itemId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g) return;
+  let item = null;
+  let title = '';
+  let sub = '';
+  if (kind === 'obstacle') {
+    item = (g.obstacles || []).find(x => x.id === itemId);
+    if (!item) return;
+    const kindInfo = item.kind ? OBSTACLE_KINDS.find(x => x.key === item.kind) : null;
+    title = kindInfo ? kindInfo.label : 'Hindernis';
+    sub = item.text;
+  } else if (kind === 'plan') {
+    item = (g.ifThenPlans || []).find(x => x.id === itemId);
+    if (!item) return;
+    title = 'Wenn-Dann-Plan';
+    sub = `Wenn ${item.when} — dann ${item.then}`;
+  } else if (kind === 'trace') {
+    item = (g.traces || []).find(x => x.id === itemId);
+    if (!item) return;
+    const typeInfo = item.type ? TRACE_TYPES.find(x => x.key === item.type) : null;
+    title = typeInfo ? typeInfo.label : 'Spur';
+    sub = item.text;
+  }
+  _goalItemActionContext = { kind, goalId, itemId };
+  document.getElementById('goal-item-action-title').textContent = title;
+  document.getElementById('goal-item-action-sub').textContent = sub;
+  document.getElementById('goal-item-action-overlay').classList.add('visible');
+}
+
+function closeGoalItemAction() {
+  document.getElementById('goal-item-action-overlay').classList.remove('visible');
+  _goalItemActionContext = null;
+}
+
+function onGoalItemActionDelete() {
+  const ctx = _goalItemActionContext;
+  if (!ctx) return;
+  closeGoalItemAction();
+  askConfirm('Diesen Eintrag wirklich löschen?', () => {
+    if (ctx.kind === 'obstacle') deleteObstacle(ctx.goalId, ctx.itemId);
+    else if (ctx.kind === 'plan') deletePlan(ctx.goalId, ctx.itemId);
+    else if (ctx.kind === 'trace') deleteTrace(ctx.goalId, ctx.itemId);
+    showToast('Gelöscht.');
+  });
+}
+
+function onGoalItemActionEdit() {
+  const ctx = _goalItemActionContext;
+  if (!ctx) return;
+  closeGoalItemAction();
+  if (ctx.kind === 'obstacle') openEditObstacle(ctx.goalId, ctx.itemId);
+  else if (ctx.kind === 'plan') openEditPlan(ctx.goalId, ctx.itemId);
+  else if (ctx.kind === 'trace') openEditTrace(ctx.goalId, ctx.itemId);
+}
+
+// --- Hindernis bearbeiten ---
+let _editingObstacle = null;  // { goalId, obstacleId, kind }
+
+function openEditObstacle(goalId, obstacleId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g) return;
+  const o = (g.obstacles || []).find(x => x.id === obstacleId);
+  if (!o) return;
+  _editingObstacle = { goalId, obstacleId, kind: o.kind || 'innerlich' };
+  document.getElementById('edit-obstacle-text').value = o.text || '';
+  renderEditObstacleKindChips();
+  document.getElementById('edit-obstacle-overlay').classList.add('visible');
+}
+
+function renderEditObstacleKindChips() {
+  const c = document.getElementById('edit-obstacle-kind-chips');
+  if (!c) return;
+  c.innerHTML = '';
+  OBSTACLE_KINDS.forEach(k => {
+    const btn = document.createElement('button');
+    const isActive = _editingObstacle && _editingObstacle.kind === k.key;
+    btn.className = 'chip' + (isActive ? ' active' : '');
+    btn.textContent = k.label;
+    btn.style.cssText = 'flex:1;min-width:0;padding:8px 12px;';
+    btn.onclick = () => {
+      _editingObstacle.kind = k.key;
+      renderEditObstacleKindChips();
+    };
+    c.appendChild(btn);
+  });
+}
+
+function closeEditObstacle() {
+  document.getElementById('edit-obstacle-overlay').classList.remove('visible');
+  _editingObstacle = null;
+}
+
+function saveEditObstacle() {
+  if (!_editingObstacle) return;
+  const g = (state.goals || []).find(x => x.id === _editingObstacle.goalId);
+  if (!g) { closeEditObstacle(); return; }
+  const o = (g.obstacles || []).find(x => x.id === _editingObstacle.obstacleId);
+  if (!o) { closeEditObstacle(); return; }
+  const text = (document.getElementById('edit-obstacle-text').value || '').trim();
+  if (!text) { showToast('Text darf nicht leer sein.'); return; }
+  o.text = text;
+  o.kind = _editingObstacle.kind;
+  g.updatedAt = new Date().toISOString();
+  saveState();
+  closeEditObstacle();
+  renderGoalDetail();
+  showToast('Geändert.');
+}
+
+// --- Plan bearbeiten ---
+function openEditPlan(goalId, planId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g) return;
+  const p = (g.ifThenPlans || []).find(x => x.id === planId);
+  if (!p) return;
+  openGoalInputOverlay({
+    title: 'Wenn-Dann-Plan bearbeiten',
+    label: 'Trage ein, was du dir konkret vornimmst — wann und was.',
+    multiField: true,
+    placeholder1: 'Wenn …',
+    placeholder2: 'dann …',
+    initialWhen: p.when || '',
+    initialThen: p.then || '',
+    onSave: (when, then) => {
+      p.when = when;
+      p.then = then;
+      g.updatedAt = new Date().toISOString();
+      saveState();
+      renderGoalDetail();
+      showToast('Geändert.');
+    }
+  });
+}
+
+// --- Spur bearbeiten ---
+let _editingTrace = null;  // { goalId, traceId, type }
+
+function openEditTrace(goalId, traceId) {
+  const g = (state.goals || []).find(x => x.id === goalId);
+  if (!g) return;
+  const t = (g.traces || []).find(x => x.id === traceId);
+  if (!t) return;
+  _editingTrace = { goalId, traceId, type: t.type || (TRACE_TYPES[0] && TRACE_TYPES[0].key) };
+  document.getElementById('edit-trace-text').value = t.text || '';
+  renderEditTraceTypeChips();
+  document.getElementById('edit-trace-overlay').classList.add('visible');
+}
+
+function renderEditTraceTypeChips() {
+  const c = document.getElementById('edit-trace-type-chips');
+  if (!c) return;
+  c.innerHTML = '';
+  TRACE_TYPES.forEach(t => {
+    const btn = document.createElement('button');
+    const isActive = _editingTrace && _editingTrace.type === t.key;
+    btn.className = 'chip' + (isActive ? ' active' : '');
+    btn.textContent = t.label;
+    btn.style.cssText = 'flex:1;min-width:0;padding:8px 12px;';
+    btn.onclick = () => {
+      _editingTrace.type = t.key;
+      renderEditTraceTypeChips();
+    };
+    c.appendChild(btn);
+  });
+}
+
+function closeEditTrace() {
+  document.getElementById('edit-trace-overlay').classList.remove('visible');
+  _editingTrace = null;
+}
+
+function saveEditTrace() {
+  if (!_editingTrace) return;
+  const g = (state.goals || []).find(x => x.id === _editingTrace.goalId);
+  if (!g) { closeEditTrace(); return; }
+  const t = (g.traces || []).find(x => x.id === _editingTrace.traceId);
+  if (!t) { closeEditTrace(); return; }
+  const text = (document.getElementById('edit-trace-text').value || '').trim();
+  if (!text) { showToast('Text darf nicht leer sein.'); return; }
+  t.text = text;
+  t.type = _editingTrace.type;
+  g.updatedAt = new Date().toISOString();
+  saveState();
+  closeEditTrace();
+  renderGoalDetail();
+  showToast('Geändert.');
 }
 
 // Sammelt alle Schritte (Aktivitäten + erledigte Vorhaben) für einen Weg
@@ -11423,15 +11738,15 @@ function openGoalInputOverlay(cfg) {
   if (cfg.multiField) {
     single.style.display = 'none';
     dual.style.display = '';
-    document.getElementById('goal-input-when').value = '';
-    document.getElementById('goal-input-then').value = '';
+    document.getElementById('goal-input-when').value = cfg.initialWhen || '';
+    document.getElementById('goal-input-then').value = cfg.initialThen || '';
     document.getElementById('goal-input-when').placeholder = cfg.placeholder1 || '';
     document.getElementById('goal-input-then').placeholder = cfg.placeholder2 || '';
     setTimeout(() => document.getElementById('goal-input-when').focus(), 100);
   } else {
     single.style.display = '';
     dual.style.display = 'none';
-    document.getElementById('goal-input-single').value = '';
+    document.getElementById('goal-input-single').value = cfg.initialValue || '';
     document.getElementById('goal-input-single').placeholder = cfg.placeholder || '';
     setTimeout(() => document.getElementById('goal-input-single').focus(), 100);
   }
