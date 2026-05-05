@@ -2305,6 +2305,64 @@ h3 {
   border-radius: 6px;
 }
 
+/* Spiegelfrage-Knopf und -Bubble */
+.mirror-btn {
+  background: none;
+  border: none;
+  color: #5a8a7a;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.mirror-btn:hover {
+  color: #4a6f63;
+  text-decoration: underline;
+}
+.mirror-bubble {
+  background: linear-gradient(135deg, rgba(90, 138, 122, 0.10) 0%, rgba(90, 138, 122, 0.04) 100%);
+  border-left: 2.5px solid #5a8a7a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 6px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: var(--ink);
+  animation: mirrorFadeIn 0.2s ease-out;
+}
+@keyframes mirrorFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mirror-bubble-text {
+  margin-bottom: 10px;
+}
+.mirror-bubble-actions {
+  display: flex;
+  gap: 8px;
+  font-style: normal;
+}
+.mirror-bubble-action {
+  background: none;
+  border: 1px solid rgba(90, 138, 122, 0.4);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mirror-bubble-action:hover {
+  background: rgba(90, 138, 122, 0.15);
+  border-color: rgba(90, 138, 122, 0.6);
+}
+
 /* Hinweis-Bubble bei erkanntem Weg */
 .goal-hint-bubble {
   background: linear-gradient(135deg, rgba(90, 138, 122, 0.12) 0%, rgba(90, 138, 122, 0.06) 100%);
@@ -3857,7 +3915,9 @@ textarea, input {
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was hast du gemacht?</div>
-      <input type="text" id="edit-activity-name" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+      <textarea id="edit-activity-name" rows="1"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;resize:none;overflow:hidden;min-height:42px;"
+        oninput="autoGrowTextarea(this)"></textarea>
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Dauer (optional)</div>
@@ -3886,7 +3946,9 @@ textarea, input {
     </div>
     <div style="margin-bottom:12px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was hast du dir vorgenommen?</div>
-      <input type="text" id="edit-today-text" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+      <textarea id="edit-today-text" rows="1"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;resize:none;overflow:hidden;min-height:42px;"
+        oninput="autoGrowTextarea(this)"></textarea>
     </div>
     <div id="edit-today-goal-wrap" style="margin-bottom:14px;display:none;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Auf einem Weg unterwegs?</div>
@@ -3986,6 +4048,8 @@ textarea, input {
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Was wünschst du dir genau? <span style="opacity:0.6;">(W — Wish)</span></div>
       <textarea id="goal-editor-wish" rows="3" placeholder="Was willst du erreichen, wer willst du sein?"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+      <button type="button" class="mirror-btn" onclick="openMirror('wish', this)">🪞 Spiegelfrage</button>
+      <div class="mirror-bubble" id="mirror-bubble-wish" style="display:none;"></div>
       <p class="goal-editor-hint">
         Spüre einen Moment hinein: Macht der Wunsch dir leichter ums Herz, oder enger? Wenn er nicht von Herzen kommt, formuliere ihn um — oder lass ihn weg. Und: Schreib, was sein <em>soll</em>, nicht was nicht mehr sein soll.
       </p>
@@ -3995,6 +4059,8 @@ textarea, input {
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Warum ist das wichtig? Wie würde es sich anfühlen? <span style="opacity:0.6;">(O — Outcome)</span></div>
       <textarea id="goal-editor-outcome" rows="3" placeholder="Was wäre möglich, wenn dieser Weg gelingt? Was würde sich verändern?"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+      <button type="button" class="mirror-btn" onclick="openMirror('outcome', this)">🪞 Spiegelfrage</button>
+      <div class="mirror-bubble" id="mirror-bubble-outcome" style="display:none;"></div>
     </div>
 
     <div style="margin-bottom:14px;">
@@ -4107,15 +4173,21 @@ textarea, input {
 
     <div id="goal-input-single-wrap" style="margin-bottom:14px;">
       <textarea id="goal-input-single" rows="3"
-        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;resize:none;background:var(--bg);color:var(--ink);outline:none;overflow:hidden;min-height:80px;"
+        oninput="autoGrowTextarea(this)"></textarea>
     </div>
 
     <div id="goal-input-dual-wrap" style="display:none;margin-bottom:14px;">
-      <input type="text" id="goal-input-when"
-        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;">
-      <input type="text" id="goal-input-then"
-        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;background:var(--bg);color:var(--ink);outline:none;">
+      <textarea id="goal-input-when" rows="1"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;resize:none;overflow:hidden;min-height:42px;"
+        oninput="autoGrowTextarea(this)"></textarea>
+      <textarea id="goal-input-then" rows="1"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;background:var(--bg);color:var(--ink);outline:none;resize:none;overflow:hidden;min-height:42px;"
+        oninput="autoGrowTextarea(this)"></textarea>
     </div>
+
+    <button type="button" class="mirror-btn" id="goal-input-mirror-btn" onclick="openMirrorForGoalInput()" style="display:none;">🪞 Spiegelfrage</button>
+    <div class="mirror-bubble" id="mirror-bubble-goal-input" style="display:none;margin-bottom:14px;"></div>
 
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeGoalInputOverlay()">Abbrechen</button>
@@ -7319,6 +7391,8 @@ function openEditActivity(e) {
     goalWrap.style.display = 'none';
   }
   document.getElementById('edit-activity-overlay').classList.add('visible');
+  // Höhe an Inhalt anpassen
+  setTimeout(() => autoGrowTextarea(document.getElementById('edit-activity-name')), 50);
 }
 
 function closeEditActivity() {
@@ -7362,6 +7436,7 @@ function openEditToday(e) {
     goalWrap.style.display = 'none';
   }
   document.getElementById('edit-today-overlay').classList.add('visible');
+  setTimeout(() => autoGrowTextarea(document.getElementById('edit-today-text')), 50);
 }
 
 function closeEditToday() {
@@ -11147,6 +11222,7 @@ function chooseObstacleKind(goalId, kindKey) {
     label: k.question,
     placeholder: k.placeholder,
     multiField: false,
+    mirrorPool: kindKey === 'innerlich' ? 'obstacle_inner' : 'obstacle_outer',
     onSave: (text) => {
       const g = (state.goals || []).find(x => x.id === goalId);
       if (!g) return;
@@ -11181,6 +11257,7 @@ function addPlanPrompt(goalId) {
     placeholder1: 'Wenn… (z.B. „ich Angst habe vor dem Anruf")',
     placeholder2: 'dann… (z.B. „atme ich dreimal tief und wähle die Nummer")',
     multiField: true,
+    mirrorPool: 'plan',
     onSave: (whenText, thenText) => {
       const g = (state.goals || []).find(x => x.id === goalId);
       if (!g) return;
@@ -11417,6 +11494,7 @@ function openEditPlan(goalId, planId) {
     placeholder2: 'dann …',
     initialWhen: p.when || '',
     initialThen: p.then || '',
+    mirrorPool: 'plan',
     onSave: (when, then) => {
       p.when = when;
       p.then = then;
@@ -11725,8 +11803,103 @@ function rememberGoalRejection(goalId, text) {
   }
 }
 
-// ----- Eingabe-Overlay (statt prompt) -----
-let _goalInputOverlayConfig = null;
+// ===== AUTO-WACHSENDE TEXTAREAS =====
+function autoGrowTextarea(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// ===== SPIEGELFRAGEN (lokal, ohne KI) =====
+const MIRROR_QUESTIONS = {
+  wish: [
+    'Wenn du diesen Wunsch leise sprichst — wird dir leichter ums Herz, oder enger?',
+    'Ist es ein Wunsch FÜR etwas, oder GEGEN etwas? Manche Wünsche tragen weiter, wenn man sie umformuliert.',
+    'Stell dir vor, du erzählst diesen Wunsch deinem zehn Jahre jüngeren Selbst. Würde es nicken — oder fremdeln?',
+    'Ist das der eigene Wunsch — oder der einer anderen Stimme in dir (Eltern, Beruf, Vergleich)?',
+    'Was wäre, wenn dieser Wunsch nicht erfüllt wird? Bleibt er trotzdem wertvoll?',
+    'Ist er groß genug, dich zu ziehen — und klein genug, dich nicht zu erdrücken?'
+  ],
+  outcome: [
+    'An welchem alltäglichen Moment würdest du merken: jetzt geht es?',
+    'Beschreibe es als Gefühl, nicht als Zahl. Was würdest du in deinem Körper spüren?',
+    'Was würden andere Menschen an dir bemerken — ohne dass du es ihnen sagen musst?',
+    'Wäre dieses Outcome auch gut, wenn niemand davon wüsste?',
+    'Stell dir vor, du bist sechs Monate weiter. Was tust du anders als heute?',
+    'Ist es ein Bild der Erfüllung — oder ein Bild der Erleichterung? Beides ist okay, aber sie tragen anders.'
+  ],
+  obstacle_inner: [
+    'Ist es wirklich Faulheit — oder Erschöpfung, Überforderung, oder etwas Drittes?',
+    'Wenn dieses Hindernis sprechen könnte, was würde es dir sagen wollen?',
+    'Wann genau im Tag taucht es auf? Morgens, abends, vor bestimmten Aufgaben?',
+    'Hat dieses Hindernis dich vielleicht früher mal vor etwas geschützt?',
+    'Beschreibe es so, dass es kein Vorwurf an dich selbst ist.',
+    'Ist es ein Hindernis — oder ein Signal deines Körpers oder deiner Seele, das du erst noch verstehen musst?'
+  ],
+  obstacle_outer: [
+    'Ist es wirklich äußerlich — oder ist es eine Form, die ein inneres Hindernis annimmt?',
+    'Was kannst du daran ändern? Was nicht?',
+    'Welche kleinste Änderung wäre möglich, ohne das ganze äußere Hindernis zu beseitigen?',
+    'Wer oder was hilft dir, wenn das Hindernis größer wird, als du tragen kannst?'
+  ],
+  plan: [
+    'Ist der Plan an einen konkreten Moment gebunden? (Tageszeit, Ort, Auslöser)',
+    'Funktioniert er auch an einem schlechten Tag — oder nur an einem idealen?',
+    'Was, wenn er einmal nicht klappt? Was sagst du dir dann? (Plan B kann Teil des Plans sein.)',
+    'Ist die "Dann"-Handlung klein genug, dass du sie auch erschöpft schaffst?',
+    'Tastest du mit diesem Plan etwas anderes Wertvolles in deinem Leben an? (z.B. Ruhe, Beziehung, andere Wege)',
+    'Ist es ein Test — oder eine Pflicht? Tests tragen länger als Pflichten.'
+  ]
+};
+
+// Pro Sitzung gesehene Fragen (Wiederholung vermeiden bei "Andere Frage")
+const _mirrorSeen = {};
+
+function pickMirrorQuestion(poolKey) {
+  const pool = MIRROR_QUESTIONS[poolKey] || [];
+  if (!pool.length) return '';
+  if (!_mirrorSeen[poolKey]) _mirrorSeen[poolKey] = new Set();
+  // Wenn schon alle gesehen: zurücksetzen
+  if (_mirrorSeen[poolKey].size >= pool.length) _mirrorSeen[poolKey].clear();
+  // Zufällig aus den noch nicht gesehenen
+  const remaining = pool.filter((_, i) => !_mirrorSeen[poolKey].has(i));
+  const idx = Math.floor(Math.random() * remaining.length);
+  const chosen = remaining[idx];
+  _mirrorSeen[poolKey].add(pool.indexOf(chosen));
+  return chosen;
+}
+
+function renderMirrorBubble(bubbleEl, poolKey) {
+  if (!bubbleEl) return;
+  const q = pickMirrorQuestion(poolKey);
+  if (!q) { bubbleEl.style.display = 'none'; return; }
+  bubbleEl.innerHTML = `
+    <div class="mirror-bubble-text">${escapeHtml(q)}</div>
+    <div class="mirror-bubble-actions">
+      <button class="mirror-bubble-action" onclick="renderMirrorBubble(document.getElementById('${bubbleEl.id}'), '${poolKey}')">Andere Frage</button>
+      <button class="mirror-bubble-action" onclick="document.getElementById('${bubbleEl.id}').style.display='none';">Schließen</button>
+    </div>
+  `;
+  bubbleEl.style.display = '';
+}
+
+// Wunsch / Outcome im Editor
+function openMirror(field, btnEl) {
+  const bubbleId = field === 'wish' ? 'mirror-bubble-wish' : 'mirror-bubble-outcome';
+  const poolKey = field === 'wish' ? 'wish' : 'outcome';
+  renderMirrorBubble(document.getElementById(bubbleId), poolKey);
+}
+
+// Im Goal-Input-Overlay (für Hindernis und Plan)
+let _currentGoalInputMirrorPool = null;
+
+function openMirrorForGoalInput() {
+  const bubble = document.getElementById('mirror-bubble-goal-input');
+  if (!_currentGoalInputMirrorPool) return;
+  renderMirrorBubble(bubble, _currentGoalInputMirrorPool);
+}
+
+
 
 function openGoalInputOverlay(cfg) {
   _goalInputOverlayConfig = cfg;
@@ -11742,20 +11915,38 @@ function openGoalInputOverlay(cfg) {
     document.getElementById('goal-input-then').value = cfg.initialThen || '';
     document.getElementById('goal-input-when').placeholder = cfg.placeholder1 || '';
     document.getElementById('goal-input-then').placeholder = cfg.placeholder2 || '';
-    setTimeout(() => document.getElementById('goal-input-when').focus(), 100);
+    setTimeout(() => {
+      document.getElementById('goal-input-when').focus();
+      autoGrowTextarea(document.getElementById('goal-input-when'));
+      autoGrowTextarea(document.getElementById('goal-input-then'));
+    }, 100);
   } else {
     single.style.display = '';
     dual.style.display = 'none';
     document.getElementById('goal-input-single').value = cfg.initialValue || '';
     document.getElementById('goal-input-single').placeholder = cfg.placeholder || '';
-    setTimeout(() => document.getElementById('goal-input-single').focus(), 100);
+    setTimeout(() => {
+      document.getElementById('goal-input-single').focus();
+      autoGrowTextarea(document.getElementById('goal-input-single'));
+    }, 100);
   }
+
+  // Spiegelfrage-Knopf nach Kontext
+  _currentGoalInputMirrorPool = cfg.mirrorPool || null;
+  const mirrorBtn = document.getElementById('goal-input-mirror-btn');
+  const mirrorBubble = document.getElementById('mirror-bubble-goal-input');
+  if (mirrorBtn) mirrorBtn.style.display = _currentGoalInputMirrorPool ? '' : 'none';
+  if (mirrorBubble) mirrorBubble.style.display = 'none';
+
   ov.classList.add('visible');
 }
 
 function closeGoalInputOverlay() {
   document.getElementById('goal-input-overlay').classList.remove('visible');
   _goalInputOverlayConfig = null;
+  _currentGoalInputMirrorPool = null;
+  const mirrorBubble = document.getElementById('mirror-bubble-goal-input');
+  if (mirrorBubble) mirrorBubble.style.display = 'none';
 }
 
 function saveGoalInputOverlay() {
