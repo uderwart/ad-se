@@ -2430,6 +2430,125 @@ h3 {
   opacity: 1;
 }
 
+/* ===== FUNDE ===== */
+#section-funde {
+  background: linear-gradient(180deg, #faf3e8 0%, var(--bg) 60%);
+}
+.fund-card {
+  background: linear-gradient(135deg, #ffffff 0%, #faf3e8 100%);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(58, 31, 26, 0.08);
+  border-left: 3px solid #c8a88a;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.fund-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(58, 31, 26, 0.12);
+}
+.fund-card-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.08rem;
+  line-height: 1.55;
+  color: var(--ink);
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.fund-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  color: var(--muted);
+  align-items: center;
+}
+.fund-card-source {
+  font-style: italic;
+  color: #8b5a3c;
+}
+.fund-card-source::before {
+  content: '— ';
+}
+.fund-card-category {
+  background: rgba(168, 99, 76, 0.1);
+  color: #8b5a3c;
+  padding: 1px 8px;
+  border-radius: 8px;
+  letter-spacing: 0.04em;
+}
+.fund-card-date {
+  opacity: 0.7;
+}
+.fund-card-place {
+  opacity: 0.7;
+}
+.fund-card-place::before {
+  content: '· ';
+}
+.fund-card-note {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(168, 99, 76, 0.15);
+  font-family: 'EB Garamond', serif;
+  font-size: 0.92rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* Zufallskarte: groß, zentral */
+.fund-card.random-card {
+  text-align: center;
+  padding: 30px 24px;
+  border-left: none;
+  border-top: 3px solid #c8a88a;
+  background: linear-gradient(135deg, #faf3e8 0%, #f4ead8 100%);
+}
+.fund-card.random-card .fund-card-text {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+.fund-card.random-card .fund-card-meta {
+  justify-content: center;
+}
+
+/* Kategorie-Chips im Editor */
+.fund-cat-chip {
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fund-cat-chip.active {
+  background: #c8a88a;
+  color: white;
+  border-color: #c8a88a;
+}
+
+/* Kategorie-Gruppen-Header */
+.funde-category-header {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--accent-deep);
+  margin: 18px 0 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.funde-category-header:first-child {
+  margin-top: 0;
+}
+
 .goal-editor-hint {
   font-family: 'EB Garamond', serif;
   font-style: italic;
@@ -4521,6 +4640,86 @@ textarea, input {
   </div>
 </div>
 
+<!-- ====== FUNDE — Schönes was berührt ====== -->
+<div id="section-funde" class="section">
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
+  <div class="greeting-block">
+    <h1>Funde</h1>
+    <div class="greeting-sub">Was dich berührt hat — Worte, Klänge, Bilder, Begegnungen.</div>
+  </div>
+
+  <div style="position:relative;margin-bottom:14px;">
+    <input type="text" id="funde-search" placeholder="Suchen…"
+      oninput="renderFunde()"
+      style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.92rem;background:var(--bg);color:var(--ink);outline:none;">
+    <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.95rem;pointer-events:none;">⌕</span>
+  </div>
+
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+    <button class="chip active" id="funde-tab-recent" onclick="setFundeView('recent')">Neueste</button>
+    <button class="chip" id="funde-tab-category" onclick="setFundeView('category')">Nach Kategorie</button>
+    <button class="chip" id="funde-tab-random" onclick="setFundeView('random')">Zufallskarte</button>
+  </div>
+
+  <button class="btn full" onclick="openFundEditor()" style="margin-bottom:14px;">+ Fund eintragen</button>
+
+  <div id="funde-list-wrap"></div>
+</div>
+
+<!-- Fund-Editor-Overlay -->
+<div class="entry-overlay" id="fund-editor-overlay">
+  <div class="entry-modal" style="max-width:480px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="fund-editor-title">Ein Fund</h2>
+      <button onclick="closeFundEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was hat dich berührt?</div>
+      <textarea id="fund-text" rows="4" placeholder="Ein Satz, ein Gedanke, ein Bild…"
+        style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:1.02rem;resize:none;background:var(--bg);color:var(--ink);outline:none;line-height:1.5;"></textarea>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Woher? <span style="opacity:0.6;">(Quelle, optional)</span></div>
+      <input type="text" id="fund-source" placeholder="z.B. Mark Aurel, Sabine, Nick Drake…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Wo? <span style="opacity:0.6;">(Ort, optional)</span></div>
+      <input type="text" id="fund-place" placeholder="z.B. zu Hause, im Park, in der S-Bahn…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Wann? <span style="opacity:0.6;">(Datum + Zeit oder Tageszeit)</span></div>
+      <input type="date" id="fund-date"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;">
+      <div id="fund-daypart-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+      <input type="time" id="fund-time"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+      <p class="muted-note" style="margin:6px 0 0;font-size:0.78rem;line-height:1.4;">
+        Wähle eine Tageszeit oder gib eine genaue Uhrzeit ein.
+      </p>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Notiz <span style="opacity:0.6;">(warum es dich getroffen hat, optional)</span></div>
+      <textarea id="fund-note" rows="2" placeholder="…"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Kategorie</div>
+      <div id="fund-category-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <button class="btn full" onclick="saveFund()">Speichern</button>
+    <button class="btn secondary full" id="fund-delete-btn" onclick="deleteFund(editingFundId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Fund löschen</button>
+  </div>
+</div>
+
 <!-- ====== MEHR / EINSTELLUNGEN (minimal für Runde 1) ====== -->
 <div id="section-settings" class="section">
 
@@ -4528,6 +4727,39 @@ textarea, input {
   <div class="greeting-block">
     <h1>Mehr</h1>
     <div class="greeting-sub">Einstellungen, Sammlungen, Rituale.</div>
+  </div>
+
+  <!-- Verlauf-Karte: prominent oben, weil oft genutzt -->
+  <div class="card" onclick="showSection('verlauf')" style="cursor:pointer;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,var(--card) 100%);">
+    <div style="font-size:1.6rem;color:var(--accent-deep);line-height:1;flex-shrink:0;">∴</div>
+    <div style="flex:1;">
+      <h2 style="margin:0 0 4px;">Verlauf</h2>
+      <p class="muted-note" style="margin:0;">Heatmap und alle Einträge der letzten Wochen.</p>
+    </div>
+    <div style="color:var(--muted);font-size:1.1rem;flex-shrink:0;">›</div>
+  </div>
+
+  <!-- Funde: Kategorien verwalten -->
+  <div class="card collapsible" id="funde-cats-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('funde-cats')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Funde — Kategorien</h2>
+        <p class="muted-note" id="funde-cats-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="funde-cats-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Kategorien helfen, Funde zu sortieren. Du kannst sie hier anpassen — alte Funde behalten ihre Kategorie, auch wenn du sie umbenennst.
+      </p>
+      <div id="funde-cats-list" style="margin-bottom:12px;display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="new-fund-cat" placeholder="Neue Kategorie"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          onkeydown="if(event.key==='Enter'){addFundCategory();}">
+        <button class="btn small" onclick="addFundCategory()">+</button>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -4922,9 +5154,9 @@ textarea, input {
     <span class="nav-icon">◇</span>
     <span>Wege</span>
   </button>
-  <button id="nav-verlauf" onclick="showSection('verlauf')">
-    <span class="nav-icon">∴</span>
-    <span>Verlauf</span>
+  <button id="nav-funde" onclick="showSection('funde')">
+    <span class="nav-icon">✦</span>
+    <span>Funde</span>
   </button>
   <button id="nav-settings" onclick="showSection('settings')">
     <span class="nav-icon">⋯</span>
@@ -5189,6 +5421,8 @@ function loadState() {
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
     personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
+    funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
+    fundeCategories: ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'],
     lastDurations: {},
     favoriteQuotes: [],
     quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
@@ -5211,6 +5445,10 @@ function loadState() {
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
     if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
+    if (!Array.isArray(saved.funde)) saved.funde = [];
+    if (!Array.isArray(saved.fundeCategories) || saved.fundeCategories.length === 0) {
+      saved.fundeCategories = ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'];
+    }
     if (typeof saved.ritualOverrides !== 'object' || saved.ritualOverrides === null) saved.ritualOverrides = { morning: null, evening: null };
     // Migration: rueckblickSettings — fehlende Schlüssel mit Defaults füllen
     if (typeof saved.rueckblickSettings !== 'object' || saved.rueckblickSettings === null) {
@@ -5382,6 +5620,12 @@ function showSection(id) {
   if (id === 'rueckblick-list') renderRueckblickList();
   if (id === 'goals') renderGoalsList();
   if (id === 'goal-detail') renderGoalDetail();
+  if (id === 'funde') {
+    fundeShownLimit = 30;
+    const searchEl = document.getElementById('funde-search');
+    if (searchEl) searchEl.value = '';
+    renderFunde();
+  }
   window.scrollTo(0, 0);
 }
 
@@ -6555,6 +6799,7 @@ function renderBodySuggestions(zone) {
 
   renderSuggestionsInto('body-type-suggestions', customs, (txt) => {
     document.getElementById('body-type-custom').value = txt;
+    renderBodyIntensitySliders();  // Schieber dazu aufbauen
   });
   renderSuggestionsInto('body-note-suggestions', noteTexts, (txt) => {
     document.getElementById('body-note').value = txt;
@@ -10927,6 +11172,7 @@ function renderSettings() {
   if (clearBtn) clearBtn.style.display = state.partner?.name ? '' : 'none';
   renderMomentSettings();
   renderAllQuotesList();
+  renderFundeCategoriesSettings();
   updateSettingsSummaries();
 }
 
@@ -12089,6 +12335,468 @@ function rememberGoalRejection(goalId, text) {
     if (g.ignoredKeywords.length > 100) g.ignoredKeywords.shift();
     saveState();
   }
+}
+
+// ===== FUNDE =====
+const FUND_DAYPARTS = [
+  { key: 'morgens', label: 'morgens', defaultHour: 8 },
+  { key: 'vormittags', label: 'vormittags', defaultHour: 10 },
+  { key: 'mittags', label: 'mittags', defaultHour: 12 },
+  { key: 'nachmittags', label: 'nachmittags', defaultHour: 15 },
+  { key: 'abends', label: 'abends', defaultHour: 20 },
+  { key: 'nachts', label: 'nachts', defaultHour: 23 }
+];
+
+function dayPartFromHour(hour) {
+  if (hour >= 5 && hour < 9) return 'morgens';
+  if (hour >= 9 && hour < 11) return 'vormittags';
+  if (hour >= 11 && hour < 13) return 'mittags';
+  if (hour >= 13 && hour < 18) return 'nachmittags';
+  if (hour >= 18 && hour < 22) return 'abends';
+  return 'nachts';
+}
+let fundeView = 'recent';  // 'recent' | 'category' | 'random'
+let fundeRandomShown = null;
+let editingFundId = null;
+let fundEditorCategory = null;
+
+function uidFund() {
+  return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function setFundeView_old_unused() {
+  // ersetzt durch neue Version weiter unten
+}
+
+let fundeShownLimit = 30;  // Pagination: Anzahl der initial sichtbaren Funde
+const FUNDE_GROUP_THRESHOLD = 20;  // Ab so vielen Einträgen nach Monat gruppieren
+
+function fundeMatchesSearch(f, query) {
+  if (!query) return true;
+  const q = query.toLowerCase();
+  const fields = [f.text, f.source, f.note, f.place, f.category];
+  return fields.some(v => v && v.toLowerCase().includes(q));
+}
+
+function getFundeFilteredAndSorted() {
+  const funde = Array.isArray(state.funde) ? state.funde : [];
+  const searchEl = document.getElementById('funde-search');
+  const query = searchEl ? (searchEl.value || '').trim() : '';
+  return {
+    list: funde.filter(f => fundeMatchesSearch(f, query)).sort((a, b) => new Date(b.ts) - new Date(a.ts)),
+    query: query
+  };
+}
+
+function monthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function monthLabel(d) {
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  return months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function renderFunde() {
+  const wrap = document.getElementById('funde-list-wrap');
+  if (!wrap) return;
+  const funde = Array.isArray(state.funde) ? state.funde : [];
+  if (funde.length === 0) {
+    wrap.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:30px 16px;line-height:1.6;">
+      Noch keine Funde gesammelt. Trage deinen ersten Fund ein — einen Satz, ein Lied, einen Moment, der dich berührt hat.
+    </p>`;
+    return;
+  }
+
+  const { list: filtered, query } = getFundeFilteredAndSorted();
+
+  // Bei leerem Suchergebnis
+  if (filtered.length === 0 && query) {
+    wrap.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:30px 16px;line-height:1.6;">
+      Nichts gefunden zu „${escapeHtml(query)}".
+    </p>`;
+    return;
+  }
+
+  if (fundeView === 'recent') {
+    const visible = filtered.slice(0, fundeShownLimit);
+    let html = '';
+    // Monatsgruppierung erst ab Schwellwert UND wenn nicht gerade gesucht wird
+    const groupByMonth = !query && filtered.length > FUNDE_GROUP_THRESHOLD;
+    if (groupByMonth) {
+      let currentMonth = null;
+      visible.forEach(f => {
+        const d = new Date(f.ts);
+        const mk = monthKey(d);
+        if (mk !== currentMonth) {
+          currentMonth = mk;
+          html += `<div class="funde-category-header" style="font-size:0.95rem;">${escapeHtml(monthLabel(d))}</div>`;
+        }
+        html += renderFundCard(f);
+      });
+    } else {
+      html = visible.map(f => renderFundCard(f)).join('');
+    }
+    // "Weitere zeigen"-Knopf
+    if (filtered.length > fundeShownLimit) {
+      const remaining = filtered.length - fundeShownLimit;
+      html += `<button class="btn secondary full" onclick="loadMoreFunde()" style="margin-top:14px;">Weitere ${remaining} ${remaining === 1 ? 'zeigen' : 'zeigen'}</button>`;
+    }
+    wrap.innerHTML = html;
+    attachFundCardClicks(wrap);
+    return;
+  }
+
+  if (fundeView === 'category') {
+    const categories = Array.isArray(state.fundeCategories) ? state.fundeCategories : [];
+    const groups = {};
+    filtered.forEach(f => {
+      const cat = f.category || 'Sonstiges';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(f);
+    });
+    let html = '';
+    const orderedCats = [...categories];
+    Object.keys(groups).forEach(c => {
+      if (!orderedCats.includes(c)) orderedCats.push(c);
+    });
+    orderedCats.forEach(cat => {
+      const list = groups[cat];
+      if (!list || list.length === 0) return;
+      const sorted = list.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+      html += `<div class="funde-category-header">${escapeHtml(cat)} <span style="font-style:normal;font-size:0.78rem;color:var(--muted);font-family:'Inter',sans-serif;">· ${list.length}</span></div>`;
+      html += sorted.map(f => renderFundCard(f)).join('');
+    });
+    wrap.innerHTML = html;
+    attachFundCardClicks(wrap);
+    return;
+  }
+
+  if (fundeView === 'random') {
+    // Zufall aus gefilterten (nicht aus allen)
+    if (!fundeRandomShown || !filtered.includes(fundeRandomShown)) {
+      fundeRandomShown = filtered[Math.floor(Math.random() * filtered.length)];
+    }
+    wrap.innerHTML = `
+      ${renderFundCard(fundeRandomShown, true)}
+      <button class="btn secondary full" onclick="fundeRandomShown=null; renderFunde();" style="margin-top:14px;">Anderen Fund zeigen</button>
+    `;
+    attachFundCardClicks(wrap);
+    return;
+  }
+}
+
+function loadMoreFunde() {
+  fundeShownLimit += 30;
+  renderFunde();
+}
+
+// Bei View-Wechsel oder Section-Wechsel: Limit zurücksetzen
+function setFundeView(view) {
+  fundeView = view;
+  fundeShownLimit = 30;
+  ['recent', 'category', 'random'].forEach(v => {
+    const tab = document.getElementById('funde-tab-' + v);
+    if (tab) tab.classList.toggle('active', v === view);
+  });
+  if (view === 'random') fundeRandomShown = null;
+  renderFunde();
+}
+
+function renderFundCard(f, isRandom) {
+  const date = f.ts ? new Date(f.ts) : null;
+  let dateStr = '';
+  if (date) {
+    const d = date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+    if (f.dayPart) {
+      // Tageszeit statt Uhrzeit
+      dateStr = `${d} · ${f.dayPart}`;
+    } else {
+      const t = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+      dateStr = `${d} · ${t}`;
+    }
+  }
+  const meta = [];
+  if (f.category) meta.push(`<span class="fund-card-category">${escapeHtml(f.category)}</span>`);
+  if (dateStr) meta.push(`<span class="fund-card-date">${escapeHtml(dateStr)}</span>`);
+  if (f.place) meta.push(`<span class="fund-card-place">${escapeHtml(f.place)}</span>`);
+  let html = `<div class="fund-card${isRandom ? ' random-card' : ''}" data-fund-id="${escapeHtml(f.id)}">
+    <div class="fund-card-text">${escapeHtml(f.text || '')}</div>`;
+  if (f.source) {
+    html += `<div class="fund-card-source" style="font-family:'EB Garamond',serif;font-size:0.95rem;margin-bottom:8px;">${escapeHtml(f.source)}</div>`;
+  }
+  if (meta.length > 0) {
+    html += `<div class="fund-card-meta">${meta.join('')}</div>`;
+  }
+  if (f.note) {
+    html += `<div class="fund-card-note">${escapeHtml(f.note)}</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function attachFundCardClicks(wrap) {
+  wrap.querySelectorAll('.fund-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.fundId;
+      openFundActionMenu(id);
+    });
+  });
+}
+
+// Aktions-Menü für Fund (Bearbeiten / Löschen)
+function openFundActionMenu(fundId) {
+  const f = (state.funde || []).find(x => x.id === fundId);
+  if (!f) return;
+  askConfirmFund(f);
+}
+
+function askConfirmFund(f) {
+  // Reuse generic confirm — aber mit drei Optionen brauchen wir eigenes
+  // Stattdessen: zeige zuerst Bearbeiten-Dialog, mit Lösch-Knopf darin
+  openFundEditor(f.id);
+}
+
+let fundEditorDayPart = null;  // 'morgens' | 'abends' | ... oder null = exakte Uhrzeit
+
+function openFundEditor(existingId) {
+  editingFundId = existingId || null;
+  const titleEl = document.getElementById('fund-editor-title');
+  const text = document.getElementById('fund-text');
+  const source = document.getElementById('fund-source');
+  const place = document.getElementById('fund-place');
+  const note = document.getElementById('fund-note');
+  const dateEl = document.getElementById('fund-date');
+  const timeEl = document.getElementById('fund-time');
+
+  if (existingId) {
+    const f = (state.funde || []).find(x => x.id === existingId);
+    if (f) {
+      titleEl.textContent = 'Fund bearbeiten';
+      text.value = f.text || '';
+      source.value = f.source || '';
+      place.value = f.place || '';
+      note.value = f.note || '';
+      fundEditorCategory = f.category || null;
+      // Datum / Uhrzeit
+      const d = f.ts ? new Date(f.ts) : new Date();
+      dateEl.value = d.toISOString().slice(0, 10);  // yyyy-mm-dd
+      timeEl.value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      fundEditorDayPart = f.dayPart || null;
+    }
+  } else {
+    titleEl.textContent = 'Ein Fund';
+    text.value = '';
+    source.value = '';
+    place.value = '';
+    note.value = '';
+    fundEditorCategory = null;
+    const now = new Date();
+    dateEl.value = now.toISOString().slice(0, 10);
+    timeEl.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    fundEditorDayPart = null;
+  }
+
+  renderFundCategoryChips();
+  renderFundDayPartChips();
+  // Lösch-Knopf nur beim Bearbeiten
+  const delBtn = document.getElementById('fund-delete-btn');
+  if (delBtn) delBtn.style.display = existingId ? '' : 'none';
+  document.getElementById('fund-editor-overlay').classList.add('visible');
+  setTimeout(() => text.focus(), 100);
+}
+
+function renderFundDayPartChips() {
+  const wrap = document.getElementById('fund-daypart-chips');
+  if (!wrap) return;
+  wrap.innerHTML = FUND_DAYPARTS.map(dp => {
+    const active = dp.key === fundEditorDayPart ? ' active' : '';
+    return `<button class="fund-cat-chip${active}" onclick="selectFundDayPart('${dp.key}')">${escapeHtml(dp.label)}</button>`;
+  }).join('');
+}
+
+function selectFundDayPart(key) {
+  if (fundEditorDayPart === key) {
+    // Abwählen: zurück zu exakter Uhrzeit
+    fundEditorDayPart = null;
+  } else {
+    fundEditorDayPart = key;
+    // Uhrzeit auf den Default der Tageszeit setzen
+    const dp = FUND_DAYPARTS.find(d => d.key === key);
+    if (dp) {
+      const timeEl = document.getElementById('fund-time');
+      if (timeEl) timeEl.value = `${String(dp.defaultHour).padStart(2,'0')}:00`;
+    }
+  }
+  renderFundDayPartChips();
+}
+
+function renderFundCategoryChips() {
+  const wrap = document.getElementById('fund-category-chips');
+  if (!wrap) return;
+  const cats = Array.isArray(state.fundeCategories) ? state.fundeCategories : [];
+  wrap.innerHTML = cats.map(c => {
+    const active = c === fundEditorCategory ? ' active' : '';
+    return `<button class="fund-cat-chip${active}" onclick="selectFundCategory('${escapeHtml(c).replace(/'/g, "&#39;")}')">${escapeHtml(c)}</button>`;
+  }).join('');
+}
+
+function selectFundCategory(cat) {
+  // Decode HTML entities
+  const decoded = cat.replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+  fundEditorCategory = (fundEditorCategory === decoded) ? null : decoded;
+  renderFundCategoryChips();
+}
+
+function closeFundEditor() {
+  document.getElementById('fund-editor-overlay').classList.remove('visible');
+  editingFundId = null;
+  fundEditorCategory = null;
+}
+
+function saveFund() {
+  const text = (document.getElementById('fund-text').value || '').trim();
+  if (!text) { showToast('Bitte trage etwas ein.'); return; }
+  const source = (document.getElementById('fund-source').value || '').trim();
+  const place = (document.getElementById('fund-place').value || '').trim();
+  const note = (document.getElementById('fund-note').value || '').trim();
+  const category = fundEditorCategory || null;
+
+  // Datum + Zeit zusammenbauen
+  const dateStr = document.getElementById('fund-date').value;
+  const timeStr = document.getElementById('fund-time').value;
+  let ts;
+  if (dateStr && timeStr) {
+    // ISO: yyyy-mm-ddThh:mm
+    const [hh, mm] = timeStr.split(':');
+    const d = new Date(dateStr);
+    d.setHours(parseInt(hh, 10) || 0, parseInt(mm, 10) || 0, 0, 0);
+    ts = d.toISOString();
+  } else {
+    ts = new Date().toISOString();
+  }
+  const dayPart = fundEditorDayPart || null;
+
+  if (!Array.isArray(state.funde)) state.funde = [];
+
+  if (editingFundId) {
+    const f = state.funde.find(x => x.id === editingFundId);
+    if (f) {
+      f.text = text;
+      f.source = source || null;
+      f.place = place || null;
+      f.note = note || null;
+      f.category = category;
+      f.ts = ts;
+      f.dayPart = dayPart;
+      f.updatedAt = new Date().toISOString();
+    }
+  } else {
+    state.funde.push({
+      id: uidFund(),
+      text: text,
+      source: source || null,
+      place: place || null,
+      note: note || null,
+      category: category,
+      ts: ts,
+      dayPart: dayPart
+    });
+  }
+  saveState();
+  closeFundEditor();
+  renderFunde();
+  showToast(editingFundId ? 'Geändert.' : 'Notiert.');
+}
+
+function deleteFund(fundId) {
+  askConfirm('Diesen Fund wirklich löschen?', () => {
+    state.funde = (state.funde || []).filter(f => f.id !== fundId);
+    saveState();
+    closeFundEditor();
+    renderFunde();
+    showToast('Gelöscht.');
+  });
+}
+
+// Kategorien-Verwaltung in Settings
+function renderFundeCategoriesSettings() {
+  const list = document.getElementById('funde-cats-list');
+  const summary = document.getElementById('funde-cats-summary');
+  if (!list) return;
+  const cats = Array.isArray(state.fundeCategories) ? state.fundeCategories : [];
+  if (summary) summary.textContent = cats.length + (cats.length === 1 ? ' Kategorie' : ' Kategorien');
+  list.innerHTML = cats.map((c, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--accent-soft);border-radius:10px;">
+      <input type="text" value="${escapeHtml(c)}" data-cat-idx="${i}"
+        style="flex:1;background:transparent;border:none;font-family:'EB Garamond',serif;font-size:1rem;color:var(--ink);outline:none;padding:2px 4px;"
+        onblur="renameFundCategory(${i}, this.value)"
+        onkeydown="if(event.key==='Enter'){this.blur();}">
+      <button onclick="removeFundCategory(${i})" style="background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:4px 8px;line-height:1;" title="Entfernen">✕</button>
+    </div>
+  `).join('');
+}
+
+function addFundCategory() {
+  const input = document.getElementById('new-fund-cat');
+  const name = (input.value || '').trim();
+  if (!name) return;
+  if (!Array.isArray(state.fundeCategories)) state.fundeCategories = [];
+  if (state.fundeCategories.some(c => c.toLowerCase() === name.toLowerCase())) {
+    showToast('Diese Kategorie gibt es schon.');
+    return;
+  }
+  state.fundeCategories.push(name);
+  saveState();
+  input.value = '';
+  renderFundeCategoriesSettings();
+  showToast('Kategorie hinzugefügt.');
+}
+
+function renameFundCategory(idx, newName) {
+  newName = (newName || '').trim();
+  if (!newName) {
+    renderFundeCategoriesSettings();
+    return;
+  }
+  if (!Array.isArray(state.fundeCategories) || idx < 0 || idx >= state.fundeCategories.length) return;
+  const oldName = state.fundeCategories[idx];
+  if (oldName === newName) return;
+  // Doppelnamen-Check
+  if (state.fundeCategories.some((c, i) => i !== idx && c.toLowerCase() === newName.toLowerCase())) {
+    showToast('Diese Kategorie gibt es schon.');
+    renderFundeCategoriesSettings();
+    return;
+  }
+  state.fundeCategories[idx] = newName;
+  // Funde mit alter Kategorie umbenennen
+  (state.funde || []).forEach(f => {
+    if (f.category === oldName) f.category = newName;
+  });
+  saveState();
+  renderFundeCategoriesSettings();
+  showToast('Umbenannt.');
+}
+
+function removeFundCategory(idx) {
+  if (!Array.isArray(state.fundeCategories) || idx < 0 || idx >= state.fundeCategories.length) return;
+  const cat = state.fundeCategories[idx];
+  // Hat sie Funde?
+  const usedCount = (state.funde || []).filter(f => f.category === cat).length;
+  const msg = usedCount > 0
+    ? `Kategorie „${cat}" entfernen? ${usedCount} Funde werden auf „Sonstiges" gesetzt.`
+    : `Kategorie „${cat}" entfernen?`;
+  askConfirm(msg, () => {
+    state.fundeCategories.splice(idx, 1);
+    // Funde mit dieser Kategorie auf "Sonstiges" setzen (oder null, wenn auch Sonstiges weg ist)
+    const fallback = state.fundeCategories.includes('Sonstiges') ? 'Sonstiges' : null;
+    (state.funde || []).forEach(f => {
+      if (f.category === cat) f.category = fallback;
+    });
+    saveState();
+    renderFundeCategoriesSettings();
+    showToast('Entfernt.');
+  });
 }
 
 // ===== AUTO-WACHSENDE TEXTAREAS =====
