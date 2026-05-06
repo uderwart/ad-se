@@ -2036,6 +2036,117 @@ h3 {
 .mensch-item-btn:hover { color: var(--accent-deep); }
 .mensch-item-btn.danger:hover { color: #a14b38; }
 
+/* Mensch-Liste: ganzes Item klickbar (öffnet Detail) */
+.mensch-item.clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.mensch-item.clickable:hover {
+  border-color: var(--accent);
+}
+.mensch-item-name-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.mensch-longtime {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--muted);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+.mensch-longtime::before {
+  content: "·";
+  margin-right: 6px;
+  opacity: 0.6;
+}
+
+/* Mensch-Detail: Begegnungen */
+.begegnung-item {
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.begegnung-item:hover {
+  border-color: var(--accent);
+}
+.begegnung-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.begegnung-art {
+  color: var(--accent-deep);
+  font-style: normal;
+}
+.begegnung-notiz {
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.begegnung-empty {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 14px 0 8px;
+}
+
+/* Art-Chips für Begegnungs-Editor */
+.art-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.art-chip {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.art-chip:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.art-chip.selected {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+
+/* "Etwas mehr dazu" / "anderer Tag" Toggle-Links */
+.subtle-toggle {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 6px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+.subtle-toggle:hover {
+  color: var(--accent-deep);
+}
+
 /* ===== WEGE (große Ziele) ===== */
 .goal-card {
   background: var(--card);
@@ -5244,6 +5355,93 @@ textarea, input {
   </div>
 </div>
 
+<!-- ====== MENSCH-DETAIL ====== -->
+<div class="entry-overlay" id="mensch-detail-overlay">
+  <div class="entry-modal" style="max-width:480px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <h2 style="margin:0 0 2px;" id="mensch-detail-name"></h2>
+        <p class="muted-note" id="mensch-detail-relation" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <button onclick="closeMenschDetail()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <div id="mensch-detail-note" style="margin:10px 0 14px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;color:var(--ink);opacity:0.85;line-height:1.55;"></div>
+
+    <div id="mensch-detail-gifted" style="margin-bottom:14px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.85rem;color:var(--accent-deep);opacity:0.85;"></div>
+
+    <!-- Begegnungen -->
+    <div style="margin:18px 0 12px;display:flex;align-items:baseline;justify-content:space-between;">
+      <h3 style="margin:0;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);">Begegnungen</h3>
+      <span class="muted-note" id="mensch-detail-begegnungen-count" style="font-size:0.78rem;"></span>
+    </div>
+    <div id="mensch-detail-begegnungen-list" style="margin-bottom:14px;"></div>
+
+    <button class="btn secondary full" style="margin-bottom:18px;" onclick="openBegegnungEditor()">+ Begegnung notieren</button>
+
+    <!-- Aktionen -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" style="flex:1;min-width:120px;padding:11px 10px;" onclick="openKommMitForCurrentMensch()">Komm mit</button>
+      <button class="btn secondary" style="flex:1;min-width:100px;padding:11px 10px;" onclick="editCurrentMensch()">Bearbeiten</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="subtle-toggle" style="color:#a14b38;" onclick="deleteCurrentMensch()">Aus der Liste entfernen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== BEGEGNUNGS-EDITOR ====== -->
+<div class="entry-overlay" id="begegnung-editor-overlay">
+  <div class="entry-modal" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="begegnung-editor-title">Begegnung notieren</h2>
+      <button onclick="closeBegegnungEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <!-- Schnelles Feld: Was war? -->
+    <div style="margin-bottom:8px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Was war?</div>
+      <textarea id="begegnung-notiz" rows="2" placeholder="Ein Satz reicht…" oninput="autoGrowTextarea(this)"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;line-height:1.5;"></textarea>
+    </div>
+
+    <!-- Datum-Toggle -->
+    <div id="begegnung-date-toggle-wrap" style="margin-bottom:8px;">
+      <button class="subtle-toggle" id="begegnung-date-toggle" onclick="toggleBegegnungDate()">War an einem anderen Tag</button>
+    </div>
+    <div id="begegnung-date-row" style="display:none;margin-bottom:14px;">
+      <input type="date" id="begegnung-date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <!-- Mehr-Dazu-Toggle -->
+    <div id="begegnung-more-toggle-wrap" style="margin-bottom:8px;">
+      <button class="subtle-toggle" id="begegnung-more-toggle" onclick="toggleBegegnungMore()">Etwas mehr dazu</button>
+    </div>
+
+    <!-- Mehr-Dazu-Bereich (Art-Chips) -->
+    <div id="begegnung-more-row" style="display:none;margin-bottom:18px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:8px;">Art der Begegnung (optional)</div>
+      <div class="art-chips" id="begegnung-art-chips">
+        <button class="art-chip" data-art="gesehen" onclick="selectBegegnungArt('gesehen')">gesehen</button>
+        <button class="art-chip" data-art="telefoniert" onclick="selectBegegnungArt('telefoniert')">telefoniert</button>
+        <button class="art-chip" data-art="geschrieben" onclick="selectBegegnungArt('geschrieben')">geschrieben</button>
+        <button class="art-chip" data-art="gemeinsam erlebt" onclick="selectBegegnungArt('gemeinsam erlebt')">gemeinsam erlebt</button>
+        <button class="art-chip" data-art="gedacht an" onclick="selectBegegnungArt('gedacht an')">gedacht an</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeBegegnungEditor()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveBegegnungEditor()">Speichern</button>
+    </div>
+
+    <!-- Löschen-Knopf nur beim Bearbeiten sichtbar -->
+    <div id="begegnung-editor-delete-wrap" style="display:none;text-align:center;margin-top:12px;">
+      <button class="subtle-toggle" style="color:#a14b38;" onclick="deleteCurrentBegegnung()">Diese Begegnung entfernen</button>
+    </div>
+  </div>
+</div>
+
 <!-- ====== CONFIRM DIALOG ====== -->
 <div class="entry-overlay" id="confirm-overlay">
   <div class="entry-modal" style="max-width:360px;">
@@ -5458,6 +5656,12 @@ function loadState() {
         if (saved.rueckblickSettings[k] === undefined) {
           saved.rueckblickSettings[k] = defaults.rueckblickSettings[k];
         }
+      });
+    }
+    // Migration: Menschen → begegnungen-Feld (Gästebuch)
+    if (Array.isArray(saved.menschen)) {
+      saved.menschen.forEach(m => {
+        if (!Array.isArray(m.begegnungen)) m.begegnungen = [];
       });
     }
     return saved;
@@ -12975,7 +13179,7 @@ function renderMenschenList() {
     container.innerHTML = `<p class="muted-note" style="text-align:center;padding:12px 0;font-style:italic;">Noch niemand notiert.</p>`;
     return;
   }
-  container.innerHTML = liste.map((m, idx) => {
+  container.innerHTML = liste.map((m) => {
     const giftedLine = m.giftedAt
       ? `<div class="mensch-item-gifted">Geschenkt ${formatGiftRelative(new Date(m.giftedAt))}</div>`
       : '';
@@ -12985,18 +13189,42 @@ function renderMenschenList() {
     const noteLine = m.note
       ? `<div class="mensch-item-note">${escapeHtml(m.note)}</div>`
       : '';
-    return `<div class="mensch-item">
-      <div class="mensch-item-name">${escapeHtml(m.name)}</div>
+    // "Lange nicht"-Echo: letzte Begegnung vor 90+ Tagen, oder noch keine bei vorhandenem Geschenk-Datum
+    const longTimeLabel = computeLongTimeLabel(m);
+    const longTimeBadge = longTimeLabel
+      ? `<span class="mensch-longtime">${longTimeLabel}</span>`
+      : '';
+    return `<div class="mensch-item clickable" onclick="openMenschDetail('${m.id}')">
+      <div class="mensch-item-name-row">
+        <div class="mensch-item-name">${escapeHtml(m.name)}</div>
+        ${longTimeBadge}
+      </div>
       ${relLine}
       ${noteLine}
       ${giftedLine}
-      <div class="mensch-item-actions">
-        <button class="mensch-item-btn primary" onclick="openKommMitForMensch('${m.id}')">${m.giftedAt ? 'Nochmal senden' : 'Komm mit'}</button>
-        <button class="mensch-item-btn" onclick="editMensch('${m.id}')">Bearbeiten</button>
-        <button class="mensch-item-btn danger" onclick="deleteMensch('${m.id}')">Entfernen</button>
-      </div>
     </div>`;
   }).join('');
+}
+
+// "Lange nicht"-Echo — leise, nie als Vorwurf
+function computeLongTimeLabel(m) {
+  const begegnungen = Array.isArray(m.begegnungen) ? m.begegnungen : [];
+  let lastTs = null;
+  if (begegnungen.length) {
+    // Jüngste Begegnung finden
+    lastTs = begegnungen.reduce((max, b) => {
+      const t = new Date(b.ts).getTime();
+      return (t > max) ? t : max;
+    }, 0);
+  } else if (m.giftedAt) {
+    lastTs = new Date(m.giftedAt).getTime();
+  }
+  if (!lastTs) return null;
+  const diffDays = Math.floor((Date.now() - lastTs) / (1000 * 60 * 60 * 24));
+  if (diffDays < 90) return null;
+  if (diffDays < 180) return 'lange nicht';
+  if (diffDays < 365) return 'schon eine Weile';
+  return 'lange her';
 }
 
 function formatGiftRelative(d) {
@@ -13056,7 +13284,8 @@ function saveMenschEditor() {
       name: name,
       relation: relation,
       note: note,
-      giftedAt: null
+      giftedAt: null,
+      begegnungen: []
     });
     saveState();
     renderMenschenList();
@@ -13088,6 +13317,284 @@ function deleteMensch(id) {
     updateSettingsSummaries();
     showToast('Entfernt.');
   }, { title: 'Entfernen?', yesText: 'Entfernen' });
+}
+
+/* ===== MENSCH-DETAIL & BEGEGNUNGEN ===== */
+
+let menschDetailCurrentId = null;
+
+function openMenschDetail(id) {
+  const m = (state.menschen || []).find(x => x.id === id);
+  if (!m) return;
+  menschDetailCurrentId = id;
+
+  document.getElementById('mensch-detail-name').textContent = m.name || '';
+
+  const relEl = document.getElementById('mensch-detail-relation');
+  if (m.relation) {
+    relEl.textContent = m.relation;
+    relEl.style.display = '';
+  } else {
+    relEl.style.display = 'none';
+  }
+
+  const noteEl = document.getElementById('mensch-detail-note');
+  if (m.note) {
+    noteEl.textContent = m.note;
+    noteEl.style.display = '';
+  } else {
+    noteEl.style.display = 'none';
+  }
+
+  const giftedEl = document.getElementById('mensch-detail-gifted');
+  if (m.giftedAt) {
+    giftedEl.textContent = `Geschenkt ${formatGiftRelative(new Date(m.giftedAt))}`;
+    giftedEl.style.display = '';
+  } else {
+    giftedEl.style.display = 'none';
+  }
+
+  renderBegegnungenList();
+
+  document.getElementById('mensch-detail-overlay').classList.add('visible');
+}
+
+function closeMenschDetail() {
+  document.getElementById('mensch-detail-overlay').classList.remove('visible');
+  menschDetailCurrentId = null;
+}
+
+function renderBegegnungenList() {
+  const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
+  if (!m) return;
+  const list = document.getElementById('mensch-detail-begegnungen-list');
+  const countEl = document.getElementById('mensch-detail-begegnungen-count');
+  const begegnungen = Array.isArray(m.begegnungen) ? m.begegnungen.slice() : [];
+
+  if (countEl) {
+    countEl.textContent = begegnungen.length === 0
+      ? ''
+      : (begegnungen.length === 1 ? '1 Eintrag' : `${begegnungen.length} Einträge`);
+  }
+
+  if (!begegnungen.length) {
+    list.innerHTML = `<p class="begegnung-empty">Noch keine Begegnungen notiert.</p>`;
+    return;
+  }
+
+  // Jüngste zuerst
+  begegnungen.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
+
+  list.innerHTML = begegnungen.map(b => {
+    const dateStr = formatGiftRelative(new Date(b.ts));
+    const artStr = b.art
+      ? ` <span class="begegnung-art">· ${escapeHtml(b.art)}</span>`
+      : '';
+    const notiz = b.notiz
+      ? `<div class="begegnung-notiz">${escapeHtml(b.notiz)}</div>`
+      : '';
+    return `<div class="begegnung-item" onclick="openBegegnungEditor('${b.id}')">
+      <div class="begegnung-meta">${dateStr}${artStr}</div>
+      ${notiz}
+    </div>`;
+  }).join('');
+}
+
+// Aktionen aus dem Detail
+function openKommMitForCurrentMensch() {
+  if (!menschDetailCurrentId) return;
+  const id = menschDetailCurrentId;
+  closeMenschDetail();
+  openKommMitForMensch(id);
+}
+
+function editCurrentMensch() {
+  if (!menschDetailCurrentId) return;
+  const id = menschDetailCurrentId;
+  closeMenschDetail();
+  openMenschEditor(id);
+}
+
+function deleteCurrentMensch() {
+  if (!menschDetailCurrentId) return;
+  const id = menschDetailCurrentId;
+  closeMenschDetail();
+  deleteMensch(id);
+}
+
+/* ----- Begegnungs-Editor ----- */
+
+let begegnungEditorCurrentId = null; // null = neu, sonst ID des bearbeiteten Eintrags
+let begegnungEditorSelectedArt = null;
+
+function openBegegnungEditor(existingId) {
+  if (!menschDetailCurrentId) return;
+  begegnungEditorCurrentId = existingId || null;
+  begegnungEditorSelectedArt = null;
+
+  const titleEl = document.getElementById('begegnung-editor-title');
+  const notizEl = document.getElementById('begegnung-notiz');
+  const dateEl = document.getElementById('begegnung-date');
+  const dateRow = document.getElementById('begegnung-date-row');
+  const dateToggleWrap = document.getElementById('begegnung-date-toggle-wrap');
+  const moreRow = document.getElementById('begegnung-more-row');
+  const moreToggleWrap = document.getElementById('begegnung-more-toggle-wrap');
+  const deleteWrap = document.getElementById('begegnung-editor-delete-wrap');
+
+  // Defaults: heute, Felder leer, alles geschlossen
+  notizEl.value = '';
+  dateEl.value = todayDateString();
+  dateRow.style.display = 'none';
+  dateToggleWrap.style.display = '';
+  moreRow.style.display = 'none';
+  moreToggleWrap.style.display = '';
+
+  // Chips zurücksetzen
+  document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => c.classList.remove('selected'));
+
+  if (existingId) {
+    titleEl.textContent = 'Begegnung bearbeiten';
+    deleteWrap.style.display = '';
+    const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
+    const b = m && Array.isArray(m.begegnungen)
+      ? m.begegnungen.find(x => x.id === existingId)
+      : null;
+    if (b) {
+      notizEl.value = b.notiz || '';
+      const d = new Date(b.ts);
+      dateEl.value = isoDateOnly(d);
+      // Wenn Datum nicht heute → Datum-Zeile öffnen
+      if (dateEl.value !== todayDateString()) {
+        dateRow.style.display = '';
+        dateToggleWrap.style.display = 'none';
+      }
+      // Wenn Art gesetzt → mehr-Bereich öffnen
+      if (b.art) {
+        moreRow.style.display = '';
+        moreToggleWrap.style.display = 'none';
+        begegnungEditorSelectedArt = b.art;
+        const chip = document.querySelector(`#begegnung-art-chips .art-chip[data-art="${b.art}"]`);
+        if (chip) chip.classList.add('selected');
+      }
+    }
+  } else {
+    titleEl.textContent = 'Begegnung notieren';
+    deleteWrap.style.display = 'none';
+  }
+
+  document.getElementById('begegnung-editor-overlay').classList.add('visible');
+  setTimeout(() => {
+    notizEl.focus();
+    autoGrowTextarea(notizEl);
+  }, 200);
+}
+
+function closeBegegnungEditor() {
+  document.getElementById('begegnung-editor-overlay').classList.remove('visible');
+  begegnungEditorCurrentId = null;
+  begegnungEditorSelectedArt = null;
+}
+
+function toggleBegegnungDate() {
+  document.getElementById('begegnung-date-toggle-wrap').style.display = 'none';
+  document.getElementById('begegnung-date-row').style.display = '';
+}
+
+function toggleBegegnungMore() {
+  document.getElementById('begegnung-more-toggle-wrap').style.display = 'none';
+  document.getElementById('begegnung-more-row').style.display = '';
+}
+
+function selectBegegnungArt(art) {
+  // Toggle-Verhalten: nochmal klicken = abwählen
+  if (begegnungEditorSelectedArt === art) {
+    begegnungEditorSelectedArt = null;
+  } else {
+    begegnungEditorSelectedArt = art;
+  }
+  document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => {
+    if (c.dataset.art === begegnungEditorSelectedArt) {
+      c.classList.add('selected');
+    } else {
+      c.classList.remove('selected');
+    }
+  });
+}
+
+function saveBegegnungEditor() {
+  if (!menschDetailCurrentId) return;
+  const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
+  if (!m) return;
+
+  const notiz = (document.getElementById('begegnung-notiz').value || '').trim();
+  const dateStr = document.getElementById('begegnung-date').value;
+  const art = begegnungEditorSelectedArt;
+
+  if (!notiz && !art) {
+    showToast('Ein Satz oder eine Art reicht.');
+    return;
+  }
+
+  // Datum mit aktueller Uhrzeit kombinieren — sonst landen alle Begegnungen auf 00:00
+  let ts;
+  if (dateStr === todayDateString()) {
+    ts = new Date().toISOString();
+  } else {
+    // Mittags 12:00, damit Zeitzonen-Wechsel den Tag nicht verschiebt
+    ts = new Date(dateStr + 'T12:00:00').toISOString();
+  }
+
+  if (!Array.isArray(m.begegnungen)) m.begegnungen = [];
+
+  if (begegnungEditorCurrentId) {
+    const b = m.begegnungen.find(x => x.id === begegnungEditorCurrentId);
+    if (b) {
+      b.notiz = notiz;
+      b.art = art || null;
+      b.ts = ts;
+    }
+  } else {
+    m.begegnungen.push({
+      id: 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
+      ts: ts,
+      art: art || null,
+      notiz: notiz
+    });
+  }
+
+  saveState();
+  closeBegegnungEditor();
+  renderBegegnungenList();
+  renderMenschenList(); // wegen "lange nicht"-Echo
+  showToast(begegnungEditorCurrentId ? 'Geändert.' : 'Notiert.');
+}
+
+function deleteCurrentBegegnung() {
+  if (!menschDetailCurrentId || !begegnungEditorCurrentId) return;
+  const begegnungIdToDelete = begegnungEditorCurrentId;
+  askConfirm('Diese Begegnung wirklich entfernen?', () => {
+    const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
+    if (m && Array.isArray(m.begegnungen)) {
+      m.begegnungen = m.begegnungen.filter(x => x.id !== begegnungIdToDelete);
+      saveState();
+    }
+    closeBegegnungEditor();
+    renderBegegnungenList();
+    renderMenschenList();
+    showToast('Entfernt.');
+  }, { title: 'Entfernen?', yesText: 'Entfernen' });
+}
+
+// Hilfsfunktionen für Datum
+function todayDateString() {
+  const d = new Date();
+  return isoDateOnly(d);
+}
+function isoDateOnly(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 /* Komm-mit Dialog */
@@ -13231,7 +13738,8 @@ function askAddToMenschenIfNew(name) {
       name: name,
       relation: '',
       note: '',
-      giftedAt: new Date().toISOString()
+      giftedAt: new Date().toISOString(),
+      begegnungen: []
     });
     saveState();
     updateSettingsSummaries();
