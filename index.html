@@ -6202,7 +6202,14 @@ function updateFeelingSelection() {
     const tag = document.createElement('div');
     tag.className = 'fm-tag';
     tag.style.background = colors[s.quadrant];
-    tag.innerHTML = `<span>${s.label}</span><span class="remove" onclick="removeFeelingWord(${i})">✕</span>`;
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = s.label;
+    const removeSpan = document.createElement('span');
+    removeSpan.className = 'remove';
+    removeSpan.textContent = '✕';
+    removeSpan.addEventListener('click', () => removeFeelingWord(i));
+    tag.appendChild(labelSpan);
+    tag.appendChild(removeSpan);
     tags.appendChild(tag);
   });
 }
