@@ -2762,6 +2762,249 @@ h3 {
   border-color: var(--accent);
 }
 
+/* ===== REISEN — Spec v02, Mai 2026 ===== */
+.trip-card {
+  background: linear-gradient(135deg, #ffffff 0%, #faf3e8 100%);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 10px rgba(58, 31, 26, 0.08);
+  border-left: 3px solid #8b6f47;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.trip-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(58, 31, 26, 0.12);
+}
+.trip-card-name {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.3rem;
+  line-height: 1.3;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.trip-card-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: center;
+}
+.trip-card-active {
+  background: rgba(139, 111, 71, 0.14);
+  color: #6b4f2c;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.trip-card-desc {
+  margin-top: 10px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Streifen auf Home, wenn Reise läuft */
+.trip-home-strip {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(139, 111, 71, 0.10) 0%, rgba(139, 111, 71, 0.04) 100%);
+  border-left: 3px solid #8b6f47;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.86rem;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: background 0.15s;
+}
+.trip-home-strip:hover {
+  background: linear-gradient(135deg, rgba(139, 111, 71, 0.18) 0%, rgba(139, 111, 71, 0.08) 100%);
+}
+.trip-home-strip-text {
+  flex: 1;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+}
+.trip-home-strip-day {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Reise-Detail: Kopf */
+.trip-detail-header {
+  background: linear-gradient(135deg, rgba(139, 111, 71, 0.12) 0%, rgba(139, 111, 71, 0.04) 100%);
+  border-radius: 14px;
+  padding: 22px 22px 20px;
+  margin-bottom: 18px;
+  border-left: 3px solid #8b6f47;
+}
+.trip-detail-name {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.65rem;
+  line-height: 1.25;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.trip-detail-range {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.trip-detail-desc {
+  font-family: 'EB Garamond', serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ink);
+  font-style: italic;
+}
+
+/* Tageseintrag-Karte (in der Chronik) */
+.trip-day-block {
+  margin-bottom: 22px;
+}
+.trip-day-header {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6b4f2c;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(139, 111, 71, 0.2);
+}
+.trip-entry-card {
+  background: #fefcf7;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-left: 2px solid #c8a88a;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.trip-entry-card:hover {
+  background: #faf3e8;
+}
+.trip-entry-text {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.trip-entry-text + .trip-entry-text {
+  margin-top: 8px;
+}
+.trip-entry-empty {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Tageseintrag-Editor (Block-Editor) */
+.te-editor-block {
+  margin-bottom: 12px;
+  position: relative;
+}
+.te-editor-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  resize: none;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+  min-height: 80px;
+  overflow: hidden;
+}
+.te-editor-textarea:focus {
+  border-color: #8b6f47;
+}
+.te-block-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.te-block-action {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.74rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  letter-spacing: 0.04em;
+}
+.te-block-action:hover { color: #a14b38; }
+.te-add-row {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 8px;
+}
+.te-add-btn {
+  background: none;
+  border: 1px dashed rgba(139, 111, 71, 0.4);
+  color: #8b6f47;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  padding: 6px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.te-add-btn:hover {
+  border-color: #8b6f47;
+  background: rgba(139, 111, 71, 0.08);
+}
+
+/* Hinweis im Fund-Editor: Reise-Zuordnung */
+.fund-trip-hint {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(139, 111, 71, 0.08);
+  border-left: 2px solid #8b6f47;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.fund-trip-hint em {
+  font-style: normal;
+  color: #6b4f2c;
+  font-weight: 500;
+}
+
 /* ===== MONATSRÜCKBLICK ===== */
 #section-rueckblick {
   padding: 0;
@@ -3517,6 +3760,12 @@ textarea, input {
   <div class="greeting-block">
     <h1 id="home-greeting">Willkommen</h1>
     <div class="greeting-sub" id="home-date"></div>
+  </div>
+
+  <!-- Reise-Streifen (Home), nur sichtbar wenn aktive Reise -->
+  <div class="trip-home-strip" id="home-trip-strip" style="display:none;" onclick="openActiveTripFromHome()">
+    <div class="trip-home-strip-text" id="home-trip-strip-text"></div>
+    <div class="trip-home-strip-day" id="home-trip-strip-day"></div>
   </div>
 
   <!-- Identität -->
@@ -4658,6 +4907,7 @@ textarea, input {
   <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
     <button class="chip active" id="funde-tab-recent" onclick="setFundeView('recent')">Neueste</button>
     <button class="chip" id="funde-tab-category" onclick="setFundeView('category')">Nach Kategorie</button>
+    <button class="chip" id="funde-tab-trips" onclick="setFundeView('trips')">Reisen</button>
     <button class="chip" id="funde-tab-random" onclick="setFundeView('random')">Zufallskarte</button>
   </div>
 
@@ -4673,6 +4923,9 @@ textarea, input {
       <h2 style="margin:0;" id="fund-editor-title">Ein Fund</h2>
       <button onclick="closeFundEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
     </div>
+
+    <!-- Reise-Hinweis: erscheint nur, wenn der Fund einer aktiven Reise zugeordnet wird -->
+    <div class="fund-trip-hint" id="fund-trip-hint" style="display:none;"></div>
 
     <div style="margin-bottom:12px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Was hat dich berührt?</div>
@@ -4695,6 +4948,7 @@ textarea, input {
     <div style="margin-bottom:12px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Wann? <span style="opacity:0.6;">(Datum + Zeit oder Tageszeit)</span></div>
       <input type="date" id="fund-date"
+        onchange="updateFundTripHint()"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;">
       <div id="fund-daypart-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
       <input type="time" id="fund-time"
@@ -4717,6 +4971,83 @@ textarea, input {
 
     <button class="btn full" onclick="saveFund()">Speichern</button>
     <button class="btn secondary full" id="fund-delete-btn" onclick="deleteFund(editingFundId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Fund löschen</button>
+  </div>
+</div>
+
+<!-- ====== REISE-DETAIL — Spec v02, Mai 2026 ====== -->
+<div id="section-trip-detail" class="section">
+  <button class="back-link" onclick="closeTripDetail()">← Reisen</button>
+
+  <div class="trip-detail-header">
+    <div class="trip-detail-name" id="trip-detail-name"></div>
+    <div class="trip-detail-range" id="trip-detail-range"></div>
+    <div class="trip-detail-desc" id="trip-detail-desc"></div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
+    <button class="btn" onclick="openTripEntryEditor()">+ Tageseintrag</button>
+    <button class="btn secondary" onclick="openTripEditor(currentTripId)">Reise bearbeiten</button>
+  </div>
+
+  <div id="trip-chronicle-wrap"></div>
+</div>
+
+<!-- ====== REISE-EDITOR (Anlegen/Bearbeiten) ====== -->
+<div class="entry-overlay" id="trip-editor-overlay">
+  <div class="entry-modal" style="max-width:480px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="trip-editor-title">Neue Reise</h2>
+      <button onclick="closeTripEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Name</div>
+      <input type="text" id="trip-edit-name" placeholder="z.B. Schweden, Sommer 2026"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Von</div>
+        <input type="date" id="trip-edit-from"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Bis</div>
+        <input type="date" id="trip-edit-to"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Beschreibung <span style="opacity:0.6;">(optional)</span></div>
+      <textarea id="trip-edit-desc" rows="3" placeholder="Worum geht es bei dieser Reise?"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;line-height:1.5;"></textarea>
+    </div>
+
+    <button class="btn full" onclick="saveTrip()">Speichern</button>
+    <button class="btn secondary full" id="trip-delete-btn" onclick="confirmDeleteTrip()" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diese Reise löschen</button>
+  </div>
+</div>
+
+<!-- ====== TAGESEINTRAG-EDITOR (Block-Editor) ====== -->
+<div class="entry-overlay" id="trip-entry-editor-overlay">
+  <div class="entry-modal" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;" id="trip-entry-editor-title">Tageseintrag</h2>
+      <button onclick="closeTripEntryEditor()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Datum</div>
+      <input type="date" id="trip-entry-date"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <div id="te-blocks-wrap" style="margin-bottom:14px;"></div>
+
+    <button class="btn full" onclick="saveTripEntry()">Speichern</button>
+    <button class="btn secondary full" id="trip-entry-delete-btn" onclick="confirmDeleteTripEntry()" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Eintrag löschen</button>
   </div>
 </div>
 
@@ -5540,6 +5871,185 @@ async function cleanupOrphans() {
   return ids.length;
 }
 
+/* ===== REISEN — Datenstruktur und Hilfsfunktionen =====
+   Eingeführt Mai 2026 — Schritt 2 der Reisetagebuch-Spec v02.
+
+   Reise-Objekt (state.trips[i]):
+     {
+       id: "t-...",
+       name: "Schweden, Sommer 2026",
+       from: "2026-07-14",     // ISO-Datum
+       to:   "2026-07-28",     // ISO-Datum
+       description: "...",     // optional
+       createdAt, updatedAt
+     }
+
+   Tageseintrag (state.tripEntries[i]):
+     {
+       id: "te-...",
+       tripId: "t-...",
+       date: "2026-07-15",     // ISO-Datum
+       blocks: [
+         { id, type: "text", content: "..." },
+         { id, type: "image", mediaId: "...", caption: "..." }   // ab Schritt 4
+       ],
+       createdAt, updatedAt
+     }
+*/
+function tripUid() { return 't-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8); }
+function tripEntryUid() { return 'te-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8); }
+function blockUid() { return 'b-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6); }
+
+/* Datum als reines yyyy-mm-dd (lokale Zeitzone) */
+function isoDateOnly(d) {
+  if (!d) return null;
+  const dd = (d instanceof Date) ? d : new Date(d);
+  const y = dd.getFullYear();
+  const m = String(dd.getMonth() + 1).padStart(2, '0');
+  const day = String(dd.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function tripsArr()       { return Array.isArray(state.trips) ? state.trips : (state.trips = [], state.trips); }
+function tripEntriesArr() { return Array.isArray(state.tripEntries) ? state.tripEntries : (state.tripEntries = [], state.tripEntries); }
+
+function createTrip({ name, from, to, description }) {
+  const trip = {
+    id: tripUid(),
+    name: (name || '').trim(),
+    from: from || null,           // yyyy-mm-dd
+    to: to || null,               // yyyy-mm-dd
+    description: (description || '').trim(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  tripsArr().push(trip);
+  saveState();
+  return trip;
+}
+
+function updateTrip(tripId, patch) {
+  const t = tripsArr().find(x => x.id === tripId);
+  if (!t) return null;
+  if (patch.name !== undefined) t.name = (patch.name || '').trim();
+  if (patch.from !== undefined) t.from = patch.from || null;
+  if (patch.to !== undefined) t.to = patch.to || null;
+  if (patch.description !== undefined) t.description = (patch.description || '').trim();
+  t.updatedAt = new Date().toISOString();
+  saveState();
+  return t;
+}
+
+function deleteTrip(tripId) {
+  state.trips = tripsArr().filter(t => t.id !== tripId);
+  // Tageseinträge dieser Reise auch entfernen
+  state.tripEntries = tripEntriesArr().filter(e => e.tripId !== tripId);
+  saveState();
+}
+
+/* Welche Reise (falls vorhanden) deckt das gegebene Datum ab?
+   Bei Überlappung gewinnt die zuletzt angelegte (createdAt). */
+function tripsForDate(dateOrIso) {
+  const iso = typeof dateOrIso === 'string' ? dateOrIso : isoDateOnly(dateOrIso);
+  if (!iso) return [];
+  return tripsArr().filter(t => {
+    if (!t.from || !t.to) return false;
+    return iso >= t.from && iso <= t.to;
+  });
+}
+
+function getActiveTrip() {
+  const today = isoDateOnly(new Date());
+  const matches = tripsForDate(today);
+  if (matches.length === 0) return null;
+  // Letzte angelegt gewinnt
+  return matches.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+}
+
+function getTripById(id) {
+  return tripsArr().find(t => t.id === id) || null;
+}
+
+function entriesForTrip(tripId) {
+  return tripEntriesArr().filter(e => e.tripId === tripId);
+}
+
+function fundenForTrip(trip) {
+  if (!trip || !trip.from || !trip.to) return [];
+  const funde = Array.isArray(state.funde) ? state.funde : [];
+  return funde.filter(f => {
+    if (!f.ts) return false;
+    const d = isoDateOnly(new Date(f.ts));
+    return d >= trip.from && d <= trip.to;
+  });
+}
+
+/* Tag-Index innerhalb der Reise (1-basiert), oder null */
+function tripDayNumber(trip, dateIso) {
+  if (!trip || !trip.from || !dateIso) return null;
+  const start = new Date(trip.from + 'T00:00:00');
+  const cur = new Date(dateIso + 'T00:00:00');
+  const ms = cur - start;
+  if (ms < 0) return null;
+  return Math.floor(ms / (24 * 3600 * 1000)) + 1;
+}
+
+function tripDayCount(trip) {
+  if (!trip || !trip.from || !trip.to) return 0;
+  const a = new Date(trip.from + 'T00:00:00');
+  const b = new Date(trip.to + 'T00:00:00');
+  return Math.floor((b - a) / (24 * 3600 * 1000)) + 1;
+}
+
+function formatTripDateRange(trip) {
+  if (!trip?.from || !trip?.to) return '';
+  const a = new Date(trip.from + 'T00:00:00');
+  const b = new Date(trip.to + 'T00:00:00');
+  const sameMonth = a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  if (sameMonth) {
+    return `${a.getDate()}.–${b.getDate()}. ${months[a.getMonth()]} ${a.getFullYear()}`;
+  }
+  return `${a.getDate()}. ${months[a.getMonth()]} – ${b.getDate()}. ${months[b.getMonth()]} ${b.getFullYear()}`;
+}
+
+/* ===== TAGESEINTRÄGE ===== */
+function getTripEntry(entryId) {
+  return tripEntriesArr().find(e => e.id === entryId) || null;
+}
+
+function getEntryForTripDate(tripId, dateIso) {
+  return tripEntriesArr().find(e => e.tripId === tripId && e.date === dateIso) || null;
+}
+
+function createTripEntry({ tripId, date, blocks }) {
+  const entry = {
+    id: tripEntryUid(),
+    tripId: tripId,
+    date: date,
+    blocks: Array.isArray(blocks) ? blocks : [{ id: blockUid(), type: 'text', content: '' }],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  tripEntriesArr().push(entry);
+  saveState();
+  return entry;
+}
+
+function updateTripEntryBlocks(entryId, blocks) {
+  const e = getTripEntry(entryId);
+  if (!e) return null;
+  e.blocks = Array.isArray(blocks) ? blocks : [];
+  e.updatedAt = new Date().toISOString();
+  saveState();
+  return e;
+}
+
+function deleteTripEntry(entryId) {
+  state.tripEntries = tripEntriesArr().filter(e => e.id !== entryId);
+  saveState();
+}
+
 /* ===== STATE ===== */
 function loadState() {
   const raw = localStorage.getItem('adse_state');
@@ -5586,6 +6096,8 @@ function loadState() {
     personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
     funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
     fundeCategories: ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'],
+    trips: [],                  // Reisen — Spec v02, Mai 2026
+    tripEntries: [],            // Tageseinträge zu Reisen — Spec v02, Mai 2026
     lastDurations: {},
     favoriteQuotes: [],
     quotes: null,  // wird lazy initialisiert aus OPENING_QUOTES (alle aktiv)
@@ -5600,7 +6112,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -5783,6 +6295,7 @@ function showSection(id) {
   if (id === 'rueckblick-list') renderRueckblickList();
   if (id === 'goals') renderGoalsList();
   if (id === 'goal-detail') renderGoalDetail();
+  if (id === 'trip-detail') renderTripDetail();
   if (id === 'funde') {
     fundeShownLimit = 30;
     const searchEl = document.getElementById('funde-search');
@@ -5871,6 +6384,7 @@ function renderHome() {
   renderGedankenHomeCard();
   renderGedankenBridge();
   renderRueckblickHomeCard();
+  renderTripHomeStrip();
   updateCollapsibleSummaries();
 }
 
@@ -12563,6 +13077,13 @@ function monthLabel(d) {
 function renderFunde() {
   const wrap = document.getElementById('funde-list-wrap');
   if (!wrap) return;
+
+  // Reisen-Ansicht: ganz eigene Mechanik, unabhängig von Funden-Liste
+  if (fundeView === 'trips') {
+    renderTripsList(wrap);
+    return;
+  }
+
   const funde = Array.isArray(state.funde) ? state.funde : [];
   if (funde.length === 0) {
     wrap.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:30px 16px;line-height:1.6;">
@@ -12658,11 +13179,23 @@ function loadMoreFunde() {
 function setFundeView(view) {
   fundeView = view;
   fundeShownLimit = 30;
-  ['recent', 'category', 'random'].forEach(v => {
+  ['recent', 'category', 'trips', 'random'].forEach(v => {
     const tab = document.getElementById('funde-tab-' + v);
     if (tab) tab.classList.toggle('active', v === view);
   });
   if (view === 'random') fundeRandomShown = null;
+  // Suchfeld bei Reisen-Ansicht ausblenden — sucht ja gar nicht in Reisen
+  const searchWrap = document.getElementById('funde-search')?.parentElement;
+  if (searchWrap) {
+    searchWrap.style.display = (view === 'trips') ? 'none' : '';
+  }
+  // Knopf "Fund eintragen" nur bei Funde-Ansichten zeigen
+  const fundButtons = document.querySelectorAll('#section-funde > button.btn.full');
+  fundButtons.forEach(b => {
+    if (b.textContent.includes('Fund eintragen')) {
+      b.style.display = (view === 'trips') ? 'none' : '';
+    }
+  });
   renderFunde();
 }
 
@@ -12765,8 +13298,28 @@ function openFundEditor(existingId) {
   // Lösch-Knopf nur beim Bearbeiten
   const delBtn = document.getElementById('fund-delete-btn');
   if (delBtn) delBtn.style.display = existingId ? '' : 'none';
+  // Reise-Hinweis aktualisieren
+  updateFundTripHint();
   document.getElementById('fund-editor-overlay').classList.add('visible');
   setTimeout(() => text.focus(), 100);
+}
+
+/* Bei Datums-Änderung im Fund-Editor neu prüfen, welche Reise zugeordnet ist */
+function updateFundTripHint() {
+  const hint = document.getElementById('fund-trip-hint');
+  if (!hint) return;
+  const dateInput = document.getElementById('fund-date');
+  const dateStr = dateInput?.value || isoDateOnly(new Date());
+  const matches = tripsForDate(dateStr);
+  if (matches.length === 0) {
+    hint.style.display = 'none';
+    hint.innerHTML = '';
+    return;
+  }
+  // Letzte angelegt gewinnt (gleiche Logik wie getActiveTrip)
+  const t = matches.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+  hint.innerHTML = `Wird der Reise <em>${escapeHtml(t.name)}</em> zugeordnet.`;
+  hint.style.display = '';
 }
 
 function renderFundDayPartChips() {
@@ -12880,6 +13433,456 @@ function deleteFund(fundId) {
     renderFunde();
     showToast('Gelöscht.');
   });
+}
+
+/* ===== REISEN — UI und Logik (Spec v02, Mai 2026) ===== */
+
+// Aktueller Bearbeitungs-Zustand
+let currentTripId = null;             // Reise, deren Detail-Seite gerade offen ist
+let editingTripId = null;             // Reise, die im Editor bearbeitet wird (null = neu)
+let editingTripEntryId = null;        // Tageseintrag im Editor (null = neu)
+let editingTripEntryTripId = null;    // Reise, zu der ein neuer Eintrag gehört
+let teBlocksDraft = [];               // Block-Editor: Arbeits-Kopie der Blöcke
+
+/* ----- Reisen-Liste (Funde-Tab "Reisen") ----- */
+function renderTripsList(wrap) {
+  const trips = tripsArr().slice().sort((a, b) => {
+    // Sortierung: laufende zuerst, dann nach Startdatum absteigend
+    const today = isoDateOnly(new Date());
+    const aActive = a.from && a.to && today >= a.from && today <= a.to;
+    const bActive = b.from && b.to && today >= b.from && today <= b.to;
+    if (aActive && !bActive) return -1;
+    if (!aActive && bActive) return 1;
+    return (b.from || '').localeCompare(a.from || '');
+  });
+
+  let html = '';
+  html += `<button class="btn full" onclick="openTripEditor(null)" style="margin-bottom:14px;">+ Neue Reise</button>`;
+
+  if (trips.length === 0) {
+    html += `<p class="muted-note" style="font-style:italic;text-align:center;padding:30px 16px;line-height:1.6;">
+      Noch keine Reisen angelegt. Eine Reise bündelt Tageseinträge und Funde aus einem Zeitraum.
+    </p>`;
+    wrap.innerHTML = html;
+    return;
+  }
+
+  const today = isoDateOnly(new Date());
+  trips.forEach(t => {
+    const isActive = t.from && t.to && today >= t.from && today <= t.to;
+    const entries = entriesForTrip(t.id);
+    const fundCount = fundenForTrip(t).length;
+    const dayCount = tripDayCount(t);
+    const range = formatTripDateRange(t);
+    let metaPieces = [];
+    if (range) metaPieces.push(escapeHtml(range));
+    metaPieces.push(`${entries.length} ${entries.length === 1 ? 'Eintrag' : 'Einträge'}`);
+    metaPieces.push(`${fundCount} ${fundCount === 1 ? 'Fund' : 'Funde'}`);
+
+    html += `<div class="trip-card" onclick="openTripDetail('${t.id}')">
+      <div class="trip-card-name">${escapeHtml(t.name || 'Ohne Namen')}</div>
+      <div class="trip-card-meta">
+        ${metaPieces.map(p => `<span>${p}</span>`).join('')}
+        ${isActive ? `<span class="trip-card-active">aktiv · Tag ${tripDayNumber(t, today)} von ${dayCount}</span>` : ''}
+      </div>
+      ${t.description ? `<div class="trip-card-desc">${escapeHtml(t.description)}</div>` : ''}
+    </div>`;
+  });
+
+  wrap.innerHTML = html;
+}
+
+/* ----- Reise-Editor (anlegen / bearbeiten) ----- */
+function openTripEditor(tripId) {
+  editingTripId = tripId || null;
+  const overlay = document.getElementById('trip-editor-overlay');
+  const titleEl = document.getElementById('trip-editor-title');
+  const nameEl  = document.getElementById('trip-edit-name');
+  const fromEl  = document.getElementById('trip-edit-from');
+  const toEl    = document.getElementById('trip-edit-to');
+  const descEl  = document.getElementById('trip-edit-desc');
+  const delBtn  = document.getElementById('trip-delete-btn');
+
+  if (tripId) {
+    const t = getTripById(tripId);
+    if (!t) return;
+    titleEl.textContent = 'Reise bearbeiten';
+    nameEl.value = t.name || '';
+    fromEl.value = t.from || '';
+    toEl.value   = t.to || '';
+    descEl.value = t.description || '';
+    delBtn.style.display = '';
+  } else {
+    titleEl.textContent = 'Neue Reise';
+    nameEl.value = '';
+    // Sinnvoller Default: heute bis heute + 7 Tage
+    const today = new Date();
+    const plus7 = new Date(today.getTime() + 7 * 24 * 3600 * 1000);
+    fromEl.value = isoDateOnly(today);
+    toEl.value   = isoDateOnly(plus7);
+    descEl.value = '';
+    delBtn.style.display = 'none';
+  }
+
+  overlay.classList.add('visible');
+  setTimeout(() => nameEl.focus(), 50);
+}
+
+function closeTripEditor() {
+  document.getElementById('trip-editor-overlay').classList.remove('visible');
+  editingTripId = null;
+}
+
+function saveTrip() {
+  const name = (document.getElementById('trip-edit-name').value || '').trim();
+  const from = document.getElementById('trip-edit-from').value || '';
+  const to   = document.getElementById('trip-edit-to').value || '';
+  const desc = (document.getElementById('trip-edit-desc').value || '').trim();
+
+  if (!name) { showToast('Bitte einen Namen eintragen.'); return; }
+  if (!from || !to) { showToast('Bitte Zeitraum festlegen.'); return; }
+  if (from > to) { showToast('„Von" muss vor „Bis" liegen.'); return; }
+
+  if (editingTripId) {
+    updateTrip(editingTripId, { name, from, to, description: desc });
+    showToast('Reise aktualisiert.');
+  } else {
+    const trip = createTrip({ name, from, to, description: desc });
+    editingTripId = trip.id;
+    showToast('Reise angelegt.');
+  }
+
+  closeTripEditor();
+  // Wenn Detail-Ansicht offen, neu rendern
+  if (currentTripId === editingTripId || currentTripId) {
+    renderTripDetail();
+  }
+  // Funde-Liste neu rendern (falls Reisen-Tab offen)
+  if (fundeView === 'trips') renderFunde();
+  // Home-Streifen aktualisieren
+  renderTripHomeStrip();
+}
+
+function confirmDeleteTrip() {
+  if (!editingTripId) return;
+  const t = getTripById(editingTripId);
+  if (!t) return;
+  const entryCount = entriesForTrip(editingTripId).length;
+  const msg = entryCount > 0
+    ? `Reise "${t.name}" wirklich löschen? ${entryCount} ${entryCount === 1 ? 'Tageseintrag wird' : 'Tageseinträge werden'} mitgelöscht. Funde aus dem Zeitraum bleiben.`
+    : `Reise "${t.name}" wirklich löschen?`;
+  askConfirm(msg, () => {
+    const id = editingTripId;
+    deleteTrip(id);
+    closeTripEditor();
+    if (currentTripId === id) closeTripDetail();
+    if (fundeView === 'trips') renderFunde();
+    renderTripHomeStrip();
+    showToast('Reise gelöscht.');
+  }, { title: 'Löschen?', yesText: 'Ja, löschen' });
+}
+
+/* ----- Reise-Detail-Ansicht ----- */
+function openTripDetail(tripId) {
+  currentTripId = tripId;
+  showSection('trip-detail');
+  renderTripDetail();
+}
+
+function closeTripDetail() {
+  currentTripId = null;
+  showSection('funde');
+  // Sicherstellen, dass Reisen-Tab aktiv bleibt
+  setFundeView('trips');
+}
+
+function renderTripDetail() {
+  if (!currentTripId) return;
+  const t = getTripById(currentTripId);
+  if (!t) { closeTripDetail(); return; }
+
+  document.getElementById('trip-detail-name').textContent = t.name || 'Ohne Namen';
+  document.getElementById('trip-detail-range').textContent = formatTripDateRange(t);
+  const descEl = document.getElementById('trip-detail-desc');
+  if (t.description) {
+    descEl.textContent = t.description;
+    descEl.style.display = '';
+  } else {
+    descEl.style.display = 'none';
+  }
+
+  // Chronik bauen: pro Tag im Zeitraum die Tageseinträge und Funde sammeln
+  const entries = entriesForTrip(t.id);
+  const funde   = fundenForTrip(t);
+
+  // Map: yyyy-mm-dd -> { entries: [...], funde: [...] }
+  const days = {};
+  entries.forEach(e => {
+    const k = e.date;
+    if (!days[k]) days[k] = { entries: [], funde: [] };
+    days[k].entries.push(e);
+  });
+  funde.forEach(f => {
+    const k = isoDateOnly(new Date(f.ts));
+    if (!days[k]) days[k] = { entries: [], funde: [] };
+    days[k].funde.push(f);
+  });
+
+  const allDates = Object.keys(days).sort();
+  const wrap = document.getElementById('trip-chronicle-wrap');
+
+  if (allDates.length === 0) {
+    wrap.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:24px 16px;line-height:1.6;">
+      Noch nichts in dieser Reise.<br>
+      Schreib einen Tageseintrag — oder sammle einen Fund (er landet automatisch hier, wenn er ins Datum fällt).
+    </p>`;
+    return;
+  }
+
+  let html = '';
+  allDates.forEach(dateIso => {
+    const d = new Date(dateIso + 'T00:00:00');
+    const dayLabel = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
+    const dayNo = tripDayNumber(t, dateIso);
+    const dayHeader = dayNo ? `${dayLabel} · Tag ${dayNo}` : dayLabel;
+
+    html += `<div class="trip-day-block">`;
+    html += `<div class="trip-day-header">${escapeHtml(dayHeader)}</div>`;
+
+    // Tageseinträge zuerst
+    days[dateIso].entries.forEach(e => {
+      html += renderTripEntryCard(e);
+    });
+    // Dann Funde des Tages
+    days[dateIso].funde.sort((a, b) => new Date(a.ts) - new Date(b.ts)).forEach(f => {
+      html += renderFundCard(f);
+    });
+    html += `</div>`;
+  });
+  wrap.innerHTML = html;
+  // Klicks auf Fund-Karten in der Chronik aktivieren (gleiche Mechanik wie in Funde-Liste)
+  attachFundCardClicks(wrap);
+}
+
+function renderTripEntryCard(entry) {
+  const blocks = Array.isArray(entry.blocks) ? entry.blocks : [];
+  const textBlocks = blocks.filter(b => b.type === 'text' && b.content && b.content.trim());
+  const imageCount = blocks.filter(b => b.type === 'image' && b.mediaId).length;
+
+  let body = '';
+  if (textBlocks.length === 0 && imageCount === 0) {
+    body = `<div class="trip-entry-empty">Leerer Eintrag</div>`;
+  } else {
+    textBlocks.forEach(b => {
+      body += `<div class="trip-entry-text">${escapeHtml(b.content)}</div>`;
+    });
+    if (imageCount > 0) {
+      body += `<div class="trip-entry-text" style="font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:8px;">${imageCount} ${imageCount === 1 ? 'Bild' : 'Bilder'} (folgt in Schritt 4)</div>`;
+    }
+  }
+
+  return `<div class="trip-entry-card" onclick="openTripEntryEditor('${entry.id}')">${body}</div>`;
+}
+
+/* ----- Tageseintrag-Editor (Block-Editor) ----- */
+function openTripEntryEditor(entryId) {
+  editingTripEntryId = entryId || null;
+  editingTripEntryTripId = currentTripId;
+
+  const overlay = document.getElementById('trip-entry-editor-overlay');
+  const titleEl = document.getElementById('trip-entry-editor-title');
+  const dateEl  = document.getElementById('trip-entry-date');
+  const delBtn  = document.getElementById('trip-entry-delete-btn');
+
+  if (entryId) {
+    const e = getTripEntry(entryId);
+    if (!e) return;
+    titleEl.textContent = 'Tageseintrag';
+    dateEl.value = e.date || '';
+    teBlocksDraft = JSON.parse(JSON.stringify(e.blocks || []));
+    if (teBlocksDraft.length === 0) {
+      teBlocksDraft = [{ id: blockUid(), type: 'text', content: '' }];
+    }
+    delBtn.style.display = '';
+    editingTripEntryTripId = e.tripId;
+  } else {
+    titleEl.textContent = 'Neuer Tageseintrag';
+    // Default-Datum: heute, falls in Reise-Zeitraum, sonst Reise-Start
+    const trip = getTripById(currentTripId);
+    const today = isoDateOnly(new Date());
+    let defaultDate = today;
+    if (trip && trip.from && trip.to) {
+      if (today < trip.from) defaultDate = trip.from;
+      else if (today > trip.to) defaultDate = trip.to;
+    }
+    dateEl.value = defaultDate;
+    teBlocksDraft = [{ id: blockUid(), type: 'text', content: '' }];
+    delBtn.style.display = 'none';
+  }
+
+  // Datums-Bereich begrenzen
+  const trip = getTripById(editingTripEntryTripId || currentTripId);
+  if (trip && trip.from && trip.to) {
+    dateEl.min = trip.from;
+    dateEl.max = trip.to;
+  } else {
+    dateEl.removeAttribute('min');
+    dateEl.removeAttribute('max');
+  }
+
+  renderTeBlocks();
+  overlay.classList.add('visible');
+}
+
+function closeTripEntryEditor() {
+  document.getElementById('trip-entry-editor-overlay').classList.remove('visible');
+  editingTripEntryId = null;
+  editingTripEntryTripId = null;
+  teBlocksDraft = [];
+}
+
+function renderTeBlocks() {
+  const wrap = document.getElementById('te-blocks-wrap');
+  if (!wrap) return;
+  let html = '';
+  // "+"-Zeile vor dem ersten Block
+  html += renderTeAddRow(0);
+  teBlocksDraft.forEach((b, idx) => {
+    html += `<div class="te-editor-block" data-block-id="${b.id}">`;
+    if (b.type === 'text') {
+      html += `<textarea class="te-editor-textarea" data-block-id="${b.id}"
+                 placeholder="Schreib los…"
+                 oninput="onTeTextInput(this)">${escapeHtml(b.content || '')}</textarea>`;
+    } else if (b.type === 'image') {
+      // Schritt 4 — Platzhalter, damit Datenstruktur erhalten bleibt
+      html += `<div style="padding:14px;border:1.5px dashed var(--border);border-radius:10px;background:var(--bg);font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);text-align:center;">
+        Bild-Block · folgt in Schritt 4
+      </div>`;
+    }
+    if (teBlocksDraft.length > 1) {
+      html += `<div class="te-block-actions">
+        <button class="te-block-action" onclick="removeTeBlock('${b.id}')">Block entfernen</button>
+      </div>`;
+    }
+    html += `</div>`;
+    // "+"-Zeile nach jedem Block
+    html += renderTeAddRow(idx + 1);
+  });
+  wrap.innerHTML = html;
+  // Auto-grow für alle Textareas
+  wrap.querySelectorAll('textarea.te-editor-textarea').forEach(t => autoGrowTextarea(t));
+}
+
+function renderTeAddRow(insertIndex) {
+  return `<div class="te-add-row">
+    <button class="te-add-btn" onclick="addTeBlock(${insertIndex}, 'text')">+ Text</button>
+  </div>`;
+  // In Schritt 4 kommt hier zusätzlich '+ Bild' dazu.
+}
+
+function onTeTextInput(textarea) {
+  const id = textarea.getAttribute('data-block-id');
+  const b = teBlocksDraft.find(x => x.id === id);
+  if (!b) return;
+  b.content = textarea.value;
+  autoGrowTextarea(textarea);
+}
+
+function addTeBlock(insertIndex, type) {
+  // Vor dem Hinzufügen: aktuelle Eingaben aus DOM in Draft synchronisieren
+  syncTeDraftFromDom();
+  const newBlock = type === 'image'
+    ? { id: blockUid(), type: 'image', mediaId: null, caption: '' }
+    : { id: blockUid(), type: 'text', content: '' };
+  teBlocksDraft.splice(insertIndex, 0, newBlock);
+  renderTeBlocks();
+}
+
+function removeTeBlock(blockId) {
+  syncTeDraftFromDom();
+  teBlocksDraft = teBlocksDraft.filter(b => b.id !== blockId);
+  if (teBlocksDraft.length === 0) {
+    teBlocksDraft = [{ id: blockUid(), type: 'text', content: '' }];
+  }
+  renderTeBlocks();
+}
+
+function syncTeDraftFromDom() {
+  const wrap = document.getElementById('te-blocks-wrap');
+  if (!wrap) return;
+  wrap.querySelectorAll('textarea.te-editor-textarea').forEach(t => {
+    const id = t.getAttribute('data-block-id');
+    const b = teBlocksDraft.find(x => x.id === id);
+    if (b) b.content = t.value;
+  });
+}
+
+function saveTripEntry() {
+  syncTeDraftFromDom();
+  const dateIso = document.getElementById('trip-entry-date').value;
+  if (!dateIso) { showToast('Bitte ein Datum wählen.'); return; }
+
+  // Inhalts-Check: mindestens ein nicht-leerer Block
+  const hasContent = teBlocksDraft.some(b =>
+    (b.type === 'text' && b.content && b.content.trim()) ||
+    (b.type === 'image' && b.mediaId)
+  );
+  if (!hasContent) { showToast('Bitte etwas eintragen.'); return; }
+
+  // Trip-Bezug
+  const tripId = editingTripEntryTripId || currentTripId;
+  if (!tripId) { showToast('Keine Reise ausgewählt.'); return; }
+
+  if (editingTripEntryId) {
+    const e = getTripEntry(editingTripEntryId);
+    if (e) {
+      e.date = dateIso;
+      e.blocks = teBlocksDraft.slice();
+      e.updatedAt = new Date().toISOString();
+      saveState();
+    }
+    showToast('Eintrag aktualisiert.');
+  } else {
+    createTripEntry({ tripId, date: dateIso, blocks: teBlocksDraft.slice() });
+    showToast('Eintrag notiert.');
+  }
+
+  closeTripEntryEditor();
+  if (currentTripId) renderTripDetail();
+  if (fundeView === 'trips') renderFunde();
+}
+
+function confirmDeleteTripEntry() {
+  if (!editingTripEntryId) return;
+  askConfirm('Diesen Tageseintrag wirklich löschen?', () => {
+    deleteTripEntry(editingTripEntryId);
+    closeTripEntryEditor();
+    if (currentTripId) renderTripDetail();
+    showToast('Eintrag gelöscht.');
+  }, { title: 'Löschen?', yesText: 'Ja, löschen' });
+}
+
+/* ----- Home-Streifen ----- */
+function renderTripHomeStrip() {
+  const strip = document.getElementById('home-trip-strip');
+  if (!strip) return;
+  const t = getActiveTrip();
+  if (!t) {
+    strip.style.display = 'none';
+    return;
+  }
+  const today = isoDateOnly(new Date());
+  const dayNo = tripDayNumber(t, today);
+  const total = tripDayCount(t);
+  document.getElementById('home-trip-strip-text').textContent = `Auf Reise: ${t.name}`;
+  document.getElementById('home-trip-strip-day').textContent = `Tag ${dayNo} von ${total}`;
+  strip.style.display = '';
+}
+
+function openActiveTripFromHome() {
+  const t = getActiveTrip();
+  if (!t) return;
+  openTripDetail(t.id);
 }
 
 // Kategorien-Verwaltung in Settings
@@ -13718,12 +14721,14 @@ function replaceStateFromImport(imported, meta) {
     goals: [],
     weeklyArchive: [],
     seenQuotes: [],
+    trips: [],
+    tripEntries: [],
     theme: 'terracotta',
     lastOpenedDate: null
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
