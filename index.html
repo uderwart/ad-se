@@ -4515,9 +4515,19 @@ textarea, input {
       <!-- Datenanzeige (Erinnerung aus der Woche) -->
       <div id="weekly-q-data" style="display:none;margin-bottom:14px;"></div>
 
-      <!-- Notizfeld -->
-      <textarea id="weekly-q-note" placeholder="Euer Gedanke… (optional)" rows="4"
-        style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;font-style:italic;resize:vertical;background:var(--bg);color:var(--ink);outline:none;line-height:1.55;"></textarea>
+      <!-- Notizfelder: pro Person ein eigenes -->
+      <div style="margin-bottom:6px;">
+        <label id="weekly-q-label-self" style="display:block;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;"></label>
+        <textarea id="weekly-q-note-self" placeholder="Dein Gedanke… (optional)" rows="3"
+          oninput="autoGrowTextarea(this)"
+          style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;font-style:italic;resize:vertical;background:var(--bg);color:var(--ink);outline:none;line-height:1.55;"></textarea>
+      </div>
+      <div>
+        <label id="weekly-q-label-partner" style="display:block;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.08em;margin-top:10px;margin-bottom:6px;"></label>
+        <textarea id="weekly-q-note-partner" placeholder="Gedanke der/des anderen… (optional)" rows="3"
+          oninput="autoGrowTextarea(this)"
+          style="width:100%;padding:12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;font-style:italic;resize:vertical;background:var(--bg);color:var(--ink);outline:none;line-height:1.55;"></textarea>
+      </div>
 
       <!-- Navigation -->
       <div style="display:flex;gap:8px;margin-top:14px;">
@@ -9351,6 +9361,40 @@ function onHeatmapCellClick(e) {
 
 /* ===== WOCHENSTUNDE ===== */
 
+// Hilfsfunktionen für Antworten:
+// answers[i] kann ein String (alte Form) oder ein Objekt {self, partner} (neue Form) sein.
+// normalizeAnswer liefert immer ein Objekt zurück, ohne den Originalwert zu verändern.
+function normalizeAnswer(a) {
+  if (!a) return { self: '', partner: '' };
+  if (typeof a === 'string') return { self: a, partner: '' };
+  if (typeof a === 'object') {
+    return { self: a.self || '', partner: a.partner || '' };
+  }
+  return { self: '', partner: '' };
+}
+
+// Liefert true, wenn mindestens ein Feld der Antwort Text enthält.
+function answerHasContent(a) {
+  const n = normalizeAnswer(a);
+  return (n.self && n.self.trim()) || (n.partner && n.partner.trim());
+}
+
+// Erste nicht-leere Notiz als String (für Vorschau-Texte im Archiv).
+function answerFirstNote(a) {
+  const n = normalizeAnswer(a);
+  if (n.self && n.self.trim()) return n.self;
+  if (n.partner && n.partner.trim()) return n.partner;
+  return '';
+}
+
+// Liefert die Anzeigenamen für eine Session — bevorzugt den in der Session gespeicherten
+// Snapshot, sonst die aktuellen Werte aus den Einstellungen, sonst generische Fallbacks.
+function sessionDisplayNames(session) {
+  const userName = session?.userName || state.profile?.name || 'Ich';
+  const partnerName = session?.partnerName || state.partner?.name || 'Partner';
+  return { userName, partnerName };
+}
+
 // Fragen-Struktur: 3 Kapitel mit Fragen, teils mit Datenanzeige
 const WEEKLY_QUESTIONS = [
   // Kapitel 1 — Rückblick
@@ -9440,13 +9484,14 @@ function renderWeeklyStart() {
       const d = new Date(s.startedAt);
       const dateStr = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
       const meta = s.completed ? 'vollständig' : `abgebrochen bei Frage ${s.stoppedAt}`;
-      const firstNote = (s.answers || []).find(a => a && a.trim());
-      const preview = firstNote ? `„${firstNote.slice(0, 100)}${firstNote.length > 100 ? '…' : ''}"` : '';
+      const firstNoteText = (s.answers || []).map(answerFirstNote).find(t => t && t.trim()) || '';
+      const preview = firstNoteText ? `„${firstNoteText.slice(0, 100)}${firstNoteText.length > 100 ? '…' : ''}"` : '';
+      const noteCount = (s.answers || []).filter(answerHasContent).length;
       const entry = document.createElement('div');
       entry.className = 'archive-entry';
       entry.innerHTML = `
         <div class="archive-entry-date">${dateStr}</div>
-        <div class="archive-entry-meta">${meta} · ${s.answers.filter(a=>a&&a.trim()).length} Notizen</div>
+        <div class="archive-entry-meta">${meta} · ${noteCount} Notizen</div>
         ${preview ? `<div class="archive-entry-preview">${escapeHtml(preview)}</div>` : ''}
       `;
       entry.onclick = () => openArchiveSession(i);
@@ -9458,14 +9503,15 @@ function renderWeeklyStart() {
   const lastCompleted = state.weeklyArchive.find(s => s.completed);
   const hint = document.getElementById('weekly-last-hint');
   const hintText = document.getElementById('weekly-last-text');
-  if (lastCompleted && lastCompleted.answers.some(a => a && a.trim())) {
+  if (lastCompleted && (lastCompleted.answers || []).some(answerHasContent)) {
     const d = new Date(lastCompleted.startedAt);
     const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
     // Zeige Schluss-Sätze (letzte drei Antworten = Kapitel 3)
-    const last3 = lastCompleted.answers.slice(-3).filter(a => a && a.trim());
+    const last3 = (lastCompleted.answers || []).slice(-3).map(answerFirstNote).filter(t => t && t.trim());
     if (last3.length) {
       hint.style.display = '';
-      hintText.innerHTML = `Vor ${daysAgo} Tagen habt ihr geschrieben:<br><em style="font-family:'EB Garamond',serif;font-size:0.85rem;">„${escapeHtml(last3[last3.length-1].slice(0, 140))}${last3[last3.length-1].length > 140 ? '…' : ''}"</em>`;
+      const lastText = last3[last3.length-1];
+      hintText.innerHTML = `Vor ${daysAgo} Tagen habt ihr geschrieben:<br><em style="font-family:'EB Garamond',serif;font-size:0.85rem;">„${escapeHtml(lastText.slice(0, 140))}${lastText.length > 140 ? '…' : ''}"</em>`;
     } else {
       hint.style.display = 'none';
     }
@@ -9480,7 +9526,7 @@ function renderWeeklyResume() {
   const d = new Date(s.pausedAt || s.startedAt);
   const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
   const q = WEEKLY_QUESTIONS[s.currentQ] || WEEKLY_QUESTIONS[0];
-  const answered = s.answers.filter(a => a && a.trim()).length;
+  const answered = (s.answers || []).filter(answerHasContent).length;
   const info = document.getElementById('weekly-resume-info');
   info.innerHTML = `
     Ihr seid bei <strong>Kapitel ${q.chapter}: ${escapeHtml(q.chapterLabel)}</strong>,
@@ -9496,8 +9542,10 @@ function startWeekly() {
   state.weeklySession = {
     startedAt: new Date().toISOString(),
     currentQ: 0,
-    answers: new Array(WEEKLY_QUESTIONS.length).fill(''),
-    paused: false
+    answers: new Array(WEEKLY_QUESTIONS.length).fill(null).map(() => ({ self: '', partner: '' })),
+    paused: false,
+    userName: state.profile?.name || '',
+    partnerName: state.partner?.name || ''
   };
   saveState();
   renderWeekly();
@@ -9524,11 +9572,20 @@ function resumeWeekly() {
   }
 }
 
+// Liest die aktuell sichtbaren Antwortfelder aus und gibt das Antwort-Objekt zurück.
+function readWeeklyCurrentAnswer() {
+  const selfEl = document.getElementById('weekly-q-note-self');
+  const partnerEl = document.getElementById('weekly-q-note-partner');
+  return {
+    self: (selfEl?.value || '').trim(),
+    partner: (partnerEl?.value || '').trim()
+  };
+}
+
 function pauseWeekly() {
   if (!state.weeklySession) return;
   // Aktuelle Antwort speichern
-  const note = (document.getElementById('weekly-q-note')?.value || '').trim();
-  state.weeklySession.answers[state.weeklySession.currentQ] = note;
+  state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
   state.weeklySession.paused = true;
   state.weeklySession.pausedAt = new Date().toISOString();
   saveState();
@@ -9541,8 +9598,7 @@ function endWeeklyEarly() {
   askConfirm(
     'Sitzung hier beenden? Was ihr bisher notiert habt, wird archiviert.',
     () => {
-      const note = (document.getElementById('weekly-q-note')?.value || '').trim();
-      state.weeklySession.answers[state.weeklySession.currentQ] = note;
+      state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
       archiveSession(state.weeklySession, false);
       state.weeklySession = null;
       saveState();
@@ -9556,8 +9612,7 @@ function endWeeklyEarly() {
 function weeklyBack() {
   if (!state.weeklySession) return;
   // Aktuelle Antwort speichern
-  const note = (document.getElementById('weekly-q-note')?.value || '').trim();
-  state.weeklySession.answers[state.weeklySession.currentQ] = note;
+  state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
   if (state.weeklySession.currentQ > 0) {
     state.weeklySession.currentQ--;
     saveState();
@@ -9567,8 +9622,7 @@ function weeklyBack() {
 
 function weeklyNext() {
   if (!state.weeklySession) return;
-  const note = (document.getElementById('weekly-q-note')?.value || '').trim();
-  state.weeklySession.answers[state.weeklySession.currentQ] = note;
+  state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
   if (state.weeklySession.currentQ < WEEKLY_QUESTIONS.length - 1) {
     state.weeklySession.currentQ++;
     saveState();
@@ -9610,14 +9664,16 @@ function closeWeeklyFinish() {
 }
 
 function archiveSession(session, completed) {
-  const answered = session.answers.filter(a => a && a.trim()).length;
+  const answered = (session.answers || []).filter(answerHasContent).length;
   if (!answered) return; // Leere Sitzungen nicht archivieren
   state.weeklyArchive.unshift({
     startedAt: session.startedAt,
     endedAt: new Date().toISOString(),
-    answers: [...session.answers],
+    answers: session.answers.map(a => normalizeAnswer(a)),
     completed,
-    stoppedAt: session.currentQ + 1
+    stoppedAt: session.currentQ + 1,
+    userName: session.userName || state.profile?.name || '',
+    partnerName: session.partnerName || state.partner?.name || ''
   });
   if (state.weeklyArchive.length > 100) state.weeklyArchive.pop();
   saveState();
@@ -9640,8 +9696,21 @@ function renderWeeklyQuestion() {
   document.getElementById('weekly-q-title').textContent = q.title;
   document.getElementById('weekly-q-sub').textContent = q.sub;
 
-  // Notiz
-  document.getElementById('weekly-q-note').value = s.answers[s.currentQ] || '';
+  // Namens-Labels und Notizen
+  const { userName, partnerName } = sessionDisplayNames(s);
+  document.getElementById('weekly-q-label-self').textContent = userName;
+  document.getElementById('weekly-q-label-partner').textContent = partnerName;
+
+  const ans = normalizeAnswer(s.answers[s.currentQ]);
+  const selfEl = document.getElementById('weekly-q-note-self');
+  const partnerEl = document.getElementById('weekly-q-note-partner');
+  selfEl.value = ans.self;
+  partnerEl.value = ans.partner;
+  // Höhe an Inhalt anpassen
+  setTimeout(() => {
+    autoGrowTextarea(selfEl);
+    autoGrowTextarea(partnerEl);
+  }, 0);
 
   // Datenanzeige
   const dataDiv = document.getElementById('weekly-q-data');
@@ -9810,11 +9879,12 @@ function openArchiveSession(i) {
   document.getElementById('archive-detail-title').textContent = dateStr;
 
   const meta = document.getElementById('archive-detail-meta');
-  const answered = (s.answers || []).filter(a => a && a.trim()).length;
+  const answered = (s.answers || []).filter(answerHasContent).length;
   meta.textContent = `Begonnen ${timeStr} · ${s.completed ? 'vollständig durchgesprochen' : `abgebrochen bei Frage ${s.stoppedAt}`} · ${answered} Notizen`;
 
   // Inhalt rendern
   const content = document.getElementById('archive-detail-content');
+  const { userName, partnerName } = sessionDisplayNames(s);
   let html = '';
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
@@ -9824,10 +9894,18 @@ function openArchiveSession(i) {
       currentChapter = q.chapter;
       html += `<div style="font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.1em;margin-top:16px;margin-bottom:8px;">Kapitel ${q.chapter} · ${escapeHtml(q.chapterLabel)}</div>`;
     }
+    const ans = normalizeAnswer(a);
+    const hasSelf = ans.self && ans.self.trim();
+    const hasPartner = ans.partner && ans.partner.trim();
     html += `<div style="margin-bottom:14px;">
-      <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);margin-bottom:4px;">${escapeHtml(q.title)}</div>`;
-    if (a && a.trim()) {
-      html += `<div style="font-style:italic;color:var(--ink);padding-left:12px;border-left:2px solid var(--accent-soft);">„${escapeHtml(a)}"</div>`;
+      <div style="font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);margin-bottom:6px;">${escapeHtml(q.title)}</div>`;
+    if (hasSelf || hasPartner) {
+      if (hasSelf) {
+        html += `<div style="margin-bottom:6px;"><div style="font-family:'Inter',sans-serif;font-size:0.74rem;color:var(--accent-deep);font-weight:600;letter-spacing:0.06em;margin-bottom:2px;">${escapeHtml(userName)}</div><div style="font-style:italic;color:var(--ink);padding-left:12px;border-left:2px solid var(--accent-soft);">„${escapeHtml(ans.self)}"</div></div>`;
+      }
+      if (hasPartner) {
+        html += `<div><div style="font-family:'Inter',sans-serif;font-size:0.74rem;color:var(--accent-deep);font-weight:600;letter-spacing:0.06em;margin-bottom:2px;">${escapeHtml(partnerName)}</div><div style="font-style:italic;color:var(--ink);padding-left:12px;border-left:2px solid var(--accent-soft);">„${escapeHtml(ans.partner)}"</div></div>`;
+      }
     } else {
       html += `<div style="color:var(--muted);font-size:0.85rem;font-style:italic;padding-left:12px;opacity:0.6;">(nicht beantwortet)</div>`;
     }
@@ -9846,20 +9924,32 @@ function closeArchiveDetail() {
 function formatSessionAsText(s) {
   const d = new Date(s.startedAt);
   const dateStr = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const partner = state.partner?.name ? ` mit ${state.partner.name}` : '';
-  let out = `Eine Stunde zu zweit${partner}\n${dateStr}\n`;
+  const { userName, partnerName } = sessionDisplayNames(s);
+  // Header: wenn Partner-Name bekannt, "mit X" anhängen — wie früher
+  const partnerHeader = (s.partnerName || state.partner?.name) ? ` mit ${s.partnerName || state.partner.name}` : '';
+  let out = `Eine Stunde zu zweit${partnerHeader}\n${dateStr}\n`;
   out += '—'.repeat(40) + '\n\n';
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
     const q = WEEKLY_QUESTIONS[idx];
     if (!q) return;
-    if (!a || !a.trim()) return;
+    const ans = normalizeAnswer(a);
+    const hasSelf = ans.self && ans.self.trim();
+    const hasPartner = ans.partner && ans.partner.trim();
+    if (!hasSelf && !hasPartner) return;
     if (q.chapter !== currentChapter) {
       currentChapter = q.chapter;
       out += `\n[ Kapitel ${q.chapter} · ${q.chapterLabel} ]\n\n`;
     }
     out += `${q.title}\n`;
-    out += `„${a}"\n\n`;
+    if (hasSelf) {
+      out += `${userName}:\n„${ans.self}"\n`;
+    }
+    if (hasPartner) {
+      if (hasSelf) out += '\n';
+      out += `${partnerName}:\n„${ans.partner}"\n`;
+    }
+    out += '\n';
   });
   out += '—'.repeat(40) + '\n';
   out += 'Notiert in Ad se';
