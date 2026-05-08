@@ -1093,6 +1093,88 @@ h3 {
   color: #b04848;
 }
 
+/* Wochenfragen-Verwaltung */
+.wq-chapter {
+  margin-bottom: 16px;
+}
+.wq-chapter-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.wq-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+.wq-item.hidden-q {
+  opacity: 0.5;
+}
+.wq-text {
+  flex: 1;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  color: var(--ink);
+  line-height: 1.4;
+  cursor: text;
+}
+.wq-edit-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+  line-height: 1.4;
+}
+.wq-action {
+  background: none;
+  border: none;
+  color: var(--muted);
+  opacity: 0.5;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px 8px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.wq-action:hover {
+  opacity: 1;
+  color: #b04848;
+}
+.wq-add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.wq-add-input {
+  flex: 1;
+  padding: 9px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+
 /* Zitat-Verwaltungsliste (Mehr → Gesammelte Gedanken) */
 .quote-section-label {
   font-size: 0.75rem;
@@ -5773,7 +5855,7 @@ textarea, input {
   <div class="card collapsible" id="questions-collapsible">
     <div class="collapsible-header" onclick="toggleSettingsCard('questions')">
       <div style="flex:1;">
-        <h2 style="margin-bottom:2px;">Reflexionsfragen</h2>
+        <h2 style="margin-bottom:2px;">Reflexionsfragen — Moment mit mir</h2>
         <p class="muted-note" id="questions-summary" style="margin:0;font-size:0.85rem;"></p>
       </div>
       <span class="collapsible-arrow">▸</span>
@@ -5788,6 +5870,29 @@ textarea, input {
           style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
           onkeydown="if(event.key==='Enter'){addMomentQuestion();}">
         <button class="btn small" onclick="addMomentQuestion()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reflexionsfragen — Eine Stunde zu zweit (drei Kapitel, fest) -->
+  <div class="card collapsible" id="weekly-questions-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('weekly-questions')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Reflexionsfragen — Eine Stunde zu zweit</h2>
+        <p class="muted-note" id="weekly-questions-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="weekly-questions-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
+        Die Fragen für eure Wochenreflexion zu zweit. Drei Kapitel sind fest gesetzt — innerhalb der Kapitel könnt ihr Fragen ergänzen, bearbeiten oder ausblenden. Tippt auf eine Frage, um sie zu bearbeiten.
+      </p>
+      <div id="weekly-questions-chapters"></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+        <button class="btn secondary full" onclick="restoreWeeklyQuestionsDefaults()">Standardfragen wiederherstellen</button>
+        <p class="muted-note" style="margin-top:8px;font-size:0.78rem;line-height:1.5;">
+          Setzt die Fragen auf den Auslieferungsstand zurück. Eigene Fragen verschwinden dabei.
+        </p>
       </div>
     </div>
   </div>
@@ -9765,6 +9870,85 @@ const WEEKLY_QUESTIONS = [
     dataKey: null },
 ];
 
+// ===== Editierbare Reflexionsfragen für "Eine Stunde zu zweit" =====
+// Datenmodell:
+//   state.weeklyQuestions = {
+//     rueckblick: [ { id, title, sub, dataKey, isStandard, hidden? }, ... ],
+//     gefuehle:   [ ... ],
+//     vorn:       [ ... ]
+//   }
+// Wenn nicht vorhanden, wird beim ersten Zugriff aus WEEKLY_QUESTIONS migriert.
+
+const WEEKLY_CHAPTERS = [
+  { key: 'rueckblick', num: 1, label: 'Rückblick' },
+  { key: 'gefuehle',   num: 2, label: 'Gefühle & Bedürfnisse' },
+  { key: 'vorn',       num: 3, label: 'Blick nach vorn' }
+];
+
+function chapterKeyForNum(num) {
+  const c = WEEKLY_CHAPTERS.find(x => x.num === num);
+  return c ? c.key : 'rueckblick';
+}
+
+function defaultWeeklyQuestionsObject() {
+  const out = { rueckblick: [], gefuehle: [], vorn: [] };
+  WEEKLY_QUESTIONS.forEach((q, idx) => {
+    const key = chapterKeyForNum(q.chapter);
+    out[key].push({
+      id: 'std-' + idx,
+      title: q.title,
+      sub: q.sub || '',
+      dataKey: q.dataKey || null,
+      isStandard: true,
+      hidden: false
+    });
+  });
+  return out;
+}
+
+function ensureWeeklyQuestions() {
+  if (!state.weeklyQuestions || typeof state.weeklyQuestions !== 'object') {
+    state.weeklyQuestions = defaultWeeklyQuestionsObject();
+    return;
+  }
+  WEEKLY_CHAPTERS.forEach(c => {
+    if (!Array.isArray(state.weeklyQuestions[c.key])) {
+      state.weeklyQuestions[c.key] = [];
+    }
+  });
+}
+
+// Liefert die effektive Frageliste (alle Kapitel, ohne hidden) als flaches Array
+// im gleichen Format wie WEEKLY_QUESTIONS — mit chapter und chapterLabel.
+function getEffectiveWeeklyQuestions() {
+  ensureWeeklyQuestions();
+  const out = [];
+  WEEKLY_CHAPTERS.forEach(c => {
+    state.weeklyQuestions[c.key].forEach(q => {
+      if (q.hidden) return;
+      out.push({
+        chapter: c.num,
+        chapterLabel: c.label,
+        title: q.title,
+        sub: q.sub || '',
+        dataKey: q.dataKey || null,
+        id: q.id
+      });
+    });
+  });
+  return out;
+}
+
+// Liefert die Frageliste, die für die aktuelle Sitzung gilt:
+// - bevorzugt Snapshot der Session (session.questions),
+// - sonst die effektive Liste aus den Settings.
+function getQuestionsForSession(session) {
+  if (session && Array.isArray(session.questions) && session.questions.length) {
+    return session.questions;
+  }
+  return getEffectiveWeeklyQuestions();
+}
+
 function weekStart() {
   // Eine Woche = letzte 7 Tage ab jetzt
   const d = new Date();
@@ -9859,12 +10043,13 @@ function renderWeeklyResume() {
   if (!s) return;
   const d = new Date(s.pausedAt || s.startedAt);
   const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
-  const q = WEEKLY_QUESTIONS[s.currentQ] || WEEKLY_QUESTIONS[0];
+  const qs = getQuestionsForSession(s);
+  const q = qs[s.currentQ] || qs[0];
   const answered = (s.answers || []).filter(answerHasContent).length;
   const info = document.getElementById('weekly-resume-info');
   info.innerHTML = `
     Ihr seid bei <strong>Kapitel ${q.chapter}: ${escapeHtml(q.chapterLabel)}</strong>,
-    Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}.<br>
+    Frage ${s.currentQ + 1} von ${qs.length}.<br>
     ${answered} Notiz${answered === 1 ? '' : 'en'} schon hinterlegt.<br>
     <span style="color:var(--muted);font-size:0.82rem;">
       Pausiert vor ${daysAgo === 0 ? 'weniger als einem Tag' : daysAgo + ' Tag' + (daysAgo === 1 ? '' : 'en')}.
@@ -9873,13 +10058,20 @@ function renderWeeklyResume() {
 }
 
 function startWeekly() {
+  const questionsSnapshot = getEffectiveWeeklyQuestions();
+  // Sicherheitsnetz: leere Liste -> Fallback auf den Default-Pool, sonst hätte
+  // man eine Sitzung ohne Fragen.
+  const effectiveQuestions = questionsSnapshot.length ? questionsSnapshot : WEEKLY_QUESTIONS.map((q, i) => ({
+    chapter: q.chapter, chapterLabel: q.chapterLabel, title: q.title, sub: q.sub, dataKey: q.dataKey, id: 'fallback-' + i
+  }));
   state.weeklySession = {
     startedAt: new Date().toISOString(),
     currentQ: 0,
-    answers: new Array(WEEKLY_QUESTIONS.length).fill(null).map(() => ({ self: '', partner: '' })),
+    answers: new Array(effectiveQuestions.length).fill(null).map(() => ({ self: '', partner: '' })),
     paused: false,
     userName: state.profile?.name || '',
-    partnerName: state.partner?.name || ''
+    partnerName: state.partner?.name || '',
+    questions: effectiveQuestions
   };
   saveState();
   renderWeekly();
@@ -9957,7 +10149,8 @@ function weeklyBack() {
 function weeklyNext() {
   if (!state.weeklySession) return;
   state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
-  if (state.weeklySession.currentQ < WEEKLY_QUESTIONS.length - 1) {
+  const qs = getQuestionsForSession(state.weeklySession);
+  if (state.weeklySession.currentQ < qs.length - 1) {
     state.weeklySession.currentQ++;
     saveState();
     renderWeekly();
@@ -10007,7 +10200,8 @@ function archiveSession(session, completed) {
     completed,
     stoppedAt: session.currentQ + 1,
     userName: session.userName || state.profile?.name || '',
-    partnerName: session.partnerName || state.partner?.name || ''
+    partnerName: session.partnerName || state.partner?.name || '',
+    questions: Array.isArray(session.questions) ? session.questions : null
   });
   if (state.weeklyArchive.length > 100) state.weeklyArchive.pop();
   saveState();
@@ -10016,15 +10210,17 @@ function archiveSession(session, completed) {
 function renderWeeklyQuestion() {
   const s = state.weeklySession;
   if (!s) return;
-  const q = WEEKLY_QUESTIONS[s.currentQ];
+  const qs = getQuestionsForSession(s);
+  const q = qs[s.currentQ];
+  if (!q) return;
 
   // Fortschritt
   document.getElementById('weekly-chapter-label').textContent =
     `Kapitel ${q.chapter} · ${q.chapterLabel}`;
-  const pct = ((s.currentQ + 1) / WEEKLY_QUESTIONS.length) * 100;
+  const pct = ((s.currentQ + 1) / qs.length) * 100;
   document.getElementById('weekly-progress-fill').style.width = pct + '%';
   document.getElementById('weekly-progress-q').textContent =
-    `Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}`;
+    `Frage ${s.currentQ + 1} von ${qs.length}`;
 
   // Frage
   document.getElementById('weekly-q-title').textContent = q.title;
@@ -10066,7 +10262,7 @@ function renderWeeklyQuestion() {
 
   // Weiter-Button: bei letzter Frage "Abschließen"
   const nextBtn = document.getElementById('weekly-next-btn');
-  nextBtn.textContent = s.currentQ === WEEKLY_QUESTIONS.length - 1 ? 'Abschließen' : 'Weiter';
+  nextBtn.textContent = s.currentQ === qs.length - 1 ? 'Abschließen' : 'Weiter';
 }
 
 function getWeeklyDataFor(key) {
@@ -10219,10 +10415,12 @@ function openArchiveSession(i) {
   // Inhalt rendern
   const content = document.getElementById('archive-detail-content');
   const { userName, partnerName } = sessionDisplayNames(s);
+  // Bevorzugt: Frage-Snapshot der Session. Fallback: globale Konstante (für Sessions vor Schritt 2).
+  const sessionQuestions = (Array.isArray(s.questions) && s.questions.length) ? s.questions : WEEKLY_QUESTIONS;
   let html = '';
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
-    const q = WEEKLY_QUESTIONS[idx];
+    const q = sessionQuestions[idx];
     if (!q) return;
     if (q.chapter !== currentChapter) {
       currentChapter = q.chapter;
@@ -10263,9 +10461,11 @@ function formatSessionAsText(s) {
   const partnerHeader = (s.partnerName || state.partner?.name) ? ` mit ${s.partnerName || state.partner.name}` : '';
   let out = `Eine Stunde zu zweit${partnerHeader}\n${dateStr}\n`;
   out += '—'.repeat(40) + '\n\n';
+  // Bevorzugt: Frage-Snapshot der Session. Fallback: globale Konstante (für Sessions vor Schritt 2).
+  const sessionQuestions = (Array.isArray(s.questions) && s.questions.length) ? s.questions : WEEKLY_QUESTIONS;
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
-    const q = WEEKLY_QUESTIONS[idx];
+    const q = sessionQuestions[idx];
     if (!q) return;
     const ans = normalizeAnswer(a);
     const hasSelf = ans.self && ans.self.trim();
@@ -10672,6 +10872,7 @@ function renderMomentSettings() {
   renderSuggestionsList();
   renderAllQuotesList();
   renderMorningGiftsList();
+  renderWeeklyQuestionsList();
 }
 
 /* ===== ZITATE VERWALTEN ===== */
@@ -10885,6 +11086,179 @@ function removeMomentQuestion(idx) {
   state.momentQuestions.splice(idx, 1);
   saveState();
   renderMomentQuestionsList();
+}
+
+/* ===== WOCHENFRAGEN (verwalten) ===== */
+
+function renderWeeklyQuestionsList() {
+  ensureWeeklyQuestions();
+  updateSettingsSummaries();
+  const container = document.getElementById('weekly-questions-chapters');
+  if (!container) return;
+
+  let html = '';
+  WEEKLY_CHAPTERS.forEach(c => {
+    const items = state.weeklyQuestions[c.key] || [];
+    html += `<div class="wq-chapter">
+      <div class="wq-chapter-label">Kapitel ${c.num} · ${escapeHtml(c.label)}</div>`;
+    if (!items.length) {
+      html += `<div style="text-align:center;padding:10px;color:var(--muted);font-size:0.85rem;font-style:italic;">Keine Fragen — füge unten eine hinzu.</div>`;
+    } else {
+      items.forEach((q, idx) => {
+        const hiddenClass = q.hidden ? ' hidden-q' : '';
+        // Standardfragen: – zum Ausblenden, + zum Wieder-Einblenden. Eigene: ✕ zum Löschen.
+        const actionBtn = q.isStandard
+          ? `<button class="wq-action" data-action="toggle" data-chapter="${c.key}" data-idx="${idx}" title="${q.hidden ? 'Wieder einblenden' : 'Ausblenden'}">${q.hidden ? '+' : '–'}</button>`
+          : `<button class="wq-action" data-action="remove" data-chapter="${c.key}" data-idx="${idx}" title="Frage entfernen">✕</button>`;
+        html += `<div class="wq-item${hiddenClass}" data-chapter="${c.key}" data-idx="${idx}">
+          <div class="wq-text" data-chapter="${c.key}" data-idx="${idx}">${escapeHtml(q.title)}</div>
+          ${actionBtn}
+        </div>`;
+      });
+    }
+    html += `<div class="wq-add-row">
+      <input type="text" class="wq-add-input" data-chapter="${c.key}" placeholder="Neue Frage in „${escapeHtml(c.label)}"…" />
+      <button class="btn small" data-action="add" data-chapter="${c.key}">+</button>
+    </div>`;
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+
+  // Event-Listener
+  container.querySelectorAll('.wq-text').forEach(el => {
+    el.addEventListener('click', () => {
+      startEditWeeklyQuestion(el.getAttribute('data-chapter'), parseInt(el.getAttribute('data-idx')), el);
+    });
+  });
+  container.querySelectorAll('.wq-action').forEach(btn => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const action = btn.getAttribute('data-action');
+      const chapter = btn.getAttribute('data-chapter');
+      const idx = parseInt(btn.getAttribute('data-idx'));
+      if (action === 'remove') removeWeeklyQuestion(chapter, idx);
+      else if (action === 'toggle') toggleWeeklyQuestionHidden(chapter, idx);
+    });
+  });
+  container.querySelectorAll('button[data-action="add"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addWeeklyQuestion(btn.getAttribute('data-chapter'));
+    });
+  });
+  container.querySelectorAll('.wq-add-input').forEach(input => {
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        addWeeklyQuestion(input.getAttribute('data-chapter'));
+      }
+    });
+  });
+}
+
+function startEditWeeklyQuestion(chapterKey, idx, textEl) {
+  ensureWeeklyQuestions();
+  const arr = state.weeklyQuestions[chapterKey];
+  if (!arr || idx < 0 || idx >= arr.length) return;
+  const q = arr[idx];
+  // Inline-Edit
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'wq-edit-input';
+  input.value = q.title;
+  textEl.replaceWith(input);
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+
+  const finish = (commit) => {
+    if (commit) {
+      const newVal = (input.value || '').trim();
+      if (newVal && newVal !== q.title) {
+        q.title = newVal;
+        saveState();
+      }
+    }
+    renderWeeklyQuestionsList();
+  };
+  input.addEventListener('blur', () => finish(true));
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      input.blur();
+    } else if (ev.key === 'Escape') {
+      ev.preventDefault();
+      finish(false);
+    }
+  });
+}
+
+function addWeeklyQuestion(chapterKey) {
+  ensureWeeklyQuestions();
+  const container = document.getElementById('weekly-questions-chapters');
+  const input = container?.querySelector(`.wq-add-input[data-chapter="${chapterKey}"]`);
+  if (!input) return;
+  const text = (input.value || '').trim();
+  if (!text) return;
+  const arr = state.weeklyQuestions[chapterKey];
+  if (arr.some(q => q.title === text && !q.hidden)) {
+    showToast('Frage existiert schon.');
+    input.value = '';
+    return;
+  }
+  arr.push({
+    id: 'usr-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    title: text,
+    sub: '',
+    dataKey: null,
+    isStandard: false,
+    hidden: false
+  });
+  saveState();
+  input.value = '';
+  renderWeeklyQuestionsList();
+  showToast('Hinzugefügt.');
+}
+
+function removeWeeklyQuestion(chapterKey, idx) {
+  ensureWeeklyQuestions();
+  const arr = state.weeklyQuestions[chapterKey];
+  if (!arr || idx < 0 || idx >= arr.length) return;
+  const q = arr[idx];
+  // Standardfragen werden nur ausgeblendet, nicht entfernt.
+  if (q.isStandard) {
+    toggleWeeklyQuestionHidden(chapterKey, idx);
+    return;
+  }
+  askConfirm(
+    `Frage „${q.title.slice(0, 60)}${q.title.length > 60 ? '…' : ''}" wirklich entfernen?`,
+    () => {
+      arr.splice(idx, 1);
+      saveState();
+      renderWeeklyQuestionsList();
+      showToast('Entfernt.');
+    },
+    { title: 'Frage entfernen?', yesText: 'Ja, entfernen' }
+  );
+}
+
+function toggleWeeklyQuestionHidden(chapterKey, idx) {
+  ensureWeeklyQuestions();
+  const arr = state.weeklyQuestions[chapterKey];
+  if (!arr || idx < 0 || idx >= arr.length) return;
+  arr[idx].hidden = !arr[idx].hidden;
+  saveState();
+  renderWeeklyQuestionsList();
+}
+
+function restoreWeeklyQuestionsDefaults() {
+  askConfirm(
+    'Standardfragen wiederherstellen? Eigene Fragen werden dabei entfernt.',
+    () => {
+      state.weeklyQuestions = defaultWeeklyQuestionsObject();
+      saveState();
+      renderWeeklyQuestionsList();
+      showToast('Standardfragen wiederhergestellt.');
+    },
+    { title: 'Wiederherstellen?', yesText: 'Ja, wiederherstellen' }
+  );
 }
 
 /* ===== MORGENGABEN (verwalten) ===== */
@@ -12754,6 +13128,24 @@ function updateSettingsSummaries() {
   if (questionsSum) {
     const questions = getMomentQuestions();
     questionsSum.textContent = questions.length === 1 ? '1 Frage' : `${questions.length} Fragen`;
+  }
+
+  // Wochenfragen für "Eine Stunde zu zweit"
+  const weeklyQSum = document.getElementById('weekly-questions-summary');
+  if (weeklyQSum) {
+    ensureWeeklyQuestions();
+    let total = 0;
+    let active = 0;
+    WEEKLY_CHAPTERS.forEach(c => {
+      const arr = state.weeklyQuestions[c.key] || [];
+      total += arr.length;
+      active += arr.filter(q => !q.hidden).length;
+    });
+    if (active === total) {
+      weeklyQSum.textContent = `${active} Frage${active === 1 ? '' : 'n'} in 3 Kapiteln`;
+    } else {
+      weeklyQSum.textContent = `${active} aktiv · ${total - active} ausgeblendet`;
+    }
   }
 
   // Vorschläge: "10 Vorschläge"
