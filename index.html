@@ -3005,6 +3005,189 @@ h3 {
   font-weight: 500;
 }
 
+/* ===== BILDER (Spec v02 Schritt 4, Mai 2026) ===== */
+/* Bild-Block im Tageseintrag */
+.te-image-block {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #faf3e8;
+  border: 1.5px solid var(--border);
+}
+.te-image-img {
+  width: 100%;
+  display: block;
+  cursor: pointer;
+  background: #efe5d3;
+}
+.te-image-caption-input {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--border);
+  padding: 8px 12px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+}
+.te-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 140px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Bild im fertigen Tageseintrag (Chronik) */
+.te-render-image {
+  margin: 10px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #efe5d3;
+}
+.te-render-image img {
+  width: 100%;
+  display: block;
+}
+.te-render-caption {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.86rem;
+  color: var(--muted);
+  padding: 6px 0 0;
+  text-align: center;
+}
+
+/* Bild bei Funden — dezenter Knopf */
+.fund-image-row {
+  margin: 4px 0 12px;
+}
+.fund-image-add-btn {
+  background: none;
+  border: 1px dashed rgba(139, 111, 71, 0.4);
+  color: #8b6f47;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  padding: 6px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+}
+.fund-image-add-btn:hover {
+  border-color: #8b6f47;
+  background: rgba(139, 111, 71, 0.08);
+}
+.fund-image-preview {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 6px;
+  background: #efe5d3;
+  max-width: 100%;
+}
+.fund-image-preview img {
+  width: 100%;
+  display: block;
+  max-height: 240px;
+  object-fit: cover;
+}
+.fund-image-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+}
+.fund-image-action {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  letter-spacing: 0.04em;
+}
+.fund-image-action:hover { color: #a14b38; }
+
+/* Fund-Karte: kleines Thumbnail wenn Bild vorhanden */
+.fund-card-image {
+  margin: 8px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  max-height: 200px;
+}
+.fund-card-image img {
+  width: 100%;
+  display: block;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+/* Lightbox */
+#lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 14, 10, 0.92);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+}
+#lightbox-overlay.visible { display: flex; }
+#lightbox-image {
+  max-width: 100%;
+  max-height: calc(100vh - 100px);
+  display: block;
+  background: #1a1410;
+  object-fit: contain;
+}
+#lightbox-caption {
+  margin-top: 14px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  max-width: 600px;
+  line-height: 1.5;
+}
+#lightbox-close {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 6px 10px;
+  line-height: 1;
+}
+#lightbox-close:hover { color: #fff; }
+
+/* Quota-Warnung im Editor */
+.te-quota-warning {
+  margin: 8px 0;
+  padding: 10px 12px;
+  background: rgba(177, 84, 56, 0.08);
+  border-left: 2px solid #b15438;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: #6b3528;
+  line-height: 1.5;
+}
+
 /* ===== MONATSRÜCKBLICK ===== */
 #section-rueckblick {
   padding: 0;
@@ -4969,6 +5152,22 @@ textarea, input {
       <div id="fund-category-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
 
+    <!-- Bild — dezent, optional (Spec v02 Schritt 4) -->
+    <div class="fund-image-row" id="fund-image-row">
+      <div id="fund-image-empty">
+        <button class="fund-image-add-btn" onclick="triggerFundImageSelect()">⌐ Bild hinzufügen</button>
+      </div>
+      <div id="fund-image-preview-wrap" style="display:none;">
+        <div class="fund-image-preview">
+          <img id="fund-image-preview" alt="">
+        </div>
+        <div class="fund-image-actions">
+          <button class="fund-image-action" onclick="triggerFundImageSelect()">Tauschen</button>
+          <button class="fund-image-action" onclick="removeFundImageDraft()">Entfernen</button>
+        </div>
+      </div>
+    </div>
+
     <button class="btn full" onclick="saveFund()">Speichern</button>
     <button class="btn secondary full" id="fund-delete-btn" onclick="deleteFund(editingFundId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Fund löschen</button>
   </div>
@@ -5046,9 +5245,22 @@ textarea, input {
 
     <div id="te-blocks-wrap" style="margin-bottom:14px;"></div>
 
+    <div id="te-quota-warning" class="te-quota-warning" style="display:none;"></div>
+
     <button class="btn full" onclick="saveTripEntry()">Speichern</button>
     <button class="btn secondary full" id="trip-entry-delete-btn" onclick="confirmDeleteTripEntry()" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Eintrag löschen</button>
   </div>
+</div>
+
+<!-- Versteckte File-Inputs für Bild-Aufnahme (Spec v02 Schritt 4) -->
+<input type="file" id="te-image-file-input" accept="image/*" style="display:none;" onchange="handleTeImageFile(event)">
+<input type="file" id="fund-image-file-input" accept="image/*" style="display:none;" onchange="handleFundImageFile(event)">
+
+<!-- Lightbox — Vollbild-Anzeige eines Bildes -->
+<div id="lightbox-overlay" onclick="closeLightbox()">
+  <button id="lightbox-close" onclick="event.stopPropagation();closeLightbox();" aria-label="Schließen">✕</button>
+  <img id="lightbox-image" alt="" onclick="event.stopPropagation();">
+  <div id="lightbox-caption"></div>
 </div>
 
 <!-- ====== MEHR / EINSTELLUNGEN (minimal für Runde 1) ====== -->
@@ -5871,6 +6083,154 @@ async function cleanupOrphans() {
   return ids.length;
 }
 
+/* ===== BILD-VERARBEITUNG (Komprimierung, EXIF-Strip) =====
+   Schritt 4 — Mai 2026.
+   Wir laden das Bild via Image-Element auf ein Canvas und exportieren als JPEG.
+   Damit ist EXIF automatisch entfernt (Canvas-Output enthält keine Metadaten).
+   Maximale Kantenlänge: 1200px. JPEG-Qualität: 0.8.
+*/
+const IMAGE_MAX_DIM = 1200;
+const IMAGE_QUALITY = 0.8;
+
+function compressImage(fileOrBlob) {
+  return new Promise((resolve, reject) => {
+    if (!fileOrBlob) { reject(new Error('Keine Datei')); return; }
+    if (!fileOrBlob.type || !fileOrBlob.type.startsWith('image/')) {
+      reject(new Error('Keine Bilddatei'));
+      return;
+    }
+    const url = URL.createObjectURL(fileOrBlob);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let { width, height } = img;
+        const longest = Math.max(width, height);
+        if (longest > IMAGE_MAX_DIM) {
+          const scale = IMAGE_MAX_DIM / longest;
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(url);
+          if (!blob) { reject(new Error('Komprimierung fehlgeschlagen')); return; }
+          resolve({ blob, width, height });
+        }, 'image/jpeg', IMAGE_QUALITY);
+      } catch (e) {
+        URL.revokeObjectURL(url);
+        reject(e);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Bild konnte nicht gelesen werden'));
+    };
+    img.src = url;
+  });
+}
+
+/* Quota prüfen — gibt true zurück, wenn (nach grober Schätzung) noch Platz ist. */
+async function hasEnoughStorageFor(approxBytes) {
+  const est = await estimateStorage();
+  if (!est || !est.quota || !est.usage) return true;
+  const free = est.quota - est.usage;
+  return free > (approxBytes + 20 * 1024 * 1024);
+}
+
+/* Refs-Management — eine mediaId zu einem Eintrag (Fund oder TripEntry) verknüpfen */
+async function addImageRef(mediaId, refKey) {
+  if (!mediaId || !refKey) return;
+  const db = await openMediaDB();
+  const tx = db.transaction(MEDIA_STORE, 'readwrite');
+  const store = tx.objectStore(MEDIA_STORE);
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(mediaId);
+    getReq.onsuccess = () => {
+      const rec = getReq.result;
+      if (!rec) { resolve(false); return; }
+      if (!Array.isArray(rec.refs)) rec.refs = [];
+      if (!rec.refs.includes(refKey)) rec.refs.push(refKey);
+      const putReq = store.put(rec, mediaId);
+      putReq.onsuccess = () => resolve(true);
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+async function removeImageRef(mediaId, refKey) {
+  if (!mediaId || !refKey) return;
+  const db = await openMediaDB();
+  const tx = db.transaction(MEDIA_STORE, 'readwrite');
+  const store = tx.objectStore(MEDIA_STORE);
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(mediaId);
+    getReq.onsuccess = async () => {
+      const rec = getReq.result;
+      if (!rec) { resolve(false); return; }
+      rec.refs = (rec.refs || []).filter(r => r !== refKey);
+      if (rec.refs.length === 0) {
+        const delReq = store.delete(mediaId);
+        delReq.onsuccess = () => resolve(true);
+        delReq.onerror = () => reject(delReq.error);
+      } else {
+        const putReq = store.put(rec, mediaId);
+        putReq.onsuccess = () => resolve(true);
+        putReq.onerror = () => reject(putReq.error);
+      }
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+/* Cache: aufgelöste Object-URLs für Bilder. Browser räumt sie auf, wir leeren nicht aktiv. */
+const _imageUrlCache = new Map();
+
+async function getImageObjectUrl(mediaId) {
+  if (!mediaId) return null;
+  if (_imageUrlCache.has(mediaId)) return _imageUrlCache.get(mediaId);
+  const rec = await getImage(mediaId);
+  if (!rec || !rec.blob) return null;
+  const url = URL.createObjectURL(rec.blob);
+  _imageUrlCache.set(mediaId, url);
+  return url;
+}
+
+function invalidateImageCache(mediaId) {
+  if (!mediaId) return;
+  const url = _imageUrlCache.get(mediaId);
+  if (url) {
+    try { URL.revokeObjectURL(url); } catch(e) {}
+    _imageUrlCache.delete(mediaId);
+  }
+}
+
+/* Lightbox — universelles Bild-Vollbild-Overlay */
+function openLightbox(mediaId, caption) {
+  const lb = document.getElementById('lightbox-overlay');
+  if (!lb) return;
+  const img = document.getElementById('lightbox-image');
+  const cap = document.getElementById('lightbox-caption');
+  cap.textContent = caption || '';
+  cap.style.display = caption ? '' : 'none';
+  img.src = '';
+  lb.classList.add('visible');
+  getImageObjectUrl(mediaId).then(url => {
+    if (url) img.src = url;
+  });
+}
+
+function closeLightbox() {
+  const lb = document.getElementById('lightbox-overlay');
+  if (lb) lb.classList.remove('visible');
+}
+
 /* ===== REISEN — Datenstruktur und Hilfsfunktionen =====
    Eingeführt Mai 2026 — Schritt 2 der Reisetagebuch-Spec v02.
 
@@ -5941,9 +6301,11 @@ function updateTrip(tripId, patch) {
 }
 
 function deleteTrip(tripId) {
+  // Erst alle Tageseinträge der Reise sauber löschen (mit Bild-Refs)
+  const entries = tripEntriesArr().filter(e => e.tripId === tripId);
+  entries.forEach(e => deleteTripEntry(e.id));
+  // Dann die Reise selbst entfernen
   state.trips = tripsArr().filter(t => t.id !== tripId);
-  // Tageseinträge dieser Reise auch entfernen
-  state.tripEntries = tripEntriesArr().filter(e => e.tripId !== tripId);
   saveState();
 }
 
@@ -6046,6 +6408,19 @@ function updateTripEntryBlocks(entryId, blocks) {
 }
 
 function deleteTripEntry(entryId) {
+  // Refs auf Bilder dieses Eintrags entfernen — Bilder werden gelöscht, wenn verwaist
+  const e = getTripEntry(entryId);
+  if (e) {
+    const refKey = 'tripEntry:' + entryId;
+    (e.blocks || []).forEach(async (b) => {
+      if (b.type === 'image' && b.mediaId) {
+        try {
+          await removeImageRef(b.mediaId, refKey);
+          invalidateImageCache(b.mediaId);
+        } catch(err) {}
+      }
+    });
+  }
   state.tripEntries = tripEntriesArr().filter(e => e.id !== entryId);
   saveState();
 }
@@ -13036,6 +13411,9 @@ let fundeView = 'recent';  // 'recent' | 'category' | 'random'
 let fundeRandomShown = null;
 let editingFundId = null;
 let fundEditorCategory = null;
+// Bild-Draft im Fund-Editor (Spec v02 Schritt 4)
+let fundImageDraft = null;          // mediaId oder null
+let fundImagePrevious = null;       // mediaId, die der Fund VORHER hatte (für Refs-Diff)
 
 function uidFund() {
   return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -13205,7 +13583,6 @@ function renderFundCard(f, isRandom) {
   if (date) {
     const d = date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
     if (f.dayPart) {
-      // Tageszeit statt Uhrzeit
       dateStr = `${d} · ${f.dayPart}`;
     } else {
       const t = date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -13220,6 +13597,12 @@ function renderFundCard(f, isRandom) {
     <div class="fund-card-text">${escapeHtml(f.text || '')}</div>`;
   if (f.source) {
     html += `<div class="fund-card-source" style="font-family:'EB Garamond',serif;font-size:0.95rem;margin-bottom:8px;">${escapeHtml(f.source)}</div>`;
+  }
+  if (f.mediaId) {
+    const cap = f.text ? f.text.replace(/'/g, '&#39;') : '';
+    html += `<div class="fund-card-image" onclick="event.stopPropagation();openLightbox('${f.mediaId}', '${cap}')">
+      <img alt="" data-media-id="${f.mediaId}">
+    </div>`;
   }
   if (meta.length > 0) {
     html += `<div class="fund-card-meta">${meta.join('')}</div>`;
@@ -13237,6 +13620,12 @@ function attachFundCardClicks(wrap) {
       const id = card.dataset.fundId;
       openFundActionMenu(id);
     });
+  });
+  // Bild-Quellen async laden
+  wrap.querySelectorAll('.fund-card img[data-media-id]').forEach(async (img) => {
+    const id = img.getAttribute('data-media-id');
+    const url = await getImageObjectUrl(id);
+    if (url) img.src = url;
   });
 }
 
@@ -13279,6 +13668,8 @@ function openFundEditor(existingId) {
       dateEl.value = d.toISOString().slice(0, 10);  // yyyy-mm-dd
       timeEl.value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
       fundEditorDayPart = f.dayPart || null;
+      fundImageDraft = f.mediaId || null;
+      fundImagePrevious = f.mediaId || null;
     }
   } else {
     titleEl.textContent = 'Ein Fund';
@@ -13291,10 +13682,13 @@ function openFundEditor(existingId) {
     dateEl.value = now.toISOString().slice(0, 10);
     timeEl.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     fundEditorDayPart = null;
+    fundImageDraft = null;
+    fundImagePrevious = null;
   }
 
   renderFundCategoryChips();
   renderFundDayPartChips();
+  renderFundImageDraft();
   // Lösch-Knopf nur beim Bearbeiten
   const delBtn = document.getElementById('fund-delete-btn');
   if (delBtn) delBtn.style.display = existingId ? '' : 'none';
@@ -13364,13 +13758,103 @@ function selectFundCategory(cat) {
   renderFundCategoryChips();
 }
 
-function closeFundEditor() {
+/* ===== FUND-BILD (Spec v02 Schritt 4) ===== */
+
+async function renderFundImageDraft() {
+  const empty = document.getElementById('fund-image-empty');
+  const previewWrap = document.getElementById('fund-image-preview-wrap');
+  const previewImg = document.getElementById('fund-image-preview');
+  if (!empty || !previewWrap || !previewImg) return;
+  if (!fundImageDraft) {
+    empty.style.display = '';
+    previewWrap.style.display = 'none';
+    previewImg.src = '';
+    return;
+  }
+  const url = await getImageObjectUrl(fundImageDraft);
+  if (url) {
+    previewImg.src = url;
+    empty.style.display = 'none';
+    previewWrap.style.display = '';
+  } else {
+    // Bild nicht ladbar — wieder Knopf zeigen
+    fundImageDraft = null;
+    empty.style.display = '';
+    previewWrap.style.display = 'none';
+  }
+}
+
+function triggerFundImageSelect() {
+  document.getElementById('fund-image-file-input').click();
+}
+
+async function handleFundImageFile(event) {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) return;
+  showToast('Bild wird verarbeitet …');
+  try {
+    const { blob, width, height } = await compressImage(file);
+    const ok = await hasEnoughStorageFor(blob.size);
+    if (!ok) {
+      showToast('Wenig Speicher übrig.');
+      return;
+    }
+    // Wenn schon ein Draft-Bild da ist, das *neu* eingefügt wurde (also nicht das ursprüngliche),
+    // löschen wir es, weil es jetzt ersetzt wird.
+    if (fundImageDraft && fundImageDraft !== fundImagePrevious) {
+      try {
+        const rec = await getImage(fundImageDraft);
+        if (rec && (!rec.refs || rec.refs.length === 0)) {
+          await deleteImage(fundImageDraft);
+          invalidateImageCache(fundImageDraft);
+        }
+      } catch(e) {}
+    }
+    const mediaId = await addImage(blob, { width, height, refs: [] });
+    fundImageDraft = mediaId;
+    renderFundImageDraft();
+    showToast('Bild hinzugefügt.');
+  } catch (err) {
+    console.error('Fund-Bild-Fehler:', err);
+    showToast('Bild konnte nicht eingefügt werden.');
+  }
+}
+
+async function removeFundImageDraft() {
+  // Wenn das aktuelle Draft-Bild *frisch* eingefügt wurde, sofort löschen
+  if (fundImageDraft && fundImageDraft !== fundImagePrevious) {
+    try {
+      const rec = await getImage(fundImageDraft);
+      if (rec && (!rec.refs || rec.refs.length === 0)) {
+        await deleteImage(fundImageDraft);
+        invalidateImageCache(fundImageDraft);
+      }
+    } catch(e) {}
+  }
+  fundImageDraft = null;
+  renderFundImageDraft();
+}
+
+async function closeFundEditor() {
+  // Frisch eingefügtes, nicht gespeichertes Bild löschen
+  if (fundImageDraft && fundImageDraft !== fundImagePrevious) {
+    try {
+      const rec = await getImage(fundImageDraft);
+      if (rec && (!rec.refs || rec.refs.length === 0)) {
+        await deleteImage(fundImageDraft);
+        invalidateImageCache(fundImageDraft);
+      }
+    } catch(e) {}
+  }
   document.getElementById('fund-editor-overlay').classList.remove('visible');
   editingFundId = null;
   fundEditorCategory = null;
+  fundImageDraft = null;
+  fundImagePrevious = null;
 }
 
-function saveFund() {
+async function saveFund() {
   const text = (document.getElementById('fund-text').value || '').trim();
   if (!text) { showToast('Bitte trage etwas ein.'); return; }
   const source = (document.getElementById('fund-source').value || '').trim();
@@ -13383,7 +13867,6 @@ function saveFund() {
   const timeStr = document.getElementById('fund-time').value;
   let ts;
   if (dateStr && timeStr) {
-    // ISO: yyyy-mm-ddThh:mm
     const [hh, mm] = timeStr.split(':');
     const d = new Date(dateStr);
     d.setHours(parseInt(hh, 10) || 0, parseInt(mm, 10) || 0, 0, 0);
@@ -13395,6 +13878,7 @@ function saveFund() {
 
   if (!Array.isArray(state.funde)) state.funde = [];
 
+  let savedFundId = editingFundId;
   if (editingFundId) {
     const f = state.funde.find(x => x.id === editingFundId);
     if (f) {
@@ -13405,28 +13889,54 @@ function saveFund() {
       f.category = category;
       f.ts = ts;
       f.dayPart = dayPart;
+      f.mediaId = fundImageDraft || null;
       f.updatedAt = new Date().toISOString();
     }
   } else {
+    savedFundId = uidFund();
     state.funde.push({
-      id: uidFund(),
+      id: savedFundId,
       text: text,
       source: source || null,
       place: place || null,
       note: note || null,
       category: category,
       ts: ts,
-      dayPart: dayPart
+      dayPart: dayPart,
+      mediaId: fundImageDraft || null
     });
   }
   saveState();
+
+  // Refs aktualisieren
+  const refKey = 'fund:' + savedFundId;
+  if (fundImageDraft && fundImageDraft !== fundImagePrevious) {
+    try { await addImageRef(fundImageDraft, refKey); } catch(e) {}
+  }
+  if (fundImagePrevious && fundImagePrevious !== fundImageDraft) {
+    try {
+      await removeImageRef(fundImagePrevious, refKey);
+      invalidateImageCache(fundImagePrevious);
+    } catch(e) {}
+  }
+
+  // Wichtig: closeFundEditor darf das Draft-Bild NICHT mehr löschen,
+  // weil es jetzt offiziell gespeichert ist. Reset des "Previous" verhindert das.
+  fundImagePrevious = fundImageDraft;
   closeFundEditor();
   renderFunde();
   showToast(editingFundId ? 'Geändert.' : 'Notiert.');
 }
 
 function deleteFund(fundId) {
-  askConfirm('Diesen Fund wirklich löschen?', () => {
+  askConfirm('Diesen Fund wirklich löschen?', async () => {
+    const f = (state.funde || []).find(x => x.id === fundId);
+    if (f && f.mediaId) {
+      try {
+        await removeImageRef(f.mediaId, 'fund:' + fundId);
+        invalidateImageCache(f.mediaId);
+      } catch(e) {}
+    }
     state.funde = (state.funde || []).filter(f => f.id !== fundId);
     saveState();
     closeFundEditor();
@@ -13471,13 +13981,24 @@ function renderTripsList(wrap) {
   trips.forEach(t => {
     const isActive = t.from && t.to && today >= t.from && today <= t.to;
     const entries = entriesForTrip(t.id);
-    const fundCount = fundenForTrip(t).length;
+    const tFunde = fundenForTrip(t);
+    const fundCount = tFunde.length;
+    // Bilder zählen: in Tageseinträgen und in Funden
+    let imageCount = 0;
+    entries.forEach(e => {
+      (e.blocks || []).forEach(b => { if (b.type === 'image' && b.mediaId) imageCount++; });
+    });
+    tFunde.forEach(f => { if (f.mediaId) imageCount++; });
+
     const dayCount = tripDayCount(t);
     const range = formatTripDateRange(t);
     let metaPieces = [];
     if (range) metaPieces.push(escapeHtml(range));
     metaPieces.push(`${entries.length} ${entries.length === 1 ? 'Eintrag' : 'Einträge'}`);
     metaPieces.push(`${fundCount} ${fundCount === 1 ? 'Fund' : 'Funde'}`);
+    if (imageCount > 0) {
+      metaPieces.push(`${imageCount} ${imageCount === 1 ? 'Bild' : 'Bilder'}`);
+    }
 
     html += `<div class="trip-card" onclick="openTripDetail('${t.id}')">
       <div class="trip-card-name">${escapeHtml(t.name || 'Ohne Namen')}</div>
@@ -13662,26 +14183,50 @@ function renderTripDetail() {
   wrap.innerHTML = html;
   // Klicks auf Fund-Karten in der Chronik aktivieren (gleiche Mechanik wie in Funde-Liste)
   attachFundCardClicks(wrap);
+  // Bilder asynchron laden
+  hydrateChronicleImages();
 }
 
 function renderTripEntryCard(entry) {
   const blocks = Array.isArray(entry.blocks) ? entry.blocks : [];
-  const textBlocks = blocks.filter(b => b.type === 'text' && b.content && b.content.trim());
-  const imageCount = blocks.filter(b => b.type === 'image' && b.mediaId).length;
+  const hasContent = blocks.some(b =>
+    (b.type === 'text' && b.content && b.content.trim()) ||
+    (b.type === 'image' && b.mediaId)
+  );
 
   let body = '';
-  if (textBlocks.length === 0 && imageCount === 0) {
+  if (!hasContent) {
     body = `<div class="trip-entry-empty">Leerer Eintrag</div>`;
   } else {
-    textBlocks.forEach(b => {
-      body += `<div class="trip-entry-text">${escapeHtml(b.content)}</div>`;
+    blocks.forEach(b => {
+      if (b.type === 'text' && b.content && b.content.trim()) {
+        body += `<div class="trip-entry-text">${escapeHtml(b.content)}</div>`;
+      } else if (b.type === 'image' && b.mediaId) {
+        const cap = b.caption ? escapeHtml(b.caption) : '';
+        const capAttr = b.caption ? b.caption.replace(/'/g, '&#39;') : '';
+        body += `<div class="te-render-image" onclick="event.stopPropagation();openLightbox('${b.mediaId}', '${capAttr}')">
+          <img alt="" data-media-id="${b.mediaId}">
+        </div>`;
+        if (cap) {
+          body += `<div class="te-render-caption">${cap}</div>`;
+        }
+      }
     });
-    if (imageCount > 0) {
-      body += `<div class="trip-entry-text" style="font-size:0.82rem;color:var(--muted);font-style:italic;margin-top:8px;">${imageCount} ${imageCount === 1 ? 'Bild' : 'Bilder'} (folgt in Schritt 4)</div>`;
-    }
   }
 
   return `<div class="trip-entry-card" onclick="openTripEntryEditor('${entry.id}')">${body}</div>`;
+}
+
+/* Bilder in der Chronik nachträglich laden — wird nach renderTripDetail aufgerufen */
+async function hydrateChronicleImages() {
+  const wrap = document.getElementById('trip-chronicle-wrap');
+  if (!wrap) return;
+  const imgs = wrap.querySelectorAll('img[data-media-id]');
+  for (const img of imgs) {
+    const id = img.getAttribute('data-media-id');
+    const url = await getImageObjectUrl(id);
+    if (url) img.src = url;
+  }
 }
 
 /* ----- Tageseintrag-Editor (Block-Editor) ----- */
@@ -13734,11 +14279,33 @@ function openTripEntryEditor(entryId) {
   overlay.classList.add('visible');
 }
 
-function closeTripEntryEditor() {
+async function closeTripEntryEditor() {
+  // Wenn der User das Editieren abbricht: Bilder, die in dieser Session eingefügt
+  // aber nie über saveTripEntry gespeichert wurden, sind verwaist (refs leer).
+  // Hier räumen wir sie auf — anhand der mediaIds, die im Draft sind, aber nicht
+  // schon zum gespeicherten Eintrag gehören.
+  const previousMediaIds = new Set();
+  if (editingTripEntryId) {
+    const old = getTripEntry(editingTripEntryId);
+    (old?.blocks || []).forEach(b => { if (b.type === 'image' && b.mediaId) previousMediaIds.add(b.mediaId); });
+  }
+  for (const b of teBlocksDraft) {
+    if (b.type === 'image' && b.mediaId && !previousMediaIds.has(b.mediaId)) {
+      try {
+        const rec = await getImage(b.mediaId);
+        if (rec && (!rec.refs || rec.refs.length === 0)) {
+          await deleteImage(b.mediaId);
+          invalidateImageCache(b.mediaId);
+        }
+      } catch(e) {}
+    }
+  }
+
   document.getElementById('trip-entry-editor-overlay').classList.remove('visible');
   editingTripEntryId = null;
   editingTripEntryTripId = null;
   teBlocksDraft = [];
+  hideQuotaWarning();
 }
 
 function renderTeBlocks() {
@@ -13754,10 +14321,19 @@ function renderTeBlocks() {
                  placeholder="Schreib los…"
                  oninput="onTeTextInput(this)">${escapeHtml(b.content || '')}</textarea>`;
     } else if (b.type === 'image') {
-      // Schritt 4 — Platzhalter, damit Datenstruktur erhalten bleibt
-      html += `<div style="padding:14px;border:1.5px dashed var(--border);border-radius:10px;background:var(--bg);font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);text-align:center;">
-        Bild-Block · folgt in Schritt 4
-      </div>`;
+      if (b.mediaId) {
+        // Echtes Bild — Vorschau (Quelle wird async gesetzt)
+        html += `<div class="te-image-block">
+          <img class="te-image-img" id="te-img-${b.id}" alt="" onclick="openLightbox('${b.mediaId}', getTeBlockCaption('${b.id}'))" data-media-id="${b.mediaId}">
+          <input class="te-image-caption-input" type="text" data-block-id="${b.id}"
+            placeholder="Bildunterschrift (optional)"
+            value="${escapeHtml(b.caption || '')}"
+            oninput="onTeCaptionInput(this)">
+        </div>`;
+      } else {
+        // Bild-Block ohne Bild (sollte nicht passieren, aber sicher ist sicher)
+        html += `<div class="te-image-block"><div class="te-image-placeholder">Bild fehlt</div></div>`;
+      }
     }
     if (teBlocksDraft.length > 1) {
       html += `<div class="te-block-actions">
@@ -13765,19 +14341,35 @@ function renderTeBlocks() {
       </div>`;
     }
     html += `</div>`;
-    // "+"-Zeile nach jedem Block
     html += renderTeAddRow(idx + 1);
   });
   wrap.innerHTML = html;
-  // Auto-grow für alle Textareas
   wrap.querySelectorAll('textarea.te-editor-textarea').forEach(t => autoGrowTextarea(t));
+  // Bild-Quellen async setzen
+  wrap.querySelectorAll('img[data-media-id]').forEach(async (imgEl) => {
+    const mediaId = imgEl.getAttribute('data-media-id');
+    const url = await getImageObjectUrl(mediaId);
+    if (url) imgEl.src = url;
+  });
+}
+
+function getTeBlockCaption(blockId) {
+  const b = teBlocksDraft.find(x => x.id === blockId);
+  return b?.caption || '';
+}
+
+function onTeCaptionInput(input) {
+  const id = input.getAttribute('data-block-id');
+  const b = teBlocksDraft.find(x => x.id === id);
+  if (!b) return;
+  b.caption = input.value;
 }
 
 function renderTeAddRow(insertIndex) {
   return `<div class="te-add-row">
     <button class="te-add-btn" onclick="addTeBlock(${insertIndex}, 'text')">+ Text</button>
+    <button class="te-add-btn" style="margin-left:6px;" onclick="addTeBlockImage(${insertIndex})">+ Bild</button>
   </div>`;
-  // In Schritt 4 kommt hier zusätzlich '+ Bild' dazu.
 }
 
 function onTeTextInput(textarea) {
@@ -13796,6 +14388,64 @@ function addTeBlock(insertIndex, type) {
     : { id: blockUid(), type: 'text', content: '' };
   teBlocksDraft.splice(insertIndex, 0, newBlock);
   renderTeBlocks();
+}
+
+/* Bild-Block hinzufügen — startet Datei-Auswahl, fügt Block erst nach erfolgreichem Speichern ein */
+let _teImageInsertIndex = null;
+function addTeBlockImage(insertIndex) {
+  syncTeDraftFromDom();
+  _teImageInsertIndex = insertIndex;
+  document.getElementById('te-image-file-input').click();
+}
+
+async function handleTeImageFile(event) {
+  const file = event.target.files?.[0];
+  event.target.value = '';   // Input zurücksetzen
+  if (!file) return;
+  if (_teImageInsertIndex === null) return;
+  const insertIndex = _teImageInsertIndex;
+  _teImageInsertIndex = null;
+
+  showToast('Bild wird verarbeitet …');
+  try {
+    const { blob, width, height } = await compressImage(file);
+
+    // Quota-Schätzung
+    const ok = await hasEnoughStorageFor(blob.size);
+    if (!ok) {
+      showQuotaWarning(`Wenig Speicher übrig. Bitte alte Bilder oder Reisen löschen, bevor du neue hinzufügst.`);
+      return;
+    } else {
+      hideQuotaWarning();
+    }
+
+    // In IndexedDB speichern (Refs werden später beim Save gesetzt — hier noch ohne Ref)
+    const mediaId = await addImage(blob, { width, height, refs: [] });
+
+    // Block einfügen
+    teBlocksDraft.splice(insertIndex, 0, {
+      id: blockUid(),
+      type: 'image',
+      mediaId: mediaId,
+      caption: ''
+    });
+    renderTeBlocks();
+    showToast('Bild eingefügt.');
+  } catch (err) {
+    console.error('Bild-Fehler:', err);
+    showToast('Bild konnte nicht eingefügt werden.');
+  }
+}
+
+function showQuotaWarning(msg) {
+  const el = document.getElementById('te-quota-warning');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = '';
+}
+function hideQuotaWarning() {
+  const el = document.getElementById('te-quota-warning');
+  if (el) el.style.display = 'none';
 }
 
 function removeTeBlock(blockId) {
@@ -13817,7 +14467,7 @@ function syncTeDraftFromDom() {
   });
 }
 
-function saveTripEntry() {
+async function saveTripEntry() {
   syncTeDraftFromDom();
   const dateIso = document.getElementById('trip-entry-date').value;
   if (!dateIso) { showToast('Bitte ein Datum wählen.'); return; }
@@ -13833,6 +14483,18 @@ function saveTripEntry() {
   const tripId = editingTripEntryTripId || currentTripId;
   if (!tripId) { showToast('Keine Reise ausgewählt.'); return; }
 
+  // Vor-Speicher-Snapshot der bisherigen Bilder (für Refs-Diff)
+  const previousMediaIds = new Set();
+  if (editingTripEntryId) {
+    const old = getTripEntry(editingTripEntryId);
+    if (old) {
+      (old.blocks || []).forEach(b => { if (b.type === 'image' && b.mediaId) previousMediaIds.add(b.mediaId); });
+    }
+  }
+  const newMediaIds = new Set();
+  teBlocksDraft.forEach(b => { if (b.type === 'image' && b.mediaId) newMediaIds.add(b.mediaId); });
+
+  let savedEntryId = editingTripEntryId;
   if (editingTripEntryId) {
     const e = getTripEntry(editingTripEntryId);
     if (e) {
@@ -13841,12 +14503,30 @@ function saveTripEntry() {
       e.updatedAt = new Date().toISOString();
       saveState();
     }
-    showToast('Eintrag aktualisiert.');
   } else {
-    createTripEntry({ tripId, date: dateIso, blocks: teBlocksDraft.slice() });
-    showToast('Eintrag notiert.');
+    const created = createTripEntry({ tripId, date: dateIso, blocks: teBlocksDraft.slice() });
+    savedEntryId = created.id;
   }
 
+  // Refs aktualisieren
+  const refKey = 'tripEntry:' + savedEntryId;
+  // Hinzugefügte Bilder bekommen Ref
+  for (const id of newMediaIds) {
+    if (!previousMediaIds.has(id)) {
+      try { await addImageRef(id, refKey); } catch(e) {}
+    }
+  }
+  // Entfernte Bilder verlieren Ref (löschen, wenn dadurch verwaist)
+  for (const id of previousMediaIds) {
+    if (!newMediaIds.has(id)) {
+      try {
+        await removeImageRef(id, refKey);
+        invalidateImageCache(id);
+      } catch(e) {}
+    }
+  }
+
+  showToast(editingTripEntryId ? 'Eintrag aktualisiert.' : 'Eintrag notiert.');
   closeTripEntryEditor();
   if (currentTripId) renderTripDetail();
   if (fundeView === 'trips') renderFunde();
