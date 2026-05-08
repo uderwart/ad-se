@@ -2147,6 +2147,104 @@ h3 {
   color: var(--accent-deep);
 }
 
+/* Begegnungs-Foto: Knopf, Vorschau, Caption */
+.begegnung-photo-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  width: 100%;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.begegnung-photo-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+.begegnung-photo-icon {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+.begegnung-photo-preview-wrap {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.begegnung-photo-preview {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+}
+.begegnung-photo-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.begegnung-photo-remove:hover {
+  background: rgba(0,0,0,0.75);
+}
+.begegnung-caption-input {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+
+/* Foto-Vorschau in der Begegnungs-Liste */
+.begegnung-item.has-photo {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.begegnung-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--bg);
+  cursor: zoom-in;
+}
+.begegnung-thumb-empty {
+  display: none;
+}
+.begegnung-photo-caption {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
 /* ===== WEGE (große Ziele) ===== */
 .goal-card {
   background: var(--card);
@@ -6024,6 +6122,22 @@ textarea, input {
         <button class="art-chip" data-art="gemeinsam erlebt" onclick="selectBegegnungArt('gemeinsam erlebt')">gemeinsam erlebt</button>
         <button class="art-chip" data-art="gedacht an" onclick="selectBegegnungArt('gedacht an')">gedacht an</button>
       </div>
+    </div>
+
+    <!-- Foto (optional) -->
+    <input type="file" id="begegnung-photo-file-input" accept="image/*" style="display:none;" onchange="handleBegegnungImageFile(event)">
+    <div id="begegnung-photo-empty" style="margin-bottom:14px;">
+      <button type="button" class="begegnung-photo-btn" onclick="triggerBegegnungImageSelect()">
+        <span class="begegnung-photo-icon">📷</span>
+        <span>Ein Foto dazulegen</span>
+      </button>
+    </div>
+    <div id="begegnung-photo-preview-wrap" class="begegnung-photo-preview-wrap" style="display:none;margin-bottom:6px;">
+      <img id="begegnung-photo-preview" class="begegnung-photo-preview" alt="Vorschau">
+      <button type="button" class="begegnung-photo-remove" onclick="removeBegegnungImageDraft()" aria-label="Foto entfernen">✕</button>
+    </div>
+    <div id="begegnung-caption-wrap" style="display:none;margin-bottom:14px;">
+      <input type="text" id="begegnung-caption" class="begegnung-caption-input" placeholder="Bildunterschrift (optional)">
     </div>
 
     <div style="display:flex;gap:8px;margin-top:14px;">
@@ -15355,7 +15469,18 @@ function editMensch(id) { openMenschEditor(id); }
 function deleteMensch(id) {
   const m = (state.menschen || []).find(x => x.id === id);
   if (!m) return;
-  askConfirm(`"${m.name}" aus deiner Liste entfernen?`, () => {
+  askConfirm(`"${m.name}" aus deiner Liste entfernen?`, async () => {
+    // Foto-Refs aller Begegnungen entfernen, damit verwaiste Bilder im Cleanup landen
+    if (Array.isArray(m.begegnungen)) {
+      for (const b of m.begegnungen) {
+        if (b.mediaId) {
+          try {
+            await removeImageRef(b.mediaId, 'begegnung:' + id + ':' + b.id);
+            invalidateImageCache(b.mediaId);
+          } catch(e) {}
+        }
+      }
+    }
     state.menschen = state.menschen.filter(x => x.id !== id);
     saveState();
     renderMenschenList();
@@ -15409,7 +15534,7 @@ function closeMenschDetail() {
   menschDetailCurrentId = null;
 }
 
-function renderBegegnungenList() {
+async function renderBegegnungenList() {
   const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
   if (!m) return;
   const list = document.getElementById('mensch-detail-begegnungen-list');
@@ -15430,6 +15555,7 @@ function renderBegegnungenList() {
   // Jüngste zuerst
   begegnungen.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
+  // Erst HTML-Gerüst — ohne Bilder
   list.innerHTML = begegnungen.map(b => {
     const dateStr = formatGiftRelative(new Date(b.ts));
     const artStr = b.art
@@ -15438,11 +15564,37 @@ function renderBegegnungenList() {
     const notiz = b.notiz
       ? `<div class="begegnung-notiz">${escapeHtml(b.notiz)}</div>`
       : '';
+    const captionLine = b.mediaCaption
+      ? `<div class="begegnung-photo-caption">${escapeHtml(b.mediaCaption)}</div>`
+      : '';
+    const hasPhoto = !!b.mediaId;
+    if (hasPhoto) {
+      return `<div class="begegnung-item has-photo" onclick="openBegegnungEditor('${b.id}')">
+        <img class="begegnung-thumb" data-media-id="${b.mediaId}" data-caption="${escapeHtml(b.mediaCaption || b.notiz || '')}" alt="" onclick="event.stopPropagation(); openLightbox(this.dataset.mediaId, this.dataset.caption);">
+        <div>
+          <div class="begegnung-meta">${dateStr}${artStr}</div>
+          ${notiz}
+          ${captionLine}
+        </div>
+      </div>`;
+    }
     return `<div class="begegnung-item" onclick="openBegegnungEditor('${b.id}')">
       <div class="begegnung-meta">${dateStr}${artStr}</div>
       ${notiz}
     </div>`;
   }).join('');
+
+  // Thumbnails async laden
+  const thumbs = list.querySelectorAll('.begegnung-thumb');
+  for (const thumb of thumbs) {
+    const mediaId = thumb.dataset.mediaId;
+    if (mediaId) {
+      try {
+        const url = await getImageObjectUrl(mediaId);
+        if (url) thumb.src = url;
+      } catch(e) {}
+    }
+  }
 }
 
 // Aktionen aus dem Detail
@@ -15471,11 +15623,96 @@ function deleteCurrentMensch() {
 
 let begegnungEditorCurrentId = null; // null = neu, sonst ID des bearbeiteten Eintrags
 let begegnungEditorSelectedArt = null;
+let begegnungImageDraft = null;     // aktuell gewählte mediaId
+let begegnungImagePrevious = null;  // mediaId beim Öffnen — für refs-Diff
+let begegnungCaptionPrevious = null; // Caption beim Öffnen
+
+function triggerBegegnungImageSelect() {
+  document.getElementById('begegnung-photo-file-input').click();
+}
+
+async function handleBegegnungImageFile(event) {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) return;
+  showToast('Bild wird verarbeitet …');
+  try {
+    const { blob, width, height } = await compressImage(file);
+    const ok = await hasEnoughStorageFor(blob.size);
+    if (!ok) {
+      showToast('Wenig Speicher übrig.');
+      return;
+    }
+    // Frisches Draft-Bild ersetzen — altes löschen, falls noch nicht gespeichert
+    if (begegnungImageDraft && begegnungImageDraft !== begegnungImagePrevious) {
+      try {
+        const rec = await getImage(begegnungImageDraft);
+        if (rec && (!rec.refs || rec.refs.length === 0)) {
+          await deleteImage(begegnungImageDraft);
+          invalidateImageCache(begegnungImageDraft);
+        }
+      } catch(e) {}
+    }
+    const mediaId = await addImage(blob, { width, height, refs: [] });
+    begegnungImageDraft = mediaId;
+    await renderBegegnungImageDraft();
+    showToast('Foto hinzugefügt.');
+  } catch (err) {
+    console.error('Begegnung-Bild-Fehler:', err);
+    showToast('Bild konnte nicht eingefügt werden.');
+  }
+}
+
+async function removeBegegnungImageDraft() {
+  // Frisch eingefügtes, nicht gespeichertes Bild aus DB entfernen
+  if (begegnungImageDraft && begegnungImageDraft !== begegnungImagePrevious) {
+    try {
+      const rec = await getImage(begegnungImageDraft);
+      if (rec && (!rec.refs || rec.refs.length === 0)) {
+        await deleteImage(begegnungImageDraft);
+        invalidateImageCache(begegnungImageDraft);
+      }
+    } catch(e) {}
+  }
+  begegnungImageDraft = null;
+  await renderBegegnungImageDraft();
+}
+
+async function renderBegegnungImageDraft() {
+  const empty = document.getElementById('begegnung-photo-empty');
+  const wrap = document.getElementById('begegnung-photo-preview-wrap');
+  const img = document.getElementById('begegnung-photo-preview');
+  const captionWrap = document.getElementById('begegnung-caption-wrap');
+  if (!empty || !wrap || !img) return;
+  if (!begegnungImageDraft) {
+    empty.style.display = '';
+    wrap.style.display = 'none';
+    img.src = '';
+    if (captionWrap) captionWrap.style.display = 'none';
+    return;
+  }
+  const url = await getImageObjectUrl(begegnungImageDraft);
+  if (url) {
+    img.src = url;
+    empty.style.display = 'none';
+    wrap.style.display = '';
+    if (captionWrap) captionWrap.style.display = '';
+  } else {
+    // Bild nicht ladbar — wieder Knopf zeigen
+    begegnungImageDraft = null;
+    empty.style.display = '';
+    wrap.style.display = 'none';
+    if (captionWrap) captionWrap.style.display = 'none';
+  }
+}
 
 function openBegegnungEditor(existingId) {
   if (!menschDetailCurrentId) return;
   begegnungEditorCurrentId = existingId || null;
   begegnungEditorSelectedArt = null;
+  begegnungImageDraft = null;
+  begegnungImagePrevious = null;
+  begegnungCaptionPrevious = null;
 
   const titleEl = document.getElementById('begegnung-editor-title');
   const notizEl = document.getElementById('begegnung-notiz');
@@ -15485,6 +15722,7 @@ function openBegegnungEditor(existingId) {
   const moreRow = document.getElementById('begegnung-more-row');
   const moreToggleWrap = document.getElementById('begegnung-more-toggle-wrap');
   const deleteWrap = document.getElementById('begegnung-editor-delete-wrap');
+  const captionEl = document.getElementById('begegnung-caption');
 
   // Defaults: heute, Felder leer, alles geschlossen
   notizEl.value = '';
@@ -15493,6 +15731,7 @@ function openBegegnungEditor(existingId) {
   dateToggleWrap.style.display = '';
   moreRow.style.display = 'none';
   moreToggleWrap.style.display = '';
+  if (captionEl) captionEl.value = '';
 
   // Chips zurücksetzen
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => c.classList.remove('selected'));
@@ -15521,11 +15760,20 @@ function openBegegnungEditor(existingId) {
         const chip = document.querySelector(`#begegnung-art-chips .art-chip[data-art="${b.art}"]`);
         if (chip) chip.classList.add('selected');
       }
+      // Bestehendes Foto übernehmen
+      if (b.mediaId) {
+        begegnungImageDraft = b.mediaId;
+        begegnungImagePrevious = b.mediaId;
+      }
+      if (captionEl) captionEl.value = b.mediaCaption || '';
+      begegnungCaptionPrevious = b.mediaCaption || null;
     }
   } else {
     titleEl.textContent = 'Begegnung notieren';
     deleteWrap.style.display = 'none';
   }
+
+  renderBegegnungImageDraft();
 
   document.getElementById('begegnung-editor-overlay').classList.add('visible');
   setTimeout(() => {
@@ -15534,10 +15782,23 @@ function openBegegnungEditor(existingId) {
   }, 200);
 }
 
-function closeBegegnungEditor() {
+async function closeBegegnungEditor() {
+  // Frisch eingefügtes, nicht gespeichertes Bild aus DB entfernen
+  if (begegnungImageDraft && begegnungImageDraft !== begegnungImagePrevious) {
+    try {
+      const rec = await getImage(begegnungImageDraft);
+      if (rec && (!rec.refs || rec.refs.length === 0)) {
+        await deleteImage(begegnungImageDraft);
+        invalidateImageCache(begegnungImageDraft);
+      }
+    } catch(e) {}
+  }
   document.getElementById('begegnung-editor-overlay').classList.remove('visible');
   begegnungEditorCurrentId = null;
   begegnungEditorSelectedArt = null;
+  begegnungImageDraft = null;
+  begegnungImagePrevious = null;
+  begegnungCaptionPrevious = null;
 }
 
 function toggleBegegnungDate() {
@@ -15566,7 +15827,7 @@ function selectBegegnungArt(art) {
   });
 }
 
-function saveBegegnungEditor() {
+async function saveBegegnungEditor() {
   if (!menschDetailCurrentId) return;
   const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
   if (!m) return;
@@ -15574,9 +15835,12 @@ function saveBegegnungEditor() {
   const notiz = (document.getElementById('begegnung-notiz').value || '').trim();
   const dateStr = document.getElementById('begegnung-date').value;
   const art = begegnungEditorSelectedArt;
+  const captionEl = document.getElementById('begegnung-caption');
+  const caption = captionEl ? (captionEl.value || '').trim() : '';
+  const mediaId = begegnungImageDraft || null;
 
-  if (!notiz && !art) {
-    showToast('Ein Satz oder eine Art reicht.');
+  if (!notiz && !art && !mediaId) {
+    showToast('Ein Satz, eine Art oder ein Foto reicht.');
     return;
   }
 
@@ -15591,24 +15855,47 @@ function saveBegegnungEditor() {
 
   if (!Array.isArray(m.begegnungen)) m.begegnungen = [];
 
+  let savedBegegnungId = begegnungEditorCurrentId;
   if (begegnungEditorCurrentId) {
     const b = m.begegnungen.find(x => x.id === begegnungEditorCurrentId);
     if (b) {
       b.notiz = notiz;
       b.art = art || null;
       b.ts = ts;
+      b.mediaId = mediaId;
+      b.mediaCaption = caption || null;
     }
   } else {
+    savedBegegnungId = 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
     m.begegnungen.push({
-      id: 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
+      id: savedBegegnungId,
       ts: ts,
       art: art || null,
-      notiz: notiz
+      notiz: notiz,
+      mediaId: mediaId,
+      mediaCaption: caption || null
     });
   }
 
   saveState();
-  closeBegegnungEditor();
+
+  // Refs aktualisieren (Garbage-Collection-Schutz)
+  const refKey = 'begegnung:' + menschDetailCurrentId + ':' + savedBegegnungId;
+  if (begegnungImageDraft && begegnungImageDraft !== begegnungImagePrevious) {
+    try { await addImageRef(begegnungImageDraft, refKey); } catch(e) {}
+  }
+  if (begegnungImagePrevious && begegnungImagePrevious !== begegnungImageDraft) {
+    try {
+      await removeImageRef(begegnungImagePrevious, refKey);
+      invalidateImageCache(begegnungImagePrevious);
+    } catch(e) {}
+  }
+
+  // Wichtig: closeBegegnungEditor darf das Draft-Bild NICHT mehr löschen,
+  // weil es jetzt gespeichert ist. Reset des "Previous" verhindert das.
+  begegnungImagePrevious = begegnungImageDraft;
+
+  await closeBegegnungEditor();
   renderBegegnungenList();
   renderMenschenList(); // wegen "lange nicht"-Echo
   showToast(begegnungEditorCurrentId ? 'Geändert.' : 'Notiert.');
@@ -15617,13 +15904,24 @@ function saveBegegnungEditor() {
 function deleteCurrentBegegnung() {
   if (!menschDetailCurrentId || !begegnungEditorCurrentId) return;
   const begegnungIdToDelete = begegnungEditorCurrentId;
-  askConfirm('Diese Begegnung wirklich entfernen?', () => {
-    const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
+  const menschId = menschDetailCurrentId;
+  askConfirm('Diese Begegnung wirklich entfernen?', async () => {
+    const m = (state.menschen || []).find(x => x.id === menschId);
     if (m && Array.isArray(m.begegnungen)) {
+      const b = m.begegnungen.find(x => x.id === begegnungIdToDelete);
+      // Foto-Referenz entfernen — Bild verschwindet beim nächsten Cleanup
+      if (b && b.mediaId) {
+        try {
+          await removeImageRef(b.mediaId, 'begegnung:' + menschId + ':' + begegnungIdToDelete);
+          invalidateImageCache(b.mediaId);
+        } catch(e) {}
+      }
       m.begegnungen = m.begegnungen.filter(x => x.id !== begegnungIdToDelete);
       saveState();
     }
-    closeBegegnungEditor();
+    // closeBegegnungEditor darf das gespeicherte Draft-Bild NICHT erneut löschen
+    begegnungImagePrevious = begegnungImageDraft;
+    await closeBegegnungEditor();
     renderBegegnungenList();
     renderMenschenList();
     showToast('Entfernt.');
