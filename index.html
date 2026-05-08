@@ -2018,6 +2018,14 @@ h3 {
   opacity: 0.8;
   margin-top: 3px;
 }
+.mensch-item-zuletzt {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--ink);
+  opacity: 0.7;
+  margin-top: 3px;
+}
 .mensch-item-actions {
   display: flex;
   gap: 8px;
@@ -15340,20 +15348,47 @@ function renderMenschenList() {
     return;
   }
   container.innerHTML = liste.map((m) => {
-    const giftedLine = m.giftedAt
-      ? `<div class="mensch-item-gifted">Geschenkt ${formatGiftRelative(new Date(m.giftedAt))}</div>`
-      : '';
+    // Jüngste Begegnung (falls vorhanden) finden
+    const begegnungen = Array.isArray(m.begegnungen) ? m.begegnungen : [];
+    let lastBegegnung = null;
+    if (begegnungen.length) {
+      lastBegegnung = begegnungen.reduce((acc, b) => {
+        if (!acc) return b;
+        return new Date(b.ts).getTime() > new Date(acc.ts).getTime() ? b : acc;
+      }, null);
+    }
+
+    // 'Zuletzt'-Zeile bauen
+    let zuletztLine = '';
+    if (lastBegegnung) {
+      const when = formatGiftRelative(new Date(lastBegegnung.ts));
+      const art = lastBegegnung.art ? ` · ${escapeHtml(lastBegegnung.art)}` : '';
+      zuletztLine = `<div class="mensch-item-zuletzt">Zuletzt ${when}${art}</div>`;
+    }
+
+    // Geschenk-Zeile: nur zeigen, wenn es keine jüngere Begegnung gibt
+    let giftedLine = '';
+    if (m.giftedAt) {
+      const giftedTs = new Date(m.giftedAt).getTime();
+      const lastBegegnungTs = lastBegegnung ? new Date(lastBegegnung.ts).getTime() : 0;
+      if (giftedTs > lastBegegnungTs) {
+        giftedLine = `<div class="mensch-item-gifted">Geschenkt ${formatGiftRelative(new Date(m.giftedAt))}</div>`;
+      }
+    }
+
     const relLine = m.relation
       ? `<div class="mensch-item-meta">${escapeHtml(m.relation)}</div>`
       : '';
     const noteLine = m.note
       ? `<div class="mensch-item-note">${escapeHtml(m.note)}</div>`
       : '';
+
     // "Lange nicht"-Echo: letzte Begegnung vor 90+ Tagen, oder noch keine bei vorhandenem Geschenk-Datum
     const longTimeLabel = computeLongTimeLabel(m);
     const longTimeBadge = longTimeLabel
       ? `<span class="mensch-longtime">${longTimeLabel}</span>`
       : '';
+
     return `<div class="mensch-item clickable" onclick="openMenschDetail('${m.id}')">
       <div class="mensch-item-name-row">
         <div class="mensch-item-name">${escapeHtml(m.name)}</div>
@@ -15361,6 +15396,7 @@ function renderMenschenList() {
       </div>
       ${relLine}
       ${noteLine}
+      ${zuletztLine}
       ${giftedLine}
     </div>`;
   }).join('');
