@@ -3874,6 +3874,18 @@ textarea, input {
         <h2 class="evening-q-title" id="evening-q-title"></h2>
         <p class="evening-q-sub" id="evening-q-sub"></p>
         <textarea id="evening-q-note" placeholder="…" rows="3" class="evening-note"></textarea>
+
+        <!-- Wege-Echo (nur in Schritt 3, wenn ein Weg seit Schwellwert keine Spur hat) -->
+        <div id="evening-goal-echo" style="display:none;background:rgba(255,255,255,0.06);border-left:2px solid rgba(255,255,255,0.25);border-radius:6px;padding:12px 16px;margin-top:20px;">
+          <div id="evening-goal-echo-text" style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.98rem;line-height:1.55;opacity:0.85;"></div>
+          <div style="margin-top:10px;display:flex;gap:8px;">
+            <button id="evening-goal-echo-trace-btn" onclick="eveningGoalEchoAddTrace()"
+              style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:inherit;padding:6px 12px;border-radius:6px;font-family:'Inter',sans-serif;font-size:0.82rem;cursor:pointer;opacity:0.85;">
+              Spur eintragen
+            </button>
+          </div>
+        </div>
+
         <div class="evening-actions">
           <button class="evening-next" id="evening-next-btn" onclick="eveningNext()">Weiter</button>
         </div>
@@ -4856,9 +4868,18 @@ textarea, input {
       <p class="muted-note" style="margin-bottom:14px;line-height:1.6;">
         Bei den Hindernissen lohnt es sich, ehrlich nach innen zu schauen. Äußere Umstände sind oft real, aber meist gibt es im Inneren eine Stelle, an der du wirklich etwas verändern kannst. Genau dort greift der Wenn-Dann-Plan.
       </p>
-      <p class="muted-note" style="margin-bottom:0;line-height:1.6;font-style:italic;font-size:0.85rem;">
+      <p class="muted-note" style="margin-bottom:18px;line-height:1.6;font-style:italic;font-size:0.85rem;">
         Die Methode wurde von Gabriele Oettingen entwickelt (NYU/Universität Hamburg) und in über 20 Jahren Forschung untersucht. Quelle: Oettingen, G. — <em>Rethinking Positive Thinking</em> (2014).
       </p>
+
+      <div style="border-top:1px solid var(--border);padding-top:18px;margin-top:6px;">
+        <div class="muted-note" style="font-size:0.82rem;margin-bottom:6px;font-weight:500;color:var(--ink);">Stille Wege</div>
+        <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
+          In der Abendstunde kann eine leise Frage erscheinen, wenn ein Weg eine Weile keine Spur bekommen hat — ein Anstoß, kein Mahnen.
+        </p>
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:8px;">Nach wie vielen stillen Tagen?</div>
+        <div id="goal-echo-threshold-buttons" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
     </div>
   </div>
 
@@ -5497,6 +5518,14 @@ function loadState() {
         if (saved.rueckblickSettings[k] === undefined) {
           saved.rueckblickSettings[k] = defaults.rueckblickSettings[k];
         }
+      });
+    }
+    // Migration: Wege — fehlende createdAt-Felder einmalig setzen, paused-Default sichern
+    if (Array.isArray(saved.goals)) {
+      const todayIso = new Date().toISOString();
+      saved.goals.forEach(g => {
+        if (!g.createdAt) g.createdAt = todayIso;
+        if (typeof g.paused !== 'boolean') g.paused = false;
       });
     }
     return saved;
@@ -9475,6 +9504,92 @@ const EVENING_QUESTIONS = [
   }
 ];
 
+// ===== WEGE-ECHO IN DER ABENDSTUNDE =====
+// Erscheint in Schritt 3, wenn ein Weg seit ≥ Schwellwert Tagen keine Spur bekommen hat.
+// Frage rotiert zufällig aus dem Pool, mit Sitzungs-Wiederholungs-Vermeidung.
+const GOAL_ECHO_QUESTIONS = [
+  'Dein Weg „{title}" war eine Weile still. Was hat sich auf ihm gezeigt — auch wenn es klein war?',
+  'An deinen Weg „{title}" hast du eine Weile nicht gerührt. Ist er noch wichtig?',
+  'Dein Weg „{title}" wartet seit einer Weile. Wo steht er gerade in dir?',
+  'Manche Wege brauchen Pausen, andere wollen weitergehen. Wie ist es mit „{title}"?',
+  'Dein Weg „{title}" ist da. Auch wenn er gerade nicht laut ruft.',
+  'Was hat dich auf deinem Weg „{title}" zuletzt gebremst?',
+  'Was wäre auf deinem Weg „{title}" jetzt dran?'
+];
+
+const _goalEchoSeen = new Set();  // pro Sitzung: schon gesehene Indizes
+
+function pickGoalEchoQuestion(title) {
+  if (_goalEchoSeen.size >= GOAL_ECHO_QUESTIONS.length) _goalEchoSeen.clear();
+  const remainingIndices = GOAL_ECHO_QUESTIONS
+    .map((_, i) => i)
+    .filter(i => !_goalEchoSeen.has(i));
+  const idx = remainingIndices[Math.floor(Math.random() * remainingIndices.length)];
+  _goalEchoSeen.add(idx);
+  return GOAL_ECHO_QUESTIONS[idx].replace('{title}', title);
+}
+
+// Default-Einstellungen sicherstellen
+function ensureGoalEchoSettings() {
+  if (!state.goalEchoSettings || typeof state.goalEchoSettings !== 'object') {
+    state.goalEchoSettings = { thresholdDays: 7, lastShownTs: null };
+  }
+  if (typeof state.goalEchoSettings.thresholdDays !== 'number') {
+    state.goalEchoSettings.thresholdDays = 7;
+  }
+  if (state.goalEchoSettings.lastShownTs === undefined) {
+    state.goalEchoSettings.lastShownTs = null;
+  }
+}
+
+// Findet den stillsten Weg (längste Stille seit letzter Spur oder seit Anlegen)
+// und prüft, ob die Stille ≥ Schwellwert ist. Liefert {goal, daysSilent} oder null.
+function findStillestGoal() {
+  ensureGoalEchoSettings();
+  const threshold = state.goalEchoSettings.thresholdDays;
+  if (!threshold || threshold <= 0) return null;  // ausgeschaltet
+
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  if (goals.length === 0) return null;
+
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  let best = null;
+  goals.forEach(g => {
+    if (g.paused) return;  // ruhende Wege überspringen
+    const traces = Array.isArray(g.traces) ? g.traces : [];
+    let lastTs;
+    if (traces.length > 0) {
+      lastTs = Math.max(...traces.map(t => new Date(t.ts).getTime()).filter(t => !isNaN(t)));
+    } else {
+      lastTs = g.createdAt ? new Date(g.createdAt).getTime() : now;
+    }
+    if (isNaN(lastTs)) return;
+    const daysSilent = Math.floor((now - lastTs) / dayMs);
+    if (daysSilent >= threshold) {
+      if (!best || daysSilent > best.daysSilent) {
+        best = { goal: g, daysSilent };
+      }
+    }
+  });
+
+  return best;
+}
+
+// Anzeigesperre: 3 Tage nach letzter Anzeige nicht erneut zeigen
+function isGoalEchoLockActive() {
+  ensureGoalEchoSettings();
+  const last = state.goalEchoSettings.lastShownTs;
+  if (!last) return false;
+  const lastTs = new Date(last).getTime();
+  if (isNaN(lastTs)) return false;
+  const lockMs = 3 * 24 * 60 * 60 * 1000;
+  return (Date.now() - lastTs) < lockMs;
+}
+
+let _currentGoalEchoGoalId = null;  // für den "Spur eintragen"-Button
+
 let eveningStep = 0;
 let eveningAnswers = ['', '', ''];
 
@@ -9521,6 +9636,31 @@ function showEveningQuestion() {
       echoEl.style.display = 'none';
     }
   }
+
+  // Wege-Echo: nur in Schritt 3 (Loslassen), wenn ein Weg lange still war und keine Sperre aktiv
+  const goalEchoEl = document.getElementById('evening-goal-echo');
+  const goalEchoTextEl = document.getElementById('evening-goal-echo-text');
+  if (goalEchoEl && goalEchoTextEl) {
+    if (eveningStep === 2 && !isGoalEchoLockActive()) {
+      const stillest = findStillestGoal();
+      if (stillest && stillest.goal && stillest.goal.title) {
+        const question = pickGoalEchoQuestion(stillest.goal.title);
+        goalEchoTextEl.textContent = question;
+        _currentGoalEchoGoalId = stillest.goal.id;
+        goalEchoEl.style.display = '';
+        // Sperre setzen — beim ersten Anzeigen merken
+        ensureGoalEchoSettings();
+        state.goalEchoSettings.lastShownTs = new Date().toISOString();
+        saveState();
+      } else {
+        goalEchoEl.style.display = 'none';
+        _currentGoalEchoGoalId = null;
+      }
+    } else {
+      goalEchoEl.style.display = 'none';
+      _currentGoalEchoGoalId = null;
+    }
+  }
 }
 
 function eveningNext() {
@@ -9544,6 +9684,16 @@ function eveningNext() {
     }
     showEveningFinish();
   }
+}
+
+// Spur eintragen aus dem Wege-Echo heraus
+function eveningGoalEchoAddTrace() {
+  if (!_currentGoalEchoGoalId) return;
+  // Echo ausblenden — der Anstoß hat seinen Zweck erfüllt
+  const goalEchoEl = document.getElementById('evening-goal-echo');
+  if (goalEchoEl) goalEchoEl.style.display = 'none';
+  // Bestehende Spuren-Auswahl öffnen (Trace-Type-Overlay)
+  openTraceTypeOverlay(_currentGoalEchoGoalId);
 }
 
 function showEveningFinish() {
@@ -11212,7 +11362,36 @@ function renderSettings() {
   renderMomentSettings();
   renderAllQuotesList();
   renderFundeCategoriesSettings();
+  renderGoalEchoThresholdButtons();
   updateSettingsSummaries();
+}
+
+// Knopf-Reihe für Schwellwert des Wege-Echos
+function renderGoalEchoThresholdButtons() {
+  const wrap = document.getElementById('goal-echo-threshold-buttons');
+  if (!wrap) return;
+  ensureGoalEchoSettings();
+  const current = state.goalEchoSettings.thresholdDays;
+  const options = [
+    { value: 0, label: 'aus' },
+    { value: 3, label: '3 Tage' },
+    { value: 7, label: '7 Tage' },
+    { value: 14, label: '14 Tage' },
+    { value: 30, label: '30 Tage' }
+  ];
+  wrap.innerHTML = options.map(o => {
+    const isActive = current === o.value;
+    return `<button onclick="setGoalEchoThreshold(${o.value})"
+      style="padding:7px 13px;border-radius:8px;font-family:'Inter',sans-serif;font-size:0.85rem;cursor:pointer;border:1.5px solid ${isActive ? 'var(--accent)' : 'var(--border)'};background:${isActive ? 'var(--accent-soft)' : 'var(--bg)'};color:var(--ink);">${escapeHtml(o.label)}</button>`;
+  }).join('');
+}
+
+function setGoalEchoThreshold(days) {
+  ensureGoalEchoSettings();
+  state.goalEchoSettings.thresholdDays = days;
+  saveState();
+  renderGoalEchoThresholdButtons();
+  showToast(days === 0 ? 'Wege-Echo aus.' : `Schwellwert: ${days} Tage.`);
 }
 
 /* ===== KLAPPBARE KARTEN (Einstellungen) ===== */
@@ -11415,17 +11594,32 @@ function renderGoalsList() {
     if (empty) empty.style.display = '';
   } else {
     if (empty) empty.style.display = 'none';
-    container.innerHTML = goals.map(g => {
+
+    const renderCard = (g, dimmed) => {
       const wishPreview = (g.wish || '').trim();
       const shortWish = wishPreview.length > 140 ? wishPreview.slice(0, 140) + '…' : wishPreview;
       const startDate = g.createdAt ? new Date(g.createdAt) : null;
       const meta = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
-      return `<div class="goal-card" onclick="openGoalDetail('${g.id}')">
+      const styleAttr = dimmed ? ' style="opacity:0.55;"' : '';
+      return `<div class="goal-card"${styleAttr} onclick="openGoalDetail('${g.id}')">
         <div class="goal-card-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
         ${shortWish ? `<div class="goal-card-wish">${escapeHtml(shortWish)}</div>` : ''}
         ${meta ? `<div class="goal-card-meta">${escapeHtml(meta)}</div>` : ''}
       </div>`;
-    }).join('');
+    };
+
+    const active = goals.filter(g => !g.paused);
+    const paused = goals.filter(g => g.paused);
+
+    let html = '';
+    if (active.length) {
+      html += active.map(g => renderCard(g, false)).join('');
+    }
+    if (paused.length) {
+      html += `<div class="muted-note" style="margin:24px 0 10px;font-size:0.82rem;letter-spacing:0.04em;text-transform:uppercase;opacity:0.7;">Ruhend</div>`;
+      html += paused.map(g => renderCard(g, true)).join('');
+    }
+    container.innerHTML = html;
   }
 
   // Add-Button nur sichtbar, wenn weniger als MAX_GOALS
@@ -11514,6 +11708,7 @@ function saveGoalEditor() {
       ifThenPlans: [],
       traces: [],
       ignoredKeywords: [],   // Begriffe, bei denen "Nein" gesagt wurde — nicht mehr fragen
+      paused: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
@@ -11681,10 +11876,21 @@ function renderGoalDetail() {
 
   html += `<div class="goal-detail-actions">
     <button class="goal-detail-action-btn" onclick="openGoalEditor('${g.id}')">Bearbeiten</button>
+    <button class="goal-detail-action-btn" onclick="toggleGoalPaused('${g.id}')">${g.paused ? 'Wieder aufnehmen' : 'Ruhen lassen'}</button>
     <button class="goal-detail-action-btn danger" onclick="deleteGoal('${g.id}')">Weg beenden</button>
   </div>`;
 
   container.innerHTML = html;
+}
+
+function toggleGoalPaused(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  g.paused = !g.paused;
+  g.updatedAt = new Date().toISOString();
+  saveState();
+  renderGoalDetail();
+  showToast(g.paused ? 'Weg ruht jetzt.' : 'Weg wieder aufgenommen.');
 }
 
 function deleteGoal(id) {
