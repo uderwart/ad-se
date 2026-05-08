@@ -3033,6 +3033,40 @@ h3 {
   outline: none;
   box-sizing: border-box;
 }
+.te-image-time-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #fff;
+  border-top: 1px solid var(--border);
+}
+.te-image-time-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.te-image-time-input {
+  border: none;
+  background: transparent;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  color: var(--ink);
+  outline: none;
+  padding: 2px 4px;
+  width: 80px;
+}
+.te-image-time-clear {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.74rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  letter-spacing: 0.04em;
+}
+.te-image-time-clear:hover { color: #a14b38; }
 .te-image-placeholder {
   display: flex;
   align-items: center;
@@ -3063,6 +3097,15 @@ h3 {
   color: var(--muted);
   padding: 6px 0 0;
   text-align: center;
+}
+.te-render-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 2px 0 0;
+  opacity: 0.75;
 }
 
 /* Bild bei Funden — dezenter Knopf */
@@ -6259,6 +6302,12 @@ function closeLightbox() {
 function tripUid() { return 't-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8); }
 function tripEntryUid() { return 'te-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8); }
 function blockUid() { return 'b-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6); }
+
+/* Aktuelle Uhrzeit als HH:MM (lokale Zeitzone) */
+function currentHHMM() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
 
 /* Datum als reines yyyy-mm-dd (lokale Zeitzone) */
 function isoDateOnly(d) {
@@ -14210,6 +14259,9 @@ function renderTripEntryCard(entry) {
         if (cap) {
           body += `<div class="te-render-caption">${cap}</div>`;
         }
+        if (b.time) {
+          body += `<div class="te-render-time">${escapeHtml(b.time)}</div>`;
+        }
       }
     });
   }
@@ -14323,15 +14375,22 @@ function renderTeBlocks() {
     } else if (b.type === 'image') {
       if (b.mediaId) {
         // Echtes Bild — Vorschau (Quelle wird async gesetzt)
+        const timeVal = b.time || '';
         html += `<div class="te-image-block">
           <img class="te-image-img" id="te-img-${b.id}" alt="" onclick="openLightbox('${b.mediaId}', getTeBlockCaption('${b.id}'))" data-media-id="${b.mediaId}">
           <input class="te-image-caption-input" type="text" data-block-id="${b.id}"
             placeholder="Bildunterschrift (optional)"
             value="${escapeHtml(b.caption || '')}"
             oninput="onTeCaptionInput(this)">
+          <div class="te-image-time-row">
+            <span class="te-image-time-label">Uhrzeit</span>
+            <input class="te-image-time-input" type="time" data-block-id="${b.id}"
+              value="${escapeHtml(timeVal)}"
+              onchange="onTeTimeInput(this)">
+            ${timeVal ? `<button class="te-image-time-clear" onclick="clearTeTime('${b.id}')">entfernen</button>` : ''}
+          </div>
         </div>`;
       } else {
-        // Bild-Block ohne Bild (sollte nicht passieren, aber sicher ist sicher)
         html += `<div class="te-image-block"><div class="te-image-placeholder">Bild fehlt</div></div>`;
       }
     }
@@ -14363,6 +14422,35 @@ function onTeCaptionInput(input) {
   const b = teBlocksDraft.find(x => x.id === id);
   if (!b) return;
   b.caption = input.value;
+}
+
+function onTeTimeInput(input) {
+  const id = input.getAttribute('data-block-id');
+  const b = teBlocksDraft.find(x => x.id === id);
+  if (!b) return;
+  b.time = input.value || null;
+  // Wenn Zeit gesetzt wurde und der Clear-Knopf bisher fehlte, neu rendern damit er erscheint
+  // (oder umgekehrt). Aber: das würde Fokus rauben. Stattdessen: Knopf-Sichtbarkeit live umschalten.
+  const row = input.closest('.te-image-time-row');
+  if (row) {
+    let clearBtn = row.querySelector('.te-image-time-clear');
+    if (b.time && !clearBtn) {
+      clearBtn = document.createElement('button');
+      clearBtn.className = 'te-image-time-clear';
+      clearBtn.textContent = 'entfernen';
+      clearBtn.onclick = () => clearTeTime(b.id);
+      row.appendChild(clearBtn);
+    } else if (!b.time && clearBtn) {
+      clearBtn.remove();
+    }
+  }
+}
+
+function clearTeTime(blockId) {
+  const b = teBlocksDraft.find(x => x.id === blockId);
+  if (!b) return;
+  b.time = null;
+  renderTeBlocks();
 }
 
 function renderTeAddRow(insertIndex) {
@@ -14427,7 +14515,8 @@ async function handleTeImageFile(event) {
       id: blockUid(),
       type: 'image',
       mediaId: mediaId,
-      caption: ''
+      caption: '',
+      time: currentHHMM()
     });
     renderTeBlocks();
     showToast('Bild eingefügt.');
@@ -14460,10 +14549,23 @@ function removeTeBlock(blockId) {
 function syncTeDraftFromDom() {
   const wrap = document.getElementById('te-blocks-wrap');
   if (!wrap) return;
+  // Text-Blöcke
   wrap.querySelectorAll('textarea.te-editor-textarea').forEach(t => {
     const id = t.getAttribute('data-block-id');
     const b = teBlocksDraft.find(x => x.id === id);
     if (b) b.content = t.value;
+  });
+  // Caption-Inputs
+  wrap.querySelectorAll('input.te-image-caption-input').forEach(t => {
+    const id = t.getAttribute('data-block-id');
+    const b = teBlocksDraft.find(x => x.id === id);
+    if (b) b.caption = t.value;
+  });
+  // Time-Inputs
+  wrap.querySelectorAll('input.te-image-time-input').forEach(t => {
+    const id = t.getAttribute('data-block-id');
+    const b = teBlocksDraft.find(x => x.id === id);
+    if (b) b.time = t.value || null;
   });
 }
 
