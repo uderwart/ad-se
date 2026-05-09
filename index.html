@@ -424,6 +424,26 @@ h3 {
   border: 1.5px solid transparent;
 }
 .fm-word.gfk { font-size: 0.7rem; }
+.fm-word.personal {
+  font-style: italic;
+  border-style: dashed;
+  border-color: rgba(0,0,0,0.25);
+}
+.fm-word-add {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px dashed var(--muted);
+  line-height: 1;
+  opacity: 0.65;
+  transition: all 0.15s;
+}
+.fm-word-add:hover { opacity: 1; }
 .fm-word.selected {
   font-weight: 600;
   transform: scale(1.05);
@@ -749,6 +769,18 @@ h3 {
   color: var(--accent-deep);
 }
 .fm-need-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Eigene Bedürfnisse — Pool unten, durch Trennlinie abgesetzt */
+.fm-needs-personal-pool {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.fm-needs-personal-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -2125,6 +2157,114 @@ h3 {
 }
 .mensch-item-btn:hover { color: var(--accent-deep); }
 .mensch-item-btn.danger:hover { color: #a14b38; }
+
+/* Fragen-Pool — Akkordeon pro Tonart */
+.fragen-tone-block {
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  overflow: hidden;
+}
+.fragen-tone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.fragen-tone-header:hover { background: rgba(0,0,0,0.02); }
+.fragen-tone-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.fragen-tone-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.fragen-tone-arrow {
+  font-size: 0.75rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.fragen-tone-block.open .fragen-tone-arrow { transform: rotate(90deg); }
+.fragen-tone-body {
+  display: none;
+  padding: 4px 14px 12px 14px;
+  border-top: 1px solid var(--border);
+}
+.fragen-tone-block.open .fragen-tone-body { display: block; }
+
+.frage-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.frage-item:last-child { border-bottom: none; }
+.frage-item-text {
+  flex: 1;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.96rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.frage-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.frage-item-btn {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.frage-item-btn:hover { color: var(--accent-deep); background: rgba(0,0,0,0.04); }
+.frage-item-btn.danger:hover { color: #a14b38; }
+.frage-add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.frage-add-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  background: var(--bg);
+  color: var(--ink);
+  outline: none;
+}
+.frage-edit-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--accent);
+  border-radius: 8px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.96rem;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+}
 
 /* Mensch-Liste: ganzes Item klickbar (öffnet Detail) */
 .mensch-item.clickable {
@@ -4402,7 +4542,10 @@ textarea, input {
           class="fm-activity-free" style="display:none;">
       </div>
 
-      <button class="btn full" style="margin-top:10px;" onclick="saveFeelingMatrix()">Gefühl notieren</button>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveFeelingMatrix()">Gefühl notieren</button>
+        <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="cancelFeelingSelection()">Abbrechen</button>
+      </div>
     </div>
 
     <div class="fm-needs" id="fm-needs"></div>
@@ -5733,6 +5876,15 @@ textarea, input {
       </p>
       <div id="menschen-list" style="margin-bottom:10px;"></div>
       <button class="btn secondary full" onclick="openMenschEditor()">Jemanden hinzufügen</button>
+
+      <!-- Fragen-Pool -->
+      <div class="menschen-fragen-section" style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+        <h3 style="margin:0 0 4px 0;font-size:1.05rem;">Fragen</h3>
+        <p class="muted-note" style="margin-bottom:14px;line-height:1.55;font-size:0.88rem;">
+          Eine kleine Sammlung — für Gespräche, die mehr sein sollen als „wie geht's". Du kannst alles ändern und ergänzen.
+        </p>
+        <div id="menschen-fragen-akkordeon"></div>
+      </div>
     </div>
   </div>
 
@@ -6926,6 +7078,8 @@ function loadState() {
     gedankenLog: [],
     gedankenEnabled: false,
     menschen: [],
+    menschenFragen: [],          // [{id, text, tone:'tief'|'alltag'|'beziehung'}]
+    menschenFragenInit: false,   // wird beim ersten Mal mit Start-Set befüllt
     rueckblicke: [],
     rueckblickSettings: {
       showMorning: true,
@@ -6953,6 +7107,7 @@ function loadState() {
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
     personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
+    personalFeelings: [],       // [{label:'überdreht', quadrant:'aa'}, ...] — eigene Gefühlswörter pro Quadrant
     funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
     fundeCategories: ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'],
     trips: [],                  // Reisen — Spec v02, Mai 2026
@@ -6979,6 +7134,7 @@ function loadState() {
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
     if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
+    if (!Array.isArray(saved.personalFeelings)) saved.personalFeelings = [];
     if (!Array.isArray(saved.funde)) saved.funde = [];
     if (!Array.isArray(saved.fundeCategories) || saved.fundeCategories.length === 0) {
       saved.fundeCategories = ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'];
@@ -7007,6 +7163,36 @@ function loadState() {
         (m.name || '').trim().toLowerCase() !== 'mich selbst'
       );
       saved._cleanedMichSelbst = true;
+    }
+    // Fragen-Pool für Menschen: einmalig mit Start-Set befüllen
+    if (!Array.isArray(saved.menschenFragen)) saved.menschenFragen = [];
+    if (!saved.menschenFragenInit) {
+      const startSet = [
+        // Tief / persönlich
+        { tone: 'tief', text: 'Was würdest du gerne können, was du nicht kannst?' },
+        { tone: 'tief', text: 'Was hast du als Kind geglaubt, das sich später als falsch herausstellte?' },
+        { tone: 'tief', text: 'Wovor hast du heute Angst — kleiner als gestern, größer als morgen?' },
+        { tone: 'tief', text: 'Wann hast du dich zuletzt wirklich verstanden gefühlt?' },
+        { tone: 'tief', text: 'Was möchtest du noch erlebt haben, bevor du alt wirst?' },
+        // Alltag
+        { tone: 'alltag', text: 'Was war heute leise schön?' },
+        { tone: 'alltag', text: 'Wer ist dir diese Woche begegnet, an den du noch denkst?' },
+        { tone: 'alltag', text: 'Was hat dich diese Woche müde gemacht — und was hat dich getragen?' },
+        { tone: 'alltag', text: 'Worauf freust du dich gerade?' },
+        { tone: 'alltag', text: 'Wenn du heute Abend einen Satz schreiben müsstest über den Tag, welcher wäre es?' },
+        // Beziehung
+        { tone: 'beziehung', text: 'Was brauchst du gerade von mir, das ich dir nicht gebe?' },
+        { tone: 'beziehung', text: 'Wann fühlst du dich mir am nächsten?' },
+        { tone: 'beziehung', text: 'Gibt es etwas, das wir aufgeschoben haben, ohne es zu sagen?' },
+        { tone: 'beziehung', text: 'Was schätzt du an mir, ohne es zu sagen?' },
+        { tone: 'beziehung', text: 'Worüber haben wir lange nicht mehr gesprochen?' }
+      ];
+      saved.menschenFragen = startSet.map(q => ({
+        id: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        text: q.text,
+        tone: q.tone
+      }));
+      saved.menschenFragenInit = true;
     }
     return saved;
   } catch(e) { return defaults; }
@@ -7346,24 +7532,32 @@ function renderFmActivityChips() {
 
   const recents = getRecentActivitiesForFeeling().slice(0, 6);
 
-  let html = '';
+  // Chips als DOM-Elemente bauen — vermeidet Quoting-Probleme im onclick
+  chipsEl.innerHTML = '';
   recents.forEach(it => {
     const timeText = formatRelativeTime(new Date(it.ts));
     const isSelected = fmLinkedActivity
       && fmLinkedActivity.kind === it.kind
       && fmLinkedActivity.refId === it.refId;
-    html += `<span class="fm-activity-chip${isSelected ? ' selected' : ''}"
-      onclick="selectFmActivity('${it.kind}', ${JSON.stringify(it.refId)}, ${JSON.stringify(it.text)})">
-      ${escapeHtml(it.text)}<span class="fm-activity-chip-time">${escapeHtml(timeText)}</span>
-    </span>`;
+    const chip = document.createElement('span');
+    chip.className = 'fm-activity-chip' + (isSelected ? ' selected' : '');
+    const txtNode = document.createTextNode(it.text);
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'fm-activity-chip-time';
+    timeSpan.textContent = timeText;
+    chip.appendChild(txtNode);
+    chip.appendChild(timeSpan);
+    chip.addEventListener('click', () => selectFmActivity(it.kind, it.refId, it.text));
+    chipsEl.appendChild(chip);
   });
 
   // "Etwas anderes"-Chip
   const isFreeSelected = fmLinkedActivity && fmLinkedActivity.kind === 'free';
-  html += `<span class="fm-activity-chip add${isFreeSelected ? ' selected' : ''}"
-    onclick="toggleFmActivityFree()">+ Etwas anderes</span>`;
-
-  chipsEl.innerHTML = html;
+  const addChip = document.createElement('span');
+  addChip.className = 'fm-activity-chip add' + (isFreeSelected ? ' selected' : '');
+  addChip.textContent = '+ Etwas anderes';
+  addChip.addEventListener('click', () => toggleFmActivityFree());
+  chipsEl.appendChild(addChip);
 
   // Frei-Eingabe nur sichtbar, wenn 'free' gewählt
   if (freeInput) {
@@ -7545,19 +7739,85 @@ function setFeelingMatrixMode(mode) {
 
 function renderFeelingMatrix() {
   const data = FEELING_MATRIX[fmMode] || FEELING_MATRIX.kern;
+  const personalAll = Array.isArray(state.personalFeelings) ? state.personalFeelings : [];
   ['ua','aa','ur','ar'].forEach(q => {
     const el = document.getElementById('fm-q-' + q);
     if (!el) return;
     el.innerHTML = '';
+    // Standard-Gefühle
     data[q].forEach(f => el.appendChild(makeFeelingChip(f, q)));
+    // Eigene Gefühle für diesen Quadranten
+    personalAll.filter(p => p.quadrant === q).forEach(p => {
+      el.appendChild(makeFeelingChip({ label: p.label, desc: '', personal: true }, q));
+    });
+    // Plus-Knopf zum Hinzufügen
+    el.appendChild(makeAddFeelingButton(q));
   });
   updateFeelingSelection();
+}
+
+function makeAddFeelingButton(quadrant) {
+  const btn = document.createElement('button');
+  btn.className = 'fm-word fm-word-add';
+  btn.textContent = '+';
+  btn.title = 'Eigenes Gefühl hinzufügen';
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    openAddFeelingInline(quadrant, btn);
+  };
+  return btn;
+}
+
+function openAddFeelingInline(quadrant, anchorBtn) {
+  if (document.getElementById('fm-add-input')) return;
+  const wrap = document.createElement('span');
+  wrap.style.display = 'inline-flex';
+  wrap.style.gap = '4px';
+  wrap.style.alignItems = 'center';
+  wrap.innerHTML = `
+    <input id="fm-add-input" type="text" placeholder="eigenes Wort"
+      style="padding:4px 8px;border:1.5px solid var(--accent);border-radius:14px;
+             font-family:'Inter',sans-serif;font-size:0.78rem;width:110px;
+             background:var(--card);color:var(--ink);outline:none;">
+    <button id="fm-add-ok" style="background:var(--accent);color:white;border:none;
+      border-radius:50%;width:22px;height:22px;font-size:0.85rem;cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;padding:0;">✓</button>
+    <button id="fm-add-cancel" style="background:transparent;color:var(--muted);border:none;
+      font-size:0.95rem;cursor:pointer;padding:0 4px;">✕</button>
+  `;
+  anchorBtn.replaceWith(wrap);
+  const input = document.getElementById('fm-add-input');
+  input.focus();
+  const cancel = () => { renderFeelingMatrix(); };
+  const commit = () => {
+    const txt = (input.value || '').trim();
+    if (!txt) { cancel(); return; }
+    if (!Array.isArray(state.personalFeelings)) state.personalFeelings = [];
+    const exists = state.personalFeelings.some(p =>
+      p.label.toLowerCase() === txt.toLowerCase() && p.quadrant === quadrant);
+    if (!exists) {
+      state.personalFeelings.unshift({ label: txt, quadrant });
+      if (state.personalFeelings.length > 60) state.personalFeelings.pop();
+      saveState();
+    }
+    if (fmSelected.length < 5 && !fmSelected.some(s => s.label === txt)) {
+      fmSelected.push({ label: txt, quadrant, desc: '', gfk: false });
+    }
+    renderFeelingMatrix();
+    if (typeof renderFmActivityChips === 'function') renderFmActivityChips();
+  };
+  document.getElementById('fm-add-ok').onclick = commit;
+  document.getElementById('fm-add-cancel').onclick = cancel;
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); cancel(); }
+  });
 }
 
 function makeFeelingChip(f, quadrant) {
   const isSelected = fmSelected.some(s => s.label === f.label);
   const btn = document.createElement('button');
-  btn.className = 'fm-word' + (f.gfk ? ' gfk' : '') + (isSelected ? ' selected' : '');
+  btn.className = 'fm-word' + (f.gfk ? ' gfk' : '') + (f.personal ? ' personal' : '') + (isSelected ? ' selected' : '');
   btn.textContent = f.label;
 
   const colors = {
@@ -7577,7 +7837,39 @@ function makeFeelingChip(f, quadrant) {
     btn.style.color = c.text;
   }
   btn.onclick = () => toggleFeelingWord(f, quadrant);
+  if (f.personal) {
+    attachLongPressDeletePersonalFeeling(btn, f.label, quadrant);
+  }
   return btn;
+}
+
+function attachLongPressDeletePersonalFeeling(chip, label, quadrant) {
+  let timer = null;
+  const start = () => {
+    timer = setTimeout(() => {
+      timer = null;
+      askConfirm(`„${label}" aus deinen eigenen Gefühlen entfernen?`, () => {
+        if (!Array.isArray(state.personalFeelings)) return;
+        const idx = state.personalFeelings.findIndex(p =>
+          p.label.toLowerCase() === label.toLowerCase() && p.quadrant === quadrant);
+        if (idx >= 0) {
+          state.personalFeelings.splice(idx, 1);
+          const selIdx = fmSelected.findIndex(s => s.label === label);
+          if (selIdx >= 0) fmSelected.splice(selIdx, 1);
+          saveState();
+          renderFeelingMatrix();
+          if (typeof showToast === 'function') showToast('Entfernt.');
+        }
+      });
+    }, 600);
+  };
+  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
+  chip.addEventListener('touchstart', start, { passive: true });
+  chip.addEventListener('mousedown', start);
+  chip.addEventListener('touchend', cancel);
+  chip.addEventListener('touchcancel', cancel);
+  chip.addEventListener('mouseup', cancel);
+  chip.addEventListener('mouseleave', cancel);
 }
 
 function toggleFeelingWord(f, quadrant) {
@@ -7613,7 +7905,14 @@ function updateFeelingSelection() {
     const tag = document.createElement('div');
     tag.className = 'fm-tag';
     tag.style.background = colors[s.quadrant];
-    tag.innerHTML = `<span>${s.label}</span><span class="remove" onclick="removeFeelingWord(${i})">✕</span>`;
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = s.label;
+    const removeSpan = document.createElement('span');
+    removeSpan.className = 'remove';
+    removeSpan.textContent = '✕';
+    removeSpan.addEventListener('click', () => removeFeelingWord(i));
+    tag.appendChild(labelSpan);
+    tag.appendChild(removeSpan);
     tags.appendChild(tag);
   });
 }
@@ -7684,34 +7983,39 @@ function showNeedsReflection(entry, logIndex) {
   let html = `<div class="fm-needs-title">${title}</div>
               <div class="fm-needs-sub" style="margin-bottom:14px;line-height:1.5;">${explanation}</div>`;
 
+  // Pro Gefühl: nur Standard-Vorschläge (keine eigenen Wörter mehr hier mischen)
   entry.feelings.forEach(f => {
     const standardNeeds = FEELING_NEEDS[f.label] || [];
-    // Eigene Bedürfnisse zuerst, dann Standard (ohne Duplikate)
-    const personalLower = personal.map(p => p.toLowerCase());
-    const standardFiltered = standardNeeds.filter(n => !personalLower.includes(n.toLowerCase()));
     const intro = introVerb.replace('{label}', escapeHtml(f.label));
 
     html += `<div class="fm-need-block">
       <div class="fm-need-intro">${intro}</div>
       <div class="fm-need-chips-wrap">`;
-    // Eigene zuerst, mit kleiner Markierung
-    personal.forEach(n => {
-      html += `<span class="fm-need-chip personal" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
-    });
-    standardFiltered.forEach(n => {
+    standardNeeds.forEach(n => {
       html += `<span class="fm-need-chip" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
     });
     html += `</div></div>`;
   });
+
+  // Eigener Pool unten — durch Trennlinie abgesetzt, ohne Titel
+  if (personal.length > 0) {
+    html += `<div class="fm-needs-personal-pool">
+      <div class="fm-needs-personal-chips">`;
+    personal.forEach(n => {
+      html += `<span class="fm-need-chip personal" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
+    });
+    html += `</div></div>`;
+  }
 
   html += `<div class="fm-needs-own-wrap">
     <div class="fm-needs-own-label">Trifft keines? Welches Wort wäre näher an deinem Bedürfnis?</div>
     <input type="text" id="fm-needs-own" placeholder="z.B. Atem, Geborgenheit, bei mir sein…"
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;background:var(--card);color:var(--ink);outline:none;">
   </div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
-      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="skipNeedsReflection()">Überspringen</button>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+      <button class="btn" style="flex:1;min-width:90px;padding:11px 10px;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
+      <button class="btn secondary" style="flex:1;min-width:90px;padding:11px 10px;" onclick="skipNeedsReflection()">Überspringen</button>
+      <button class="btn secondary" style="flex:1;min-width:90px;padding:11px 10px;" onclick="cancelNeedsReflection()">Abbrechen</button>
     </div>`;
   needsDiv.innerHTML = html;
 
@@ -7784,6 +8088,49 @@ function saveNeedsReflection(logIndex) {
 function skipNeedsReflection() {
   finishNeedsReflection();
   showToast('Notiert.');
+}
+
+// Abbrechen während der Auswahl-Phase: alles wegwerfen
+function cancelFeelingSelection() {
+  fmSelected = [];
+  fmLinkedActivity = null;
+  const ctx = document.getElementById('fm-context');
+  if (ctx) ctx.value = '';
+  const freeInput = document.getElementById('fm-activity-free');
+  if (freeInput) freeInput.value = '';
+  renderFeelingMatrix();
+  // Matrix zuklappen
+  const card = document.getElementById('matrix-collapsible');
+  const body = document.getElementById('matrix-body');
+  if (card && body) {
+    card.classList.remove('open');
+    body.style.maxHeight = '0';
+  }
+  showToast('Abgebrochen.');
+}
+
+// Abbrechen während der Bedürfnis-Reflexion: Eintrag wieder löschen
+function cancelNeedsReflection() {
+  // Der zuletzt angelegte Eintrag steht auf state.feelingLog[0] — wieder entfernen
+  if (Array.isArray(state.feelingLog) && state.feelingLog.length > 0) {
+    state.feelingLog.shift();
+    saveState();
+  }
+  document.getElementById('fm-needs').classList.remove('visible');
+  fmSelected = [];
+  const ctx = document.getElementById('fm-context');
+  if (ctx) ctx.value = '';
+  renderFeelingMatrix();
+  // Matrix zuklappen
+  const card = document.getElementById('matrix-collapsible');
+  const body = document.getElementById('matrix-body');
+  if (card && body) {
+    card.classList.remove('open');
+    body.style.maxHeight = '0';
+  }
+  // Heute-Seite ggf. neu rendern, damit der entfernte Eintrag verschwindet
+  if (typeof renderHome === 'function') renderHome();
+  showToast('Abgebrochen.');
 }
 
 // Ausgangsgefühle für die Gedanken-Brücke (muss vor finishNeedsReflection deklariert sein)
@@ -13210,6 +13557,7 @@ function updateSettingsSummaries() {
   renderGedankenToggle();
   // Menschen: Liste rendern
   renderMenschenList();
+  renderMenschenFragen();
   // Monatsrückblick: Toggles und Watchwords
   renderRueckblickToggles();
   renderRueckblickNarrativeToggle();
@@ -15792,6 +16140,187 @@ function renderMenschenList() {
       ${giftedLine}
     </div>`;
   }).join('');
+}
+
+/* ===== FRAGEN-POOL für nahestehende Menschen ===== */
+const FRAGEN_TONES = [
+  { key: 'tief',       label: 'Tief',       order: 1 },
+  { key: 'alltag',     label: 'Alltag',     order: 2 },
+  { key: 'beziehung',  label: 'Beziehung',  order: 3 }
+];
+// merkt offene Akkordeon-Blöcke nur für die Session
+let fragenAkkordeonOpen = {};
+// merkt aktiven Inline-Edit
+let fragenEditingId = null;
+
+function renderMenschenFragen() {
+  const root = document.getElementById('menschen-fragen-akkordeon');
+  if (!root) return;
+  const fragen = Array.isArray(state.menschenFragen) ? state.menschenFragen : [];
+
+  root.innerHTML = '';
+  FRAGEN_TONES.forEach(t => {
+    const fragenDieser = fragen.filter(f => f.tone === t.key);
+    const isOpen = !!fragenAkkordeonOpen[t.key];
+
+    const block = document.createElement('div');
+    block.className = 'fragen-tone-block' + (isOpen ? ' open' : '');
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'fragen-tone-header';
+    header.innerHTML = `
+      <div style="display:flex;align-items:baseline;gap:8px;flex:1;">
+        <span class="fragen-tone-title">${t.label}</span>
+        <span class="fragen-tone-count">${fragenDieser.length}</span>
+      </div>
+      <span class="fragen-tone-arrow">▸</span>
+    `;
+    header.addEventListener('click', () => {
+      fragenAkkordeonOpen[t.key] = !fragenAkkordeonOpen[t.key];
+      renderMenschenFragen();
+    });
+    block.appendChild(header);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'fragen-tone-body';
+
+    if (fragenDieser.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'muted-note';
+      empty.style.cssText = 'text-align:center;padding:8px 0;font-style:italic;font-size:0.88rem;';
+      empty.textContent = 'Noch keine Frage in dieser Tonart.';
+      body.appendChild(empty);
+    } else {
+      fragenDieser.forEach(f => {
+        body.appendChild(buildFrageItem(f, t.key));
+      });
+    }
+
+    // Hinzufüge-Zeile
+    const addRow = document.createElement('div');
+    addRow.className = 'frage-add-row';
+    const addInput = document.createElement('input');
+    addInput.type = 'text';
+    addInput.className = 'frage-add-input';
+    addInput.placeholder = 'Eigene Frage in „' + t.label + '"…';
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn small';
+    addBtn.textContent = '+';
+    const commit = () => {
+      const txt = (addInput.value || '').trim();
+      if (!txt) return;
+      addMenschenFrage(txt, t.key);
+      addInput.value = '';
+    };
+    addBtn.addEventListener('click', commit);
+    addInput.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
+    });
+    addRow.appendChild(addInput);
+    addRow.appendChild(addBtn);
+    body.appendChild(addRow);
+
+    block.appendChild(body);
+    root.appendChild(block);
+  });
+}
+
+function buildFrageItem(f, toneKey) {
+  const item = document.createElement('div');
+  item.className = 'frage-item';
+
+  // Edit-Modus?
+  if (fragenEditingId === f.id) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'flex:1;width:100%;';
+    const ta = document.createElement('textarea');
+    ta.className = 'frage-edit-textarea';
+    ta.value = f.text;
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn small';
+    okBtn.textContent = 'Speichern';
+    okBtn.addEventListener('click', () => {
+      const newTxt = (ta.value || '').trim();
+      if (newTxt) {
+        updateMenschenFrage(f.id, { text: newTxt });
+      }
+      fragenEditingId = null;
+      renderMenschenFragen();
+    });
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn secondary small';
+    cancelBtn.textContent = 'Abbrechen';
+    cancelBtn.addEventListener('click', () => {
+      fragenEditingId = null;
+      renderMenschenFragen();
+    });
+    actions.appendChild(okBtn);
+    actions.appendChild(cancelBtn);
+    wrap.appendChild(ta);
+    wrap.appendChild(actions);
+    item.appendChild(wrap);
+    setTimeout(() => ta.focus(), 30);
+    return item;
+  }
+
+  // Lese-Modus
+  const txtEl = document.createElement('div');
+  txtEl.className = 'frage-item-text';
+  txtEl.textContent = f.text;
+
+  const actions = document.createElement('div');
+  actions.className = 'frage-item-actions';
+  const editBtn = document.createElement('button');
+  editBtn.className = 'frage-item-btn';
+  editBtn.textContent = 'Ändern';
+  editBtn.addEventListener('click', () => {
+    fragenEditingId = f.id;
+    renderMenschenFragen();
+  });
+  const delBtn = document.createElement('button');
+  delBtn.className = 'frage-item-btn danger';
+  delBtn.textContent = 'Löschen';
+  delBtn.addEventListener('click', () => {
+    if (typeof askConfirm === 'function') {
+      askConfirm('Diese Frage löschen?', () => deleteMenschenFrage(f.id));
+    } else if (confirm('Diese Frage löschen?')) {
+      deleteMenschenFrage(f.id);
+    }
+  });
+  actions.appendChild(editBtn);
+  actions.appendChild(delBtn);
+
+  item.appendChild(txtEl);
+  item.appendChild(actions);
+  return item;
+}
+
+function addMenschenFrage(text, tone) {
+  if (!Array.isArray(state.menschenFragen)) state.menschenFragen = [];
+  const id = 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  state.menschenFragen.push({ id, text, tone });
+  saveState();
+  fragenAkkordeonOpen[tone] = true;
+  renderMenschenFragen();
+}
+
+function updateMenschenFrage(id, patch) {
+  if (!Array.isArray(state.menschenFragen)) return;
+  const f = state.menschenFragen.find(x => x.id === id);
+  if (!f) return;
+  Object.assign(f, patch);
+  saveState();
+}
+
+function deleteMenschenFrage(id) {
+  if (!Array.isArray(state.menschenFragen)) return;
+  state.menschenFragen = state.menschenFragen.filter(x => x.id !== id);
+  saveState();
+  renderMenschenFragen();
 }
 
 // "Lange nicht"-Echo — leise, nie als Vorwurf
