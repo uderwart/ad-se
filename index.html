@@ -2931,6 +2931,57 @@ h3 {
   margin-top: 0;
 }
 
+/* Ziehharmonika für Funde (Monats- und Kategoriegruppen) */
+.funde-group {
+  margin-bottom: 12px;
+}
+.funde-group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--card);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s;
+}
+.funde-group-header:hover {
+  border-color: var(--accent);
+}
+.funde-group-title {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--accent-deep);
+}
+.funde-group-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.funde-group-chevron {
+  font-size: 0.85rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.funde-group.expanded .funde-group-chevron {
+  transform: rotate(90deg);
+}
+.funde-group-body {
+  display: none;
+  padding-top: 10px;
+}
+.funde-group.expanded .funde-group-body {
+  display: block;
+}
+
 .goal-editor-hint {
   font-family: 'EB Garamond', serif;
   font-style: italic;
@@ -14226,6 +14277,11 @@ function setFundeView_old_unused() {
 let fundeShownLimit = 30;  // Pagination: Anzahl der initial sichtbaren Funde
 const FUNDE_GROUP_THRESHOLD = 20;  // Ab so vielen Einträgen nach Monat gruppieren
 
+// Ziehharmonika: welche Gruppen sind gerade aufgeklappt
+const fundeExpandedMonths = new Set();      // Schlüssel: 'yyyy-mm'
+const fundeExpandedCategories = new Set();   // Schlüssel: Kategoriename
+let fundeExpandInitialized = false;          // jüngsten Monat einmalig öffnen
+
 function fundeMatchesSearch(f, query) {
   if (!query) return true;
   const q = query.toLowerCase();
@@ -14281,29 +14337,63 @@ function renderFunde() {
   }
 
   if (fundeView === 'recent') {
-    const visible = filtered.slice(0, fundeShownLimit);
     let html = '';
-    // Monatsgruppierung erst ab Schwellwert UND wenn nicht gerade gesucht wird
-    const groupByMonth = !query && filtered.length > FUNDE_GROUP_THRESHOLD;
-    if (groupByMonth) {
-      let currentMonth = null;
-      visible.forEach(f => {
-        const d = new Date(f.ts);
-        const mk = monthKey(d);
-        if (mk !== currentMonth) {
-          currentMonth = mk;
-          html += `<div class="funde-category-header" style="font-size:0.95rem;">${escapeHtml(monthLabel(d))}</div>`;
-        }
-        html += renderFundCard(f);
-      });
-    } else {
+
+    // Bei aktiver Suche: keine Gruppierung, einfache flache Liste
+    if (query) {
+      const visible = filtered.slice(0, fundeShownLimit);
       html = visible.map(f => renderFundCard(f)).join('');
+      if (filtered.length > fundeShownLimit) {
+        const remaining = filtered.length - fundeShownLimit;
+        html += `<button class="btn secondary full" onclick="loadMoreFunde()" style="margin-top:14px;">Weitere ${remaining} zeigen</button>`;
+      }
+      wrap.innerHTML = html;
+      attachFundCardClicks(wrap);
+      return;
     }
-    // "Weitere zeigen"-Knopf
+
+    // Ohne Suche: nach Monaten gruppieren, jeder Monat aufklappbar
+    // Limit-Logik: Nur den jüngsten N Funden zugehörige Monate werden gerendert,
+    // bis das Limit erreicht ist.
+    const visible = filtered.slice(0, fundeShownLimit);
+    const monthsMap = {};
+    visible.forEach(f => {
+      const d = new Date(f.ts);
+      const mk = monthKey(d);
+      if (!monthsMap[mk]) monthsMap[mk] = { label: monthLabel(d), funde: [] };
+      monthsMap[mk].funde.push(f);
+    });
+    const monthKeys = Object.keys(monthsMap).sort().reverse();
+
+    // Beim ersten Render: jüngsten Monat aufklappen
+    if (!fundeExpandInitialized && monthKeys.length > 0) {
+      fundeExpandedMonths.add(monthKeys[0]);
+      fundeExpandInitialized = true;
+    }
+
+    monthKeys.forEach(mk => {
+      const group = monthsMap[mk];
+      const isExp = fundeExpandedMonths.has(mk);
+      const expClass = isExp ? 'expanded' : '';
+      const countLabel = group.funde.length === 1 ? '1 Fund' : `${group.funde.length} Funde`;
+      const body = isExp ? group.funde.map(f => renderFundCard(f)).join('') : '';
+      html += `<div class="funde-group ${expClass}">
+        <div class="funde-group-header" onclick="toggleFundeMonth('${mk}')">
+          <div class="funde-group-title">${escapeHtml(group.label)}</div>
+          <div class="funde-group-meta">
+            <span>${countLabel}</span>
+            <span class="funde-group-chevron">›</span>
+          </div>
+        </div>
+        <div class="funde-group-body">${body}</div>
+      </div>`;
+    });
+
     if (filtered.length > fundeShownLimit) {
       const remaining = filtered.length - fundeShownLimit;
-      html += `<button class="btn secondary full" onclick="loadMoreFunde()" style="margin-top:14px;">Weitere ${remaining} ${remaining === 1 ? 'zeigen' : 'zeigen'}</button>`;
+      html += `<button class="btn secondary full" onclick="loadMoreFunde()" style="margin-top:14px;">Weitere ${remaining} zeigen</button>`;
     }
+
     wrap.innerHTML = html;
     attachFundCardClicks(wrap);
     return;
@@ -14326,8 +14416,21 @@ function renderFunde() {
       const list = groups[cat];
       if (!list || list.length === 0) return;
       const sorted = list.sort((a, b) => new Date(b.ts) - new Date(a.ts));
-      html += `<div class="funde-category-header">${escapeHtml(cat)} <span style="font-style:normal;font-size:0.78rem;color:var(--muted);font-family:'Inter',sans-serif;">· ${list.length}</span></div>`;
-      html += sorted.map(f => renderFundCard(f)).join('');
+      // Bei aktiver Suche: alle aufklappen, damit Treffer sichtbar werden
+      const isExp = !!query || fundeExpandedCategories.has(cat);
+      const expClass = isExp ? 'expanded' : '';
+      const countLabel = list.length === 1 ? '1 Fund' : `${list.length} Funde`;
+      const body = isExp ? sorted.map(f => renderFundCard(f)).join('') : '';
+      html += `<div class="funde-group ${expClass}">
+        <div class="funde-group-header" onclick="toggleFundeCategory('${escapeHtml(cat).replace(/'/g, '&#39;')}')">
+          <div class="funde-group-title">${escapeHtml(cat)}</div>
+          <div class="funde-group-meta">
+            <span>${countLabel}</span>
+            <span class="funde-group-chevron">›</span>
+          </div>
+        </div>
+        <div class="funde-group-body">${body}</div>
+      </div>`;
     });
     wrap.innerHTML = html;
     attachFundCardClicks(wrap);
@@ -14350,6 +14453,24 @@ function renderFunde() {
 
 function loadMoreFunde() {
   fundeShownLimit += 30;
+  renderFunde();
+}
+
+function toggleFundeMonth(monthKey) {
+  if (fundeExpandedMonths.has(monthKey)) {
+    fundeExpandedMonths.delete(monthKey);
+  } else {
+    fundeExpandedMonths.add(monthKey);
+  }
+  renderFunde();
+}
+
+function toggleFundeCategory(cat) {
+  if (fundeExpandedCategories.has(cat)) {
+    fundeExpandedCategories.delete(cat);
+  } else {
+    fundeExpandedCategories.add(cat);
+  }
   renderFunde();
 }
 
