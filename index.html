@@ -16495,18 +16495,6 @@ async function saveBegegnungEditor() {
 
   if (!Array.isArray(m.begegnungen)) m.begegnungen = [];
 
-  // ====== DIAGNOSE — bitte einmal speichern und das Alert-Fenster fotografieren ======
-  alert(
-    'DIAGNOSE\n\n' +
-    'dateStr (Feld): ' + dateStr + '\n' +
-    'timeStr (Feld): ' + (timeStr || '(leer)') + '\n' +
-    'dayPart: ' + (dayPart || '(keiner)') + '\n' +
-    'originalTs: ' + (begegnungEditorOriginalTs || '(neu)') + '\n' +
-    'berechneter ts: ' + ts + '\n' +
-    'als Datum: ' + new Date(ts).toString()
-  );
-  // ====== ENDE DIAGNOSE ======
-
   let savedBegegnungId = begegnungEditorCurrentId;
   // Liste der Menschen, bei denen die Begegnung gespeichert wird
   // (für die Foto-Refs später wichtig)
