@@ -12062,8 +12062,9 @@ function toggleGedankenEntry(idx, event) {
 
 function formatGedankenDate(d) {
   const now = new Date();
-  const diffMs = now - d;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfThen  = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((startOfToday - startOfThen) / (1000 * 60 * 60 * 24));
   const weekdays = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
   const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   if (diffDays === 0) {
@@ -13949,8 +13950,9 @@ function formatStepDate(d) {
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
   if (itemDay === dayKey(yesterday)) return 'gestern';
-  const diffMs = now - d;
-  const diffDays = Math.floor(diffMs / (24 * 3600 * 1000));
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfThen  = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((startOfToday - startOfThen) / (1000 * 60 * 60 * 24));
   if (diffDays < 7) return `vor ${diffDays} Tagen`;
   // Sonst: Datum
   return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
@@ -15790,7 +15792,11 @@ function computeLongTimeLabel(m) {
     lastTs = new Date(m.giftedAt).getTime();
   }
   if (!lastTs) return null;
-  const diffDays = Math.floor((Date.now() - lastTs) / (1000 * 60 * 60 * 24));
+  const lastDate = new Date(lastTs);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfThen  = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate());
+  const diffDays = Math.round((startOfToday - startOfThen) / (1000 * 60 * 60 * 24));
   if (diffDays < 90) return null;
   if (diffDays < 180) return 'lange nicht';
   if (diffDays < 365) return 'schon eine Weile';
@@ -15815,9 +15821,14 @@ function formatBegegnungTime(b) {
 }
 
 function formatGiftRelative(d) {
+  // Wir vergleichen Kalendertage, nicht 24-Stunden-Spannen.
+  // Sonst wäre eine Begegnung gestern Abend (z.B. 22:00) heute Morgen (8:00)
+  // nur "10 Stunden" alt → Math.floor(10/24) = 0 → fälschlich "heute".
   const now = new Date();
-  const diffMs = now - d;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfThen  = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffMs = startOfToday - startOfThen;
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
   if (diffDays === 0) return 'heute';
   if (diffDays === 1) return 'gestern';
   if (diffDays < 7) return `vor ${diffDays} Tagen`;
@@ -16483,6 +16494,18 @@ async function saveBegegnungEditor() {
   }
 
   if (!Array.isArray(m.begegnungen)) m.begegnungen = [];
+
+  // ====== DIAGNOSE — bitte einmal speichern und das Alert-Fenster fotografieren ======
+  alert(
+    'DIAGNOSE\n\n' +
+    'dateStr (Feld): ' + dateStr + '\n' +
+    'timeStr (Feld): ' + (timeStr || '(leer)') + '\n' +
+    'dayPart: ' + (dayPart || '(keiner)') + '\n' +
+    'originalTs: ' + (begegnungEditorOriginalTs || '(neu)') + '\n' +
+    'berechneter ts: ' + ts + '\n' +
+    'als Datum: ' + new Date(ts).toString()
+  );
+  // ====== ENDE DIAGNOSE ======
 
   let savedBegegnungId = begegnungEditorCurrentId;
   // Liste der Menschen, bei denen die Begegnung gespeichert wird
