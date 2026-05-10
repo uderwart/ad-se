@@ -424,26 +424,6 @@ h3 {
   border: 1.5px solid transparent;
 }
 .fm-word.gfk { font-size: 0.7rem; }
-.fm-word.personal {
-  font-style: italic;
-  border-style: dashed;
-  border-color: rgba(0,0,0,0.25);
-}
-.fm-word-add {
-  padding: 4px 10px;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  font-weight: 400;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  background: transparent;
-  color: var(--muted);
-  border: 1.5px dashed var(--muted);
-  line-height: 1;
-  opacity: 0.65;
-  transition: all 0.15s;
-}
-.fm-word-add:hover { opacity: 1; }
 .fm-word.selected {
   font-weight: 600;
   transform: scale(1.05);
@@ -769,18 +749,6 @@ h3 {
   color: var(--accent-deep);
 }
 .fm-need-chips-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-/* Eigene Bedürfnisse — Pool unten, durch Trennlinie abgesetzt */
-.fm-needs-personal-pool {
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-.fm-needs-personal-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -1123,88 +1091,6 @@ h3 {
 .mq-remove:hover {
   opacity: 1;
   color: #b04848;
-}
-
-/* Wochenfragen-Verwaltung */
-.wq-chapter {
-  margin-bottom: 16px;
-}
-.wq-chapter-label {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: var(--accent-deep);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 6px;
-}
-.wq-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  margin-bottom: 5px;
-}
-.wq-item.hidden-q {
-  opacity: 0.5;
-}
-.wq-text {
-  flex: 1;
-  font-family: 'EB Garamond', serif;
-  font-style: italic;
-  font-size: 0.98rem;
-  color: var(--ink);
-  line-height: 1.4;
-  cursor: text;
-}
-.wq-edit-input {
-  flex: 1;
-  padding: 8px 10px;
-  border: 1.5px solid var(--accent);
-  border-radius: 8px;
-  font-family: 'EB Garamond', serif;
-  font-style: italic;
-  font-size: 0.98rem;
-  background: var(--bg);
-  color: var(--ink);
-  outline: none;
-  line-height: 1.4;
-}
-.wq-action {
-  background: none;
-  border: none;
-  color: var(--muted);
-  opacity: 0.5;
-  cursor: pointer;
-  font-size: 1rem;
-  padding: 4px 8px;
-  line-height: 1;
-  flex-shrink: 0;
-  transition: opacity 0.15s, color 0.15s;
-}
-.wq-action:hover {
-  opacity: 1;
-  color: #b04848;
-}
-.wq-add-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 6px;
-}
-.wq-add-input {
-  flex: 1;
-  padding: 9px 11px;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.88rem;
-  background: var(--bg);
-  color: var(--ink);
-  outline: none;
 }
 
 /* Zitat-Verwaltungsliste (Mehr → Gesammelte Gedanken) */
@@ -2028,6 +1914,97 @@ h3 {
 }
 .gedanken-entry-delete:hover { opacity: 1; color: var(--accent-deep); }
 
+/* Gedanken-Buch: Monatsgruppen (Ziehharmonika oberste Ebene) */
+.gedanken-month-group {
+  margin-bottom: 16px;
+}
+.gedanken-month-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.gedanken-month-header:hover {
+  border-color: #5d6b58;
+}
+.gedanken-month-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+.gedanken-month-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gedanken-month-chevron {
+  font-size: 0.8rem;
+  color: var(--muted);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.gedanken-month-group.expanded .gedanken-month-chevron {
+  transform: rotate(90deg);
+}
+.gedanken-month-body {
+  display: none;
+  padding-top: 12px;
+}
+.gedanken-month-group.expanded .gedanken-month-body {
+  display: block;
+}
+
+/* Eintragsebene als kollabierte Karte mit Titel */
+.gedanken-entry.collapsed {
+  padding: 14px 18px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.gedanken-entry.collapsed:hover {
+  border-left-color: #8a9b81;
+}
+.gedanken-entry.collapsed .gedanken-entry-row,
+.gedanken-entry.collapsed .gedanken-entry-delete {
+  display: none;
+}
+.gedanken-entry.collapsed .gedanken-entry-date {
+  margin-bottom: 6px;
+}
+.gedanken-entry-preview {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  color: var(--ink);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.gedanken-entry-preview-empty {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: var(--muted);
+  opacity: 0.7;
+}
+.gedanken-entry.expanded .gedanken-entry-preview {
+  display: none;
+}
+
 /* Komm-mit — dezenter Link auf den Abschluss-Schirmen */
 .kommmit-link-wrap {
   text-align: center;
@@ -2157,114 +2134,6 @@ h3 {
 }
 .mensch-item-btn:hover { color: var(--accent-deep); }
 .mensch-item-btn.danger:hover { color: #a14b38; }
-
-/* Fragen-Pool — Akkordeon pro Tonart */
-.fragen-tone-block {
-  margin-bottom: 8px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--card);
-  overflow: hidden;
-}
-.fragen-tone-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 11px 14px;
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.15s;
-}
-.fragen-tone-header:hover { background: rgba(0,0,0,0.02); }
-.fragen-tone-title {
-  font-family: 'EB Garamond', serif;
-  font-size: 1rem;
-  color: var(--ink);
-}
-.fragen-tone-count {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-.fragen-tone-arrow {
-  font-size: 0.75rem;
-  color: var(--muted);
-  transition: transform 0.2s;
-}
-.fragen-tone-block.open .fragen-tone-arrow { transform: rotate(90deg); }
-.fragen-tone-body {
-  display: none;
-  padding: 4px 14px 12px 14px;
-  border-top: 1px solid var(--border);
-}
-.fragen-tone-block.open .fragen-tone-body { display: block; }
-
-.frage-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--border);
-}
-.frage-item:last-child { border-bottom: none; }
-.frage-item-text {
-  flex: 1;
-  font-family: 'EB Garamond', serif;
-  font-size: 0.96rem;
-  line-height: 1.4;
-  color: var(--ink);
-}
-.frage-item-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.frage-item-btn {
-  background: none;
-  border: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
-  color: var(--muted);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
-}
-.frage-item-btn:hover { color: var(--accent-deep); background: rgba(0,0,0,0.04); }
-.frage-item-btn.danger:hover { color: #a14b38; }
-.frage-add-row {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px dashed var(--border);
-}
-.frage-add-input {
-  flex: 1;
-  padding: 8px 10px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  font-family: 'EB Garamond', serif;
-  font-style: italic;
-  font-size: 0.92rem;
-  background: var(--bg);
-  color: var(--ink);
-  outline: none;
-}
-.frage-edit-textarea {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1.5px solid var(--accent);
-  border-radius: 8px;
-  font-family: 'EB Garamond', serif;
-  font-size: 0.96rem;
-  background: var(--card);
-  color: var(--ink);
-  outline: none;
-  resize: vertical;
-  min-height: 60px;
-}
 
 /* Mensch-Liste: ganzes Item klickbar (öffnet Detail) */
 .mensch-item.clickable {
@@ -2473,6 +2342,80 @@ h3 {
   font-size: 0.85rem;
   color: var(--muted);
   margin-top: 4px;
+}
+
+/* Mit-Personen-Auswahl */
+.mit-personen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.mit-person-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  padding: 5px 10px 5px 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.mit-person-chip-remove {
+  background: none;
+  border: none;
+  color: var(--accent-deep);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  opacity: 0.7;
+}
+.mit-person-chip-remove:hover { opacity: 1; }
+
+.mit-personen-picker-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  margin-bottom: 14px;
+}
+.mit-personen-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.mit-personen-picker-item:last-child { border-bottom: none; }
+.mit-personen-picker-item:hover { background: var(--accent-soft); }
+.mit-personen-picker-item.selected { background: var(--accent-soft); }
+.mit-personen-picker-check {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--accent-deep);
+  flex-shrink: 0;
+}
+.mit-personen-picker-item.selected .mit-personen-picker-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.mit-personen-picker-name {
+  font-family: 'EB Garamond', serif;
+  font-size: 0.95rem;
+  color: var(--ink);
 }
 
 /* ===== WEGE (große Ziele) ===== */
@@ -3442,6 +3385,57 @@ h3 {
   font-style: normal;
   color: #6b4f2c;
   font-weight: 500;
+}
+.fund-trip-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  font-style: normal;
+}
+.fund-trip-toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.fund-trip-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.fund-trip-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 20px;
+  transition: 0.2s;
+}
+.fund-trip-toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.fund-trip-toggle input:checked + .fund-trip-toggle-slider {
+  background-color: #8b6f47;
+}
+.fund-trip-toggle input:checked + .fund-trip-toggle-slider::before {
+  transform: translateX(16px);
+}
+.fund-trip-toggle-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink);
+  user-select: none;
+  cursor: pointer;
 }
 
 /* ===== BILDER (Spec v02 Schritt 4, Mai 2026) ===== */
@@ -4542,10 +4536,7 @@ textarea, input {
           class="fm-activity-free" style="display:none;">
       </div>
 
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveFeelingMatrix()">Gefühl notieren</button>
-        <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="cancelFeelingSelection()">Abbrechen</button>
-      </div>
+      <button class="btn full" style="margin-top:10px;" onclick="saveFeelingMatrix()">Gefühl notieren</button>
     </div>
 
     <div class="fm-needs" id="fm-needs"></div>
@@ -5876,15 +5867,6 @@ textarea, input {
       </p>
       <div id="menschen-list" style="margin-bottom:10px;"></div>
       <button class="btn secondary full" onclick="openMenschEditor()">Jemanden hinzufügen</button>
-
-      <!-- Fragen-Pool -->
-      <div class="menschen-fragen-section" style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
-        <h3 style="margin:0 0 4px 0;font-size:1.05rem;">Fragen</h3>
-        <p class="muted-note" style="margin-bottom:14px;line-height:1.55;font-size:0.88rem;">
-          Eine kleine Sammlung — für Gespräche, die mehr sein sollen als „wie geht's". Du kannst alles ändern und ergänzen.
-        </p>
-        <div id="menschen-fragen-akkordeon"></div>
-      </div>
     </div>
   </div>
 
@@ -6007,7 +5989,7 @@ textarea, input {
   <div class="card collapsible" id="questions-collapsible">
     <div class="collapsible-header" onclick="toggleSettingsCard('questions')">
       <div style="flex:1;">
-        <h2 style="margin-bottom:2px;">Reflexionsfragen — Moment mit mir</h2>
+        <h2 style="margin-bottom:2px;">Reflexionsfragen</h2>
         <p class="muted-note" id="questions-summary" style="margin:0;font-size:0.85rem;"></p>
       </div>
       <span class="collapsible-arrow">▸</span>
@@ -6022,29 +6004,6 @@ textarea, input {
           style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
           onkeydown="if(event.key==='Enter'){addMomentQuestion();}">
         <button class="btn small" onclick="addMomentQuestion()">+</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Reflexionsfragen — Eine Stunde zu zweit (drei Kapitel, fest) -->
-  <div class="card collapsible" id="weekly-questions-collapsible">
-    <div class="collapsible-header" onclick="toggleSettingsCard('weekly-questions')">
-      <div style="flex:1;">
-        <h2 style="margin-bottom:2px;">Reflexionsfragen — Eine Stunde zu zweit</h2>
-        <p class="muted-note" id="weekly-questions-summary" style="margin:0;font-size:0.85rem;"></p>
-      </div>
-      <span class="collapsible-arrow">▸</span>
-    </div>
-    <div class="collapsible-body" id="weekly-questions-body" style="display:none;">
-      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
-        Die Fragen für eure Wochenreflexion zu zweit. Drei Kapitel sind fest gesetzt — innerhalb der Kapitel könnt ihr Fragen ergänzen, bearbeiten oder ausblenden. Tippt auf eine Frage, um sie zu bearbeiten.
-      </p>
-      <div id="weekly-questions-chapters"></div>
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
-        <button class="btn secondary full" onclick="restoreWeeklyQuestionsDefaults()">Standardfragen wiederherstellen</button>
-        <p class="muted-note" style="margin-top:8px;font-size:0.78rem;line-height:1.5;">
-          Setzt die Fragen auf den Auslieferungsstand zurück. Eigene Fragen verschwinden dabei.
-        </p>
       </div>
     </div>
   </div>
@@ -6366,10 +6325,13 @@ textarea, input {
 
     <!-- Datum-Toggle -->
     <div id="begegnung-date-toggle-wrap" style="margin-bottom:8px;">
-      <button class="subtle-toggle" id="begegnung-date-toggle" onclick="toggleBegegnungDate()">War an einem anderen Tag</button>
+      <button class="subtle-toggle" id="begegnung-date-toggle" onclick="toggleBegegnungDate()">War an einem anderen Tag oder zu anderer Zeit</button>
     </div>
     <div id="begegnung-date-row" style="display:none;margin-bottom:14px;">
-      <input type="date" id="begegnung-date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      <input type="date" id="begegnung-date" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;">
+      <div id="begegnung-daypart-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+      <input type="time" id="begegnung-time" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;" oninput="onBegegnungTimeManualChange()">
+      <p class="muted-note" style="margin:6px 0 0;font-size:0.78rem;line-height:1.4;">Wähle eine Tageszeit oder gib eine Uhrzeit ein.</p>
     </div>
 
     <!-- Mehr-Dazu-Toggle -->
@@ -6377,7 +6339,7 @@ textarea, input {
       <button class="subtle-toggle" id="begegnung-more-toggle" onclick="toggleBegegnungMore()">Etwas mehr dazu</button>
     </div>
 
-    <!-- Mehr-Dazu-Bereich (Art-Chips) -->
+    <!-- Mehr-Dazu-Bereich (Art-Chips + Mit-Personen) -->
     <div id="begegnung-more-row" style="display:none;margin-bottom:18px;">
       <div class="muted-note" style="font-size:0.78rem;margin-bottom:8px;">Art der Begegnung (optional)</div>
       <div class="art-chips" id="begegnung-art-chips">
@@ -6386,6 +6348,13 @@ textarea, input {
         <button class="art-chip" data-art="geschrieben" onclick="selectBegegnungArt('geschrieben')">geschrieben</button>
         <button class="art-chip" data-art="gemeinsam erlebt" onclick="selectBegegnungArt('gemeinsam erlebt')">gemeinsam erlebt</button>
         <button class="art-chip" data-art="gedacht an" onclick="selectBegegnungArt('gedacht an')">gedacht an</button>
+      </div>
+
+      <!-- Mit-Personen (nur bei neuen Begegnungen) -->
+      <div id="begegnung-mit-section" style="margin-top:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Dabei waren auch (optional)</div>
+        <button type="button" class="subtle-toggle" id="begegnung-mit-add-btn" onclick="openMitPersonenPicker()" style="text-decoration:none;border:1.5px dashed var(--border);border-radius:999px;padding:5px 12px;">+ Person hinzufügen</button>
+        <div id="begegnung-mit-chips" class="mit-personen-chips"></div>
       </div>
     </div>
 
@@ -6413,6 +6382,22 @@ textarea, input {
     <!-- Löschen-Knopf nur beim Bearbeiten sichtbar -->
     <div id="begegnung-editor-delete-wrap" style="display:none;text-align:center;margin-top:12px;">
       <button class="subtle-toggle" style="color:#a14b38;" onclick="deleteCurrentBegegnung()">Diese Begegnung entfernen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MIT-PERSONEN-PICKER ====== -->
+<div class="entry-overlay" id="mit-personen-picker-overlay">
+  <div class="entry-modal" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Wer war noch dabei?</h2>
+      <button onclick="closeMitPersonenPicker()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" style="margin:0 0 10px;font-size:0.85rem;">Bei jeder ausgewählten Person wird der gleiche Eintrag angelegt.</p>
+    <div id="mit-personen-picker-list" class="mit-personen-picker-list"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeMitPersonenPicker()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="confirmMitPersonenPicker()">Übernehmen</button>
     </div>
   </div>
 </div>
@@ -6977,6 +6962,8 @@ function fundenForTrip(trip) {
   const funde = Array.isArray(state.funde) ? state.funde : [];
   return funde.filter(f => {
     if (!f.ts) return false;
+    // Bewusste Abwahl: Fund liegt zwar im Datums-Zeitraum, soll aber nicht zugeordnet werden
+    if (f.tripLink === null) return false;
     const d = isoDateOnly(new Date(f.ts));
     return d >= trip.from && d <= trip.to;
   });
@@ -7078,8 +7065,6 @@ function loadState() {
     gedankenLog: [],
     gedankenEnabled: false,
     menschen: [],
-    menschenFragen: [],          // [{id, text, tone:'tief'|'alltag'|'beziehung'}]
-    menschenFragenInit: false,   // wird beim ersten Mal mit Start-Set befüllt
     rueckblicke: [],
     rueckblickSettings: {
       showMorning: true,
@@ -7107,7 +7092,6 @@ function loadState() {
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
     personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
-    personalFeelings: [],       // [{label:'überdreht', quadrant:'aa'}, ...] — eigene Gefühlswörter pro Quadrant
     funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
     fundeCategories: ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'],
     trips: [],                  // Reisen — Spec v02, Mai 2026
@@ -7134,7 +7118,6 @@ function loadState() {
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
     if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
-    if (!Array.isArray(saved.personalFeelings)) saved.personalFeelings = [];
     if (!Array.isArray(saved.funde)) saved.funde = [];
     if (!Array.isArray(saved.fundeCategories) || saved.fundeCategories.length === 0) {
       saved.fundeCategories = ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'];
@@ -7163,36 +7146,6 @@ function loadState() {
         (m.name || '').trim().toLowerCase() !== 'mich selbst'
       );
       saved._cleanedMichSelbst = true;
-    }
-    // Fragen-Pool für Menschen: einmalig mit Start-Set befüllen
-    if (!Array.isArray(saved.menschenFragen)) saved.menschenFragen = [];
-    if (!saved.menschenFragenInit) {
-      const startSet = [
-        // Tief / persönlich
-        { tone: 'tief', text: 'Was würdest du gerne können, was du nicht kannst?' },
-        { tone: 'tief', text: 'Was hast du als Kind geglaubt, das sich später als falsch herausstellte?' },
-        { tone: 'tief', text: 'Wovor hast du heute Angst — kleiner als gestern, größer als morgen?' },
-        { tone: 'tief', text: 'Wann hast du dich zuletzt wirklich verstanden gefühlt?' },
-        { tone: 'tief', text: 'Was möchtest du noch erlebt haben, bevor du alt wirst?' },
-        // Alltag
-        { tone: 'alltag', text: 'Was war heute leise schön?' },
-        { tone: 'alltag', text: 'Wer ist dir diese Woche begegnet, an den du noch denkst?' },
-        { tone: 'alltag', text: 'Was hat dich diese Woche müde gemacht — und was hat dich getragen?' },
-        { tone: 'alltag', text: 'Worauf freust du dich gerade?' },
-        { tone: 'alltag', text: 'Wenn du heute Abend einen Satz schreiben müsstest über den Tag, welcher wäre es?' },
-        // Beziehung
-        { tone: 'beziehung', text: 'Was brauchst du gerade von mir, das ich dir nicht gebe?' },
-        { tone: 'beziehung', text: 'Wann fühlst du dich mir am nächsten?' },
-        { tone: 'beziehung', text: 'Gibt es etwas, das wir aufgeschoben haben, ohne es zu sagen?' },
-        { tone: 'beziehung', text: 'Was schätzt du an mir, ohne es zu sagen?' },
-        { tone: 'beziehung', text: 'Worüber haben wir lange nicht mehr gesprochen?' }
-      ];
-      saved.menschenFragen = startSet.map(q => ({
-        id: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
-        text: q.text,
-        tone: q.tone
-      }));
-      saved.menschenFragenInit = true;
     }
     return saved;
   } catch(e) { return defaults; }
@@ -7532,32 +7485,24 @@ function renderFmActivityChips() {
 
   const recents = getRecentActivitiesForFeeling().slice(0, 6);
 
-  // Chips als DOM-Elemente bauen — vermeidet Quoting-Probleme im onclick
-  chipsEl.innerHTML = '';
+  let html = '';
   recents.forEach(it => {
     const timeText = formatRelativeTime(new Date(it.ts));
     const isSelected = fmLinkedActivity
       && fmLinkedActivity.kind === it.kind
       && fmLinkedActivity.refId === it.refId;
-    const chip = document.createElement('span');
-    chip.className = 'fm-activity-chip' + (isSelected ? ' selected' : '');
-    const txtNode = document.createTextNode(it.text);
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'fm-activity-chip-time';
-    timeSpan.textContent = timeText;
-    chip.appendChild(txtNode);
-    chip.appendChild(timeSpan);
-    chip.addEventListener('click', () => selectFmActivity(it.kind, it.refId, it.text));
-    chipsEl.appendChild(chip);
+    html += `<span class="fm-activity-chip${isSelected ? ' selected' : ''}"
+      onclick="selectFmActivity('${it.kind}', ${JSON.stringify(it.refId)}, ${JSON.stringify(it.text)})">
+      ${escapeHtml(it.text)}<span class="fm-activity-chip-time">${escapeHtml(timeText)}</span>
+    </span>`;
   });
 
   // "Etwas anderes"-Chip
   const isFreeSelected = fmLinkedActivity && fmLinkedActivity.kind === 'free';
-  const addChip = document.createElement('span');
-  addChip.className = 'fm-activity-chip add' + (isFreeSelected ? ' selected' : '');
-  addChip.textContent = '+ Etwas anderes';
-  addChip.addEventListener('click', () => toggleFmActivityFree());
-  chipsEl.appendChild(addChip);
+  html += `<span class="fm-activity-chip add${isFreeSelected ? ' selected' : ''}"
+    onclick="toggleFmActivityFree()">+ Etwas anderes</span>`;
+
+  chipsEl.innerHTML = html;
 
   // Frei-Eingabe nur sichtbar, wenn 'free' gewählt
   if (freeInput) {
@@ -7739,85 +7684,19 @@ function setFeelingMatrixMode(mode) {
 
 function renderFeelingMatrix() {
   const data = FEELING_MATRIX[fmMode] || FEELING_MATRIX.kern;
-  const personalAll = Array.isArray(state.personalFeelings) ? state.personalFeelings : [];
   ['ua','aa','ur','ar'].forEach(q => {
     const el = document.getElementById('fm-q-' + q);
     if (!el) return;
     el.innerHTML = '';
-    // Standard-Gefühle
     data[q].forEach(f => el.appendChild(makeFeelingChip(f, q)));
-    // Eigene Gefühle für diesen Quadranten
-    personalAll.filter(p => p.quadrant === q).forEach(p => {
-      el.appendChild(makeFeelingChip({ label: p.label, desc: '', personal: true }, q));
-    });
-    // Plus-Knopf zum Hinzufügen
-    el.appendChild(makeAddFeelingButton(q));
   });
   updateFeelingSelection();
-}
-
-function makeAddFeelingButton(quadrant) {
-  const btn = document.createElement('button');
-  btn.className = 'fm-word fm-word-add';
-  btn.textContent = '+';
-  btn.title = 'Eigenes Gefühl hinzufügen';
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    openAddFeelingInline(quadrant, btn);
-  };
-  return btn;
-}
-
-function openAddFeelingInline(quadrant, anchorBtn) {
-  if (document.getElementById('fm-add-input')) return;
-  const wrap = document.createElement('span');
-  wrap.style.display = 'inline-flex';
-  wrap.style.gap = '4px';
-  wrap.style.alignItems = 'center';
-  wrap.innerHTML = `
-    <input id="fm-add-input" type="text" placeholder="eigenes Wort"
-      style="padding:4px 8px;border:1.5px solid var(--accent);border-radius:14px;
-             font-family:'Inter',sans-serif;font-size:0.78rem;width:110px;
-             background:var(--card);color:var(--ink);outline:none;">
-    <button id="fm-add-ok" style="background:var(--accent);color:white;border:none;
-      border-radius:50%;width:22px;height:22px;font-size:0.85rem;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;padding:0;">✓</button>
-    <button id="fm-add-cancel" style="background:transparent;color:var(--muted);border:none;
-      font-size:0.95rem;cursor:pointer;padding:0 4px;">✕</button>
-  `;
-  anchorBtn.replaceWith(wrap);
-  const input = document.getElementById('fm-add-input');
-  input.focus();
-  const cancel = () => { renderFeelingMatrix(); };
-  const commit = () => {
-    const txt = (input.value || '').trim();
-    if (!txt) { cancel(); return; }
-    if (!Array.isArray(state.personalFeelings)) state.personalFeelings = [];
-    const exists = state.personalFeelings.some(p =>
-      p.label.toLowerCase() === txt.toLowerCase() && p.quadrant === quadrant);
-    if (!exists) {
-      state.personalFeelings.unshift({ label: txt, quadrant });
-      if (state.personalFeelings.length > 60) state.personalFeelings.pop();
-      saveState();
-    }
-    if (fmSelected.length < 5 && !fmSelected.some(s => s.label === txt)) {
-      fmSelected.push({ label: txt, quadrant, desc: '', gfk: false });
-    }
-    renderFeelingMatrix();
-    if (typeof renderFmActivityChips === 'function') renderFmActivityChips();
-  };
-  document.getElementById('fm-add-ok').onclick = commit;
-  document.getElementById('fm-add-cancel').onclick = cancel;
-  input.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
-    else if (ev.key === 'Escape') { ev.preventDefault(); cancel(); }
-  });
 }
 
 function makeFeelingChip(f, quadrant) {
   const isSelected = fmSelected.some(s => s.label === f.label);
   const btn = document.createElement('button');
-  btn.className = 'fm-word' + (f.gfk ? ' gfk' : '') + (f.personal ? ' personal' : '') + (isSelected ? ' selected' : '');
+  btn.className = 'fm-word' + (f.gfk ? ' gfk' : '') + (isSelected ? ' selected' : '');
   btn.textContent = f.label;
 
   const colors = {
@@ -7837,39 +7716,7 @@ function makeFeelingChip(f, quadrant) {
     btn.style.color = c.text;
   }
   btn.onclick = () => toggleFeelingWord(f, quadrant);
-  if (f.personal) {
-    attachLongPressDeletePersonalFeeling(btn, f.label, quadrant);
-  }
   return btn;
-}
-
-function attachLongPressDeletePersonalFeeling(chip, label, quadrant) {
-  let timer = null;
-  const start = () => {
-    timer = setTimeout(() => {
-      timer = null;
-      askConfirm(`„${label}" aus deinen eigenen Gefühlen entfernen?`, () => {
-        if (!Array.isArray(state.personalFeelings)) return;
-        const idx = state.personalFeelings.findIndex(p =>
-          p.label.toLowerCase() === label.toLowerCase() && p.quadrant === quadrant);
-        if (idx >= 0) {
-          state.personalFeelings.splice(idx, 1);
-          const selIdx = fmSelected.findIndex(s => s.label === label);
-          if (selIdx >= 0) fmSelected.splice(selIdx, 1);
-          saveState();
-          renderFeelingMatrix();
-          if (typeof showToast === 'function') showToast('Entfernt.');
-        }
-      });
-    }, 600);
-  };
-  const cancel = () => { if (timer) { clearTimeout(timer); timer = null; } };
-  chip.addEventListener('touchstart', start, { passive: true });
-  chip.addEventListener('mousedown', start);
-  chip.addEventListener('touchend', cancel);
-  chip.addEventListener('touchcancel', cancel);
-  chip.addEventListener('mouseup', cancel);
-  chip.addEventListener('mouseleave', cancel);
 }
 
 function toggleFeelingWord(f, quadrant) {
@@ -7905,14 +7752,7 @@ function updateFeelingSelection() {
     const tag = document.createElement('div');
     tag.className = 'fm-tag';
     tag.style.background = colors[s.quadrant];
-    const labelSpan = document.createElement('span');
-    labelSpan.textContent = s.label;
-    const removeSpan = document.createElement('span');
-    removeSpan.className = 'remove';
-    removeSpan.textContent = '✕';
-    removeSpan.addEventListener('click', () => removeFeelingWord(i));
-    tag.appendChild(labelSpan);
-    tag.appendChild(removeSpan);
+    tag.innerHTML = `<span>${s.label}</span><span class="remove" onclick="removeFeelingWord(${i})">✕</span>`;
     tags.appendChild(tag);
   });
 }
@@ -7983,39 +7823,34 @@ function showNeedsReflection(entry, logIndex) {
   let html = `<div class="fm-needs-title">${title}</div>
               <div class="fm-needs-sub" style="margin-bottom:14px;line-height:1.5;">${explanation}</div>`;
 
-  // Pro Gefühl: nur Standard-Vorschläge (keine eigenen Wörter mehr hier mischen)
   entry.feelings.forEach(f => {
     const standardNeeds = FEELING_NEEDS[f.label] || [];
+    // Eigene Bedürfnisse zuerst, dann Standard (ohne Duplikate)
+    const personalLower = personal.map(p => p.toLowerCase());
+    const standardFiltered = standardNeeds.filter(n => !personalLower.includes(n.toLowerCase()));
     const intro = introVerb.replace('{label}', escapeHtml(f.label));
 
     html += `<div class="fm-need-block">
       <div class="fm-need-intro">${intro}</div>
       <div class="fm-need-chips-wrap">`;
-    standardNeeds.forEach(n => {
+    // Eigene zuerst, mit kleiner Markierung
+    personal.forEach(n => {
+      html += `<span class="fm-need-chip personal" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
+    });
+    standardFiltered.forEach(n => {
       html += `<span class="fm-need-chip" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
     });
     html += `</div></div>`;
   });
-
-  // Eigener Pool unten — durch Trennlinie abgesetzt, ohne Titel
-  if (personal.length > 0) {
-    html += `<div class="fm-needs-personal-pool">
-      <div class="fm-needs-personal-chips">`;
-    personal.forEach(n => {
-      html += `<span class="fm-need-chip personal" data-need="${escapeHtml(n)}" onclick="toggleNeedChip(this)">${escapeHtml(n)}</span>`;
-    });
-    html += `</div></div>`;
-  }
 
   html += `<div class="fm-needs-own-wrap">
     <div class="fm-needs-own-label">Trifft keines? Welches Wort wäre näher an deinem Bedürfnis?</div>
     <input type="text" id="fm-needs-own" placeholder="z.B. Atem, Geborgenheit, bei mir sein…"
       style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;background:var(--card);color:var(--ink);outline:none;">
   </div>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-      <button class="btn" style="flex:1;min-width:90px;padding:11px 10px;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
-      <button class="btn secondary" style="flex:1;min-width:90px;padding:11px 10px;" onclick="skipNeedsReflection()">Überspringen</button>
-      <button class="btn secondary" style="flex:1;min-width:90px;padding:11px 10px;" onclick="cancelNeedsReflection()">Abbrechen</button>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveNeedsReflection(${logIndex})">Speichern</button>
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="skipNeedsReflection()">Überspringen</button>
     </div>`;
   needsDiv.innerHTML = html;
 
@@ -8088,49 +7923,6 @@ function saveNeedsReflection(logIndex) {
 function skipNeedsReflection() {
   finishNeedsReflection();
   showToast('Notiert.');
-}
-
-// Abbrechen während der Auswahl-Phase: alles wegwerfen
-function cancelFeelingSelection() {
-  fmSelected = [];
-  fmLinkedActivity = null;
-  const ctx = document.getElementById('fm-context');
-  if (ctx) ctx.value = '';
-  const freeInput = document.getElementById('fm-activity-free');
-  if (freeInput) freeInput.value = '';
-  renderFeelingMatrix();
-  // Matrix zuklappen
-  const card = document.getElementById('matrix-collapsible');
-  const body = document.getElementById('matrix-body');
-  if (card && body) {
-    card.classList.remove('open');
-    body.style.maxHeight = '0';
-  }
-  showToast('Abgebrochen.');
-}
-
-// Abbrechen während der Bedürfnis-Reflexion: Eintrag wieder löschen
-function cancelNeedsReflection() {
-  // Der zuletzt angelegte Eintrag steht auf state.feelingLog[0] — wieder entfernen
-  if (Array.isArray(state.feelingLog) && state.feelingLog.length > 0) {
-    state.feelingLog.shift();
-    saveState();
-  }
-  document.getElementById('fm-needs').classList.remove('visible');
-  fmSelected = [];
-  const ctx = document.getElementById('fm-context');
-  if (ctx) ctx.value = '';
-  renderFeelingMatrix();
-  // Matrix zuklappen
-  const card = document.getElementById('matrix-collapsible');
-  const body = document.getElementById('matrix-body');
-  if (card && body) {
-    card.classList.remove('open');
-    body.style.maxHeight = '0';
-  }
-  // Heute-Seite ggf. neu rendern, damit der entfernte Eintrag verschwindet
-  if (typeof renderHome === 'function') renderHome();
-  showToast('Abgebrochen.');
 }
 
 // Ausgangsgefühle für die Gedanken-Brücke (muss vor finishNeedsReflection deklariert sein)
@@ -10217,85 +10009,6 @@ const WEEKLY_QUESTIONS = [
     dataKey: null },
 ];
 
-// ===== Editierbare Reflexionsfragen für "Eine Stunde zu zweit" =====
-// Datenmodell:
-//   state.weeklyQuestions = {
-//     rueckblick: [ { id, title, sub, dataKey, isStandard, hidden? }, ... ],
-//     gefuehle:   [ ... ],
-//     vorn:       [ ... ]
-//   }
-// Wenn nicht vorhanden, wird beim ersten Zugriff aus WEEKLY_QUESTIONS migriert.
-
-const WEEKLY_CHAPTERS = [
-  { key: 'rueckblick', num: 1, label: 'Rückblick' },
-  { key: 'gefuehle',   num: 2, label: 'Gefühle & Bedürfnisse' },
-  { key: 'vorn',       num: 3, label: 'Blick nach vorn' }
-];
-
-function chapterKeyForNum(num) {
-  const c = WEEKLY_CHAPTERS.find(x => x.num === num);
-  return c ? c.key : 'rueckblick';
-}
-
-function defaultWeeklyQuestionsObject() {
-  const out = { rueckblick: [], gefuehle: [], vorn: [] };
-  WEEKLY_QUESTIONS.forEach((q, idx) => {
-    const key = chapterKeyForNum(q.chapter);
-    out[key].push({
-      id: 'std-' + idx,
-      title: q.title,
-      sub: q.sub || '',
-      dataKey: q.dataKey || null,
-      isStandard: true,
-      hidden: false
-    });
-  });
-  return out;
-}
-
-function ensureWeeklyQuestions() {
-  if (!state.weeklyQuestions || typeof state.weeklyQuestions !== 'object') {
-    state.weeklyQuestions = defaultWeeklyQuestionsObject();
-    return;
-  }
-  WEEKLY_CHAPTERS.forEach(c => {
-    if (!Array.isArray(state.weeklyQuestions[c.key])) {
-      state.weeklyQuestions[c.key] = [];
-    }
-  });
-}
-
-// Liefert die effektive Frageliste (alle Kapitel, ohne hidden) als flaches Array
-// im gleichen Format wie WEEKLY_QUESTIONS — mit chapter und chapterLabel.
-function getEffectiveWeeklyQuestions() {
-  ensureWeeklyQuestions();
-  const out = [];
-  WEEKLY_CHAPTERS.forEach(c => {
-    state.weeklyQuestions[c.key].forEach(q => {
-      if (q.hidden) return;
-      out.push({
-        chapter: c.num,
-        chapterLabel: c.label,
-        title: q.title,
-        sub: q.sub || '',
-        dataKey: q.dataKey || null,
-        id: q.id
-      });
-    });
-  });
-  return out;
-}
-
-// Liefert die Frageliste, die für die aktuelle Sitzung gilt:
-// - bevorzugt Snapshot der Session (session.questions),
-// - sonst die effektive Liste aus den Settings.
-function getQuestionsForSession(session) {
-  if (session && Array.isArray(session.questions) && session.questions.length) {
-    return session.questions;
-  }
-  return getEffectiveWeeklyQuestions();
-}
-
 function weekStart() {
   // Eine Woche = letzte 7 Tage ab jetzt
   const d = new Date();
@@ -10390,13 +10103,12 @@ function renderWeeklyResume() {
   if (!s) return;
   const d = new Date(s.pausedAt || s.startedAt);
   const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
-  const qs = getQuestionsForSession(s);
-  const q = qs[s.currentQ] || qs[0];
+  const q = WEEKLY_QUESTIONS[s.currentQ] || WEEKLY_QUESTIONS[0];
   const answered = (s.answers || []).filter(answerHasContent).length;
   const info = document.getElementById('weekly-resume-info');
   info.innerHTML = `
     Ihr seid bei <strong>Kapitel ${q.chapter}: ${escapeHtml(q.chapterLabel)}</strong>,
-    Frage ${s.currentQ + 1} von ${qs.length}.<br>
+    Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}.<br>
     ${answered} Notiz${answered === 1 ? '' : 'en'} schon hinterlegt.<br>
     <span style="color:var(--muted);font-size:0.82rem;">
       Pausiert vor ${daysAgo === 0 ? 'weniger als einem Tag' : daysAgo + ' Tag' + (daysAgo === 1 ? '' : 'en')}.
@@ -10405,20 +10117,13 @@ function renderWeeklyResume() {
 }
 
 function startWeekly() {
-  const questionsSnapshot = getEffectiveWeeklyQuestions();
-  // Sicherheitsnetz: leere Liste -> Fallback auf den Default-Pool, sonst hätte
-  // man eine Sitzung ohne Fragen.
-  const effectiveQuestions = questionsSnapshot.length ? questionsSnapshot : WEEKLY_QUESTIONS.map((q, i) => ({
-    chapter: q.chapter, chapterLabel: q.chapterLabel, title: q.title, sub: q.sub, dataKey: q.dataKey, id: 'fallback-' + i
-  }));
   state.weeklySession = {
     startedAt: new Date().toISOString(),
     currentQ: 0,
-    answers: new Array(effectiveQuestions.length).fill(null).map(() => ({ self: '', partner: '' })),
+    answers: new Array(WEEKLY_QUESTIONS.length).fill(null).map(() => ({ self: '', partner: '' })),
     paused: false,
     userName: state.profile?.name || '',
-    partnerName: state.partner?.name || '',
-    questions: effectiveQuestions
+    partnerName: state.partner?.name || ''
   };
   saveState();
   renderWeekly();
@@ -10496,8 +10201,7 @@ function weeklyBack() {
 function weeklyNext() {
   if (!state.weeklySession) return;
   state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
-  const qs = getQuestionsForSession(state.weeklySession);
-  if (state.weeklySession.currentQ < qs.length - 1) {
+  if (state.weeklySession.currentQ < WEEKLY_QUESTIONS.length - 1) {
     state.weeklySession.currentQ++;
     saveState();
     renderWeekly();
@@ -10547,8 +10251,7 @@ function archiveSession(session, completed) {
     completed,
     stoppedAt: session.currentQ + 1,
     userName: session.userName || state.profile?.name || '',
-    partnerName: session.partnerName || state.partner?.name || '',
-    questions: Array.isArray(session.questions) ? session.questions : null
+    partnerName: session.partnerName || state.partner?.name || ''
   });
   if (state.weeklyArchive.length > 100) state.weeklyArchive.pop();
   saveState();
@@ -10557,17 +10260,15 @@ function archiveSession(session, completed) {
 function renderWeeklyQuestion() {
   const s = state.weeklySession;
   if (!s) return;
-  const qs = getQuestionsForSession(s);
-  const q = qs[s.currentQ];
-  if (!q) return;
+  const q = WEEKLY_QUESTIONS[s.currentQ];
 
   // Fortschritt
   document.getElementById('weekly-chapter-label').textContent =
     `Kapitel ${q.chapter} · ${q.chapterLabel}`;
-  const pct = ((s.currentQ + 1) / qs.length) * 100;
+  const pct = ((s.currentQ + 1) / WEEKLY_QUESTIONS.length) * 100;
   document.getElementById('weekly-progress-fill').style.width = pct + '%';
   document.getElementById('weekly-progress-q').textContent =
-    `Frage ${s.currentQ + 1} von ${qs.length}`;
+    `Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}`;
 
   // Frage
   document.getElementById('weekly-q-title').textContent = q.title;
@@ -10609,7 +10310,7 @@ function renderWeeklyQuestion() {
 
   // Weiter-Button: bei letzter Frage "Abschließen"
   const nextBtn = document.getElementById('weekly-next-btn');
-  nextBtn.textContent = s.currentQ === qs.length - 1 ? 'Abschließen' : 'Weiter';
+  nextBtn.textContent = s.currentQ === WEEKLY_QUESTIONS.length - 1 ? 'Abschließen' : 'Weiter';
 }
 
 function getWeeklyDataFor(key) {
@@ -10762,12 +10463,10 @@ function openArchiveSession(i) {
   // Inhalt rendern
   const content = document.getElementById('archive-detail-content');
   const { userName, partnerName } = sessionDisplayNames(s);
-  // Bevorzugt: Frage-Snapshot der Session. Fallback: globale Konstante (für Sessions vor Schritt 2).
-  const sessionQuestions = (Array.isArray(s.questions) && s.questions.length) ? s.questions : WEEKLY_QUESTIONS;
   let html = '';
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
-    const q = sessionQuestions[idx];
+    const q = WEEKLY_QUESTIONS[idx];
     if (!q) return;
     if (q.chapter !== currentChapter) {
       currentChapter = q.chapter;
@@ -10808,11 +10507,9 @@ function formatSessionAsText(s) {
   const partnerHeader = (s.partnerName || state.partner?.name) ? ` mit ${s.partnerName || state.partner.name}` : '';
   let out = `Eine Stunde zu zweit${partnerHeader}\n${dateStr}\n`;
   out += '—'.repeat(40) + '\n\n';
-  // Bevorzugt: Frage-Snapshot der Session. Fallback: globale Konstante (für Sessions vor Schritt 2).
-  const sessionQuestions = (Array.isArray(s.questions) && s.questions.length) ? s.questions : WEEKLY_QUESTIONS;
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
-    const q = sessionQuestions[idx];
+    const q = WEEKLY_QUESTIONS[idx];
     if (!q) return;
     const ans = normalizeAnswer(a);
     const hasSelf = ans.self && ans.self.trim();
@@ -11219,7 +10916,6 @@ function renderMomentSettings() {
   renderSuggestionsList();
   renderAllQuotesList();
   renderMorningGiftsList();
-  renderWeeklyQuestionsList();
 }
 
 /* ===== ZITATE VERWALTEN ===== */
@@ -11433,179 +11129,6 @@ function removeMomentQuestion(idx) {
   state.momentQuestions.splice(idx, 1);
   saveState();
   renderMomentQuestionsList();
-}
-
-/* ===== WOCHENFRAGEN (verwalten) ===== */
-
-function renderWeeklyQuestionsList() {
-  ensureWeeklyQuestions();
-  updateSettingsSummaries();
-  const container = document.getElementById('weekly-questions-chapters');
-  if (!container) return;
-
-  let html = '';
-  WEEKLY_CHAPTERS.forEach(c => {
-    const items = state.weeklyQuestions[c.key] || [];
-    html += `<div class="wq-chapter">
-      <div class="wq-chapter-label">Kapitel ${c.num} · ${escapeHtml(c.label)}</div>`;
-    if (!items.length) {
-      html += `<div style="text-align:center;padding:10px;color:var(--muted);font-size:0.85rem;font-style:italic;">Keine Fragen — füge unten eine hinzu.</div>`;
-    } else {
-      items.forEach((q, idx) => {
-        const hiddenClass = q.hidden ? ' hidden-q' : '';
-        // Standardfragen: – zum Ausblenden, + zum Wieder-Einblenden. Eigene: ✕ zum Löschen.
-        const actionBtn = q.isStandard
-          ? `<button class="wq-action" data-action="toggle" data-chapter="${c.key}" data-idx="${idx}" title="${q.hidden ? 'Wieder einblenden' : 'Ausblenden'}">${q.hidden ? '+' : '–'}</button>`
-          : `<button class="wq-action" data-action="remove" data-chapter="${c.key}" data-idx="${idx}" title="Frage entfernen">✕</button>`;
-        html += `<div class="wq-item${hiddenClass}" data-chapter="${c.key}" data-idx="${idx}">
-          <div class="wq-text" data-chapter="${c.key}" data-idx="${idx}">${escapeHtml(q.title)}</div>
-          ${actionBtn}
-        </div>`;
-      });
-    }
-    html += `<div class="wq-add-row">
-      <input type="text" class="wq-add-input" data-chapter="${c.key}" placeholder="Neue Frage in „${escapeHtml(c.label)}"…" />
-      <button class="btn small" data-action="add" data-chapter="${c.key}">+</button>
-    </div>`;
-    html += `</div>`;
-  });
-  container.innerHTML = html;
-
-  // Event-Listener
-  container.querySelectorAll('.wq-text').forEach(el => {
-    el.addEventListener('click', () => {
-      startEditWeeklyQuestion(el.getAttribute('data-chapter'), parseInt(el.getAttribute('data-idx')), el);
-    });
-  });
-  container.querySelectorAll('.wq-action').forEach(btn => {
-    btn.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const action = btn.getAttribute('data-action');
-      const chapter = btn.getAttribute('data-chapter');
-      const idx = parseInt(btn.getAttribute('data-idx'));
-      if (action === 'remove') removeWeeklyQuestion(chapter, idx);
-      else if (action === 'toggle') toggleWeeklyQuestionHidden(chapter, idx);
-    });
-  });
-  container.querySelectorAll('button[data-action="add"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      addWeeklyQuestion(btn.getAttribute('data-chapter'));
-    });
-  });
-  container.querySelectorAll('.wq-add-input').forEach(input => {
-    input.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        addWeeklyQuestion(input.getAttribute('data-chapter'));
-      }
-    });
-  });
-}
-
-function startEditWeeklyQuestion(chapterKey, idx, textEl) {
-  ensureWeeklyQuestions();
-  const arr = state.weeklyQuestions[chapterKey];
-  if (!arr || idx < 0 || idx >= arr.length) return;
-  const q = arr[idx];
-  // Inline-Edit
-  const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'wq-edit-input';
-  input.value = q.title;
-  textEl.replaceWith(input);
-  input.focus();
-  input.setSelectionRange(input.value.length, input.value.length);
-
-  const finish = (commit) => {
-    if (commit) {
-      const newVal = (input.value || '').trim();
-      if (newVal && newVal !== q.title) {
-        q.title = newVal;
-        saveState();
-      }
-    }
-    renderWeeklyQuestionsList();
-  };
-  input.addEventListener('blur', () => finish(true));
-  input.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter') {
-      ev.preventDefault();
-      input.blur();
-    } else if (ev.key === 'Escape') {
-      ev.preventDefault();
-      finish(false);
-    }
-  });
-}
-
-function addWeeklyQuestion(chapterKey) {
-  ensureWeeklyQuestions();
-  const container = document.getElementById('weekly-questions-chapters');
-  const input = container?.querySelector(`.wq-add-input[data-chapter="${chapterKey}"]`);
-  if (!input) return;
-  const text = (input.value || '').trim();
-  if (!text) return;
-  const arr = state.weeklyQuestions[chapterKey];
-  if (arr.some(q => q.title === text && !q.hidden)) {
-    showToast('Frage existiert schon.');
-    input.value = '';
-    return;
-  }
-  arr.push({
-    id: 'usr-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
-    title: text,
-    sub: '',
-    dataKey: null,
-    isStandard: false,
-    hidden: false
-  });
-  saveState();
-  input.value = '';
-  renderWeeklyQuestionsList();
-  showToast('Hinzugefügt.');
-}
-
-function removeWeeklyQuestion(chapterKey, idx) {
-  ensureWeeklyQuestions();
-  const arr = state.weeklyQuestions[chapterKey];
-  if (!arr || idx < 0 || idx >= arr.length) return;
-  const q = arr[idx];
-  // Standardfragen werden nur ausgeblendet, nicht entfernt.
-  if (q.isStandard) {
-    toggleWeeklyQuestionHidden(chapterKey, idx);
-    return;
-  }
-  askConfirm(
-    `Frage „${q.title.slice(0, 60)}${q.title.length > 60 ? '…' : ''}" wirklich entfernen?`,
-    () => {
-      arr.splice(idx, 1);
-      saveState();
-      renderWeeklyQuestionsList();
-      showToast('Entfernt.');
-    },
-    { title: 'Frage entfernen?', yesText: 'Ja, entfernen' }
-  );
-}
-
-function toggleWeeklyQuestionHidden(chapterKey, idx) {
-  ensureWeeklyQuestions();
-  const arr = state.weeklyQuestions[chapterKey];
-  if (!arr || idx < 0 || idx >= arr.length) return;
-  arr[idx].hidden = !arr[idx].hidden;
-  saveState();
-  renderWeeklyQuestionsList();
-}
-
-function restoreWeeklyQuestionsDefaults() {
-  askConfirm(
-    'Standardfragen wiederherstellen? Eigene Fragen werden dabei entfernt.',
-    () => {
-      state.weeklyQuestions = defaultWeeklyQuestionsObject();
-      saveState();
-      renderWeeklyQuestionsList();
-      showToast('Standardfragen wiederhergestellt.');
-    },
-    { title: 'Wiederherstellen?', yesText: 'Ja, wiederherstellen' }
-  );
 }
 
 /* ===== MORGENGABEN (verwalten) ===== */
@@ -12425,6 +11948,12 @@ function renderGedankenHomeCard() {
 }
 
 /* ===== GEDANKEN-BUCH: eigener Verlauf ===== */
+// Set merkt sich, welche Monate und Einträge gerade aufgeklappt sind.
+// Default-Zustand: jüngster Monat auf, alle Einträge zu.
+const gedankenExpandedMonths = new Set();
+const gedankenExpandedEntries = new Set();
+let gedankenExpandInitialized = false;
+
 function renderGedankenLog() {
   const list = document.getElementById('gedanken-log-list');
   const empty = document.getElementById('gedanken-log-empty');
@@ -12437,25 +11966,98 @@ function renderGedankenLog() {
   }
   if (empty) empty.style.display = 'none';
 
+  // Einträge nach Jahr-Monat gruppieren (Schlüssel: 'yyyy-mm')
+  const monthsMap = {};
+  entries.forEach((e, idx) => {
+    const d = new Date(e.ts);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (!monthsMap[key]) monthsMap[key] = [];
+    monthsMap[key].push({ entry: e, idx: idx });
+  });
+
+  // Monate absteigend sortieren (jüngste zuerst)
+  const monthKeys = Object.keys(monthsMap).sort().reverse();
+
+  // Beim ersten Render: jüngsten Monat aufklappen
+  if (!gedankenExpandInitialized && monthKeys.length > 0) {
+    gedankenExpandedMonths.add(monthKeys[0]);
+    gedankenExpandInitialized = true;
+  }
+
+  const months = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   const labels = ['Was war passiert', 'Dein Gedanke', 'Die Wirkung', 'Andere Lesart', 'Und jetzt'];
 
-  list.innerHTML = entries.map((e, idx) => {
-    const d = new Date(e.ts);
-    const dateStr = formatGedankenDate(d);
-    const rows = (e.answers || []).map((a, i) => {
-      const txt = (a || '').trim();
-      if (!txt) return '';
-      return `<div class="gedanken-entry-row">
-        <div class="gedanken-entry-label">${labels[i]}</div>
-        <div class="gedanken-entry-text">${escapeHtml(txt)}</div>
+  list.innerHTML = monthKeys.map(monthKey => {
+    const [yearStr, monthStr] = monthKey.split('-');
+    const monthLabel = `${months[parseInt(monthStr, 10) - 1]} ${yearStr}`;
+    const monthEntries = monthsMap[monthKey];
+    const count = monthEntries.length;
+    const countLabel = count === 1 ? '1 Eintrag' : `${count} Einträge`;
+    const isExpanded = gedankenExpandedMonths.has(monthKey);
+    const expClass = isExpanded ? 'expanded' : '';
+
+    const entriesHtml = monthEntries.map(({ entry: e, idx }) => {
+      const d = new Date(e.ts);
+      const dateStr = formatGedankenDate(d);
+      const isEntryExpanded = gedankenExpandedEntries.has(idx);
+      const entryExpClass = isEntryExpanded ? 'expanded' : 'collapsed';
+
+      // Erste Antwort als Vorschau
+      const firstAnswer = (e.answers && e.answers[0] || '').trim();
+      const preview = firstAnswer
+        ? `<div class="gedanken-entry-preview">${escapeHtml(firstAnswer)}</div>`
+        : `<div class="gedanken-entry-preview-empty">— ohne Worte —</div>`;
+
+      // Volle Antwort-Liste (nur sichtbar, wenn aufgeklappt)
+      const rows = (e.answers || []).map((a, i) => {
+        const txt = (a || '').trim();
+        if (!txt) return '';
+        return `<div class="gedanken-entry-row">
+          <div class="gedanken-entry-label">${labels[i]}</div>
+          <div class="gedanken-entry-text">${escapeHtml(txt)}</div>
+        </div>`;
+      }).join('');
+
+      return `<div class="gedanken-entry ${entryExpClass}" onclick="toggleGedankenEntry(${idx}, event)">
+        <button class="gedanken-entry-delete" onclick="deleteGedankenEntry(${idx}); event.stopPropagation();" title="Löschen">✕</button>
+        <div class="gedanken-entry-date">${dateStr}</div>
+        ${preview}
+        ${rows}
       </div>`;
     }).join('');
-    return `<div class="gedanken-entry">
-      <button class="gedanken-entry-delete" onclick="deleteGedankenEntry(${idx})" title="Löschen">✕</button>
-      <div class="gedanken-entry-date">${dateStr}</div>
-      ${rows}
+
+    return `<div class="gedanken-month-group ${expClass}">
+      <div class="gedanken-month-header" onclick="toggleGedankenMonth('${monthKey}')">
+        <div class="gedanken-month-title">${escapeHtml(monthLabel)}</div>
+        <div class="gedanken-month-meta">
+          <span>${countLabel}</span>
+          <span class="gedanken-month-chevron">›</span>
+        </div>
+      </div>
+      <div class="gedanken-month-body">
+        ${entriesHtml}
+      </div>
     </div>`;
   }).join('');
+}
+
+function toggleGedankenMonth(monthKey) {
+  if (gedankenExpandedMonths.has(monthKey)) {
+    gedankenExpandedMonths.delete(monthKey);
+  } else {
+    gedankenExpandedMonths.add(monthKey);
+  }
+  renderGedankenLog();
+}
+
+function toggleGedankenEntry(idx, event) {
+  if (event) event.stopPropagation();
+  if (gedankenExpandedEntries.has(idx)) {
+    gedankenExpandedEntries.delete(idx);
+  } else {
+    gedankenExpandedEntries.add(idx);
+  }
+  renderGedankenLog();
 }
 
 function formatGedankenDate(d) {
@@ -12482,6 +12084,8 @@ function deleteGedankenEntry(idx) {
     if (idx < 0 || idx >= state.gedankenLog.length) return;
     state.gedankenLog.splice(idx, 1);
     saveState();
+    // Indizes im expanded-Set haben sich verschoben — sicherheitshalber leeren
+    gedankenExpandedEntries.clear();
     renderGedankenLog();
     showToast('Gelöscht.');
   }, { title: 'Eintrag löschen?', yesText: 'Löschen' });
@@ -13477,24 +13081,6 @@ function updateSettingsSummaries() {
     questionsSum.textContent = questions.length === 1 ? '1 Frage' : `${questions.length} Fragen`;
   }
 
-  // Wochenfragen für "Eine Stunde zu zweit"
-  const weeklyQSum = document.getElementById('weekly-questions-summary');
-  if (weeklyQSum) {
-    ensureWeeklyQuestions();
-    let total = 0;
-    let active = 0;
-    WEEKLY_CHAPTERS.forEach(c => {
-      const arr = state.weeklyQuestions[c.key] || [];
-      total += arr.length;
-      active += arr.filter(q => !q.hidden).length;
-    });
-    if (active === total) {
-      weeklyQSum.textContent = `${active} Frage${active === 1 ? '' : 'n'} in 3 Kapiteln`;
-    } else {
-      weeklyQSum.textContent = `${active} aktiv · ${total - active} ausgeblendet`;
-    }
-  }
-
   // Vorschläge: "10 Vorschläge"
   const suggestionsSum = document.getElementById('suggestions-summary');
   if (suggestionsSum) {
@@ -13557,7 +13143,6 @@ function updateSettingsSummaries() {
   renderGedankenToggle();
   // Menschen: Liste rendern
   renderMenschenList();
-  renderMenschenFragen();
   // Monatsrückblick: Toggles und Watchwords
   renderRueckblickToggles();
   renderRueckblickNarrativeToggle();
@@ -14925,7 +14510,28 @@ function updateFundTripHint() {
   }
   // Letzte angelegt gewinnt (gleiche Logik wie getActiveTrip)
   const t = matches.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
-  hint.innerHTML = `Wird der Reise <em>${escapeHtml(t.name)}</em> zugeordnet.`;
+
+  // Aktuellen Wunsch des Nutzers ermitteln:
+  // - Beim Bearbeiten eines vorhandenen Funds: dessen tripLink-Feld respektieren
+  // - Beim Anlegen eines neuen Funds: Default = zugeordnet (true)
+  let isLinked = true;
+  if (editingFundId) {
+    const f = (state.funde || []).find(x => x.id === editingFundId);
+    if (f && f.tripLink === null) isLinked = false;
+  }
+
+  hint.innerHTML = `
+    <div>Wird der Reise <em>${escapeHtml(t.name)}</em> zugeordnet.</div>
+    <div class="fund-trip-toggle-row">
+      <label class="fund-trip-toggle">
+        <input type="checkbox" id="fund-trip-toggle-input" ${isLinked ? 'checked' : ''}>
+        <span class="fund-trip-toggle-slider"></span>
+      </label>
+      <label class="fund-trip-toggle-label" for="fund-trip-toggle-input">
+        Zur Reise zuordnen
+      </label>
+    </div>
+  `;
   hint.style.display = '';
 }
 
@@ -15091,6 +14697,18 @@ async function saveFund() {
 
   if (!Array.isArray(state.funde)) state.funde = [];
 
+  // Trip-Verknüpfung ermitteln
+  // - Toggle existiert nur, wenn das Datum in einen Reisezeitraum fällt
+  // - Toggle aus → tripLink = null (bewusste Abwahl)
+  // - Toggle an oder kein Toggle sichtbar → tripLink = undefined (Default-Auto)
+  const toggleEl = document.getElementById('fund-trip-toggle-input');
+  let tripLink;
+  if (toggleEl && !toggleEl.checked) {
+    tripLink = null;
+  } else {
+    tripLink = undefined;
+  }
+
   let savedFundId = editingFundId;
   if (editingFundId) {
     const f = state.funde.find(x => x.id === editingFundId);
@@ -15104,10 +14722,16 @@ async function saveFund() {
       f.dayPart = dayPart;
       f.mediaId = fundImageDraft || null;
       f.updatedAt = new Date().toISOString();
+      // tripLink: explizit setzen oder Feld entfernen (Default-Auto)
+      if (tripLink === null) {
+        f.tripLink = null;
+      } else {
+        delete f.tripLink;
+      }
     }
   } else {
     savedFundId = uidFund();
-    state.funde.push({
+    const newFund = {
       id: savedFundId,
       text: text,
       source: source || null,
@@ -15117,7 +14741,9 @@ async function saveFund() {
       ts: ts,
       dayPart: dayPart,
       mediaId: fundImageDraft || null
-    });
+    };
+    if (tripLink === null) newFund.tripLink = null;
+    state.funde.push(newFund);
   }
   saveState();
 
@@ -15362,7 +14988,7 @@ function renderTripDetail() {
     days[k].funde.push(f);
   });
 
-  const allDates = Object.keys(days).sort();
+  const allDates = Object.keys(days).sort().reverse();
   const wrap = document.getElementById('trip-chronicle-wrap');
 
   if (allDates.length === 0) {
@@ -15383,13 +15009,22 @@ function renderTripDetail() {
     html += `<div class="trip-day-block">`;
     html += `<div class="trip-day-header">${escapeHtml(dayHeader)}</div>`;
 
-    // Tageseinträge zuerst
+    // Einträge und Funde gemeinsam sortieren — neueste zuerst.
+    // Tageseinträge: updatedAt als Zeitstempel; Funde: ts.
+    const dayItems = [];
     days[dateIso].entries.forEach(e => {
-      html += renderTripEntryCard(e);
+      dayItems.push({ kind: 'entry', sortTs: new Date(e.updatedAt || e.createdAt || 0).getTime(), data: e });
     });
-    // Dann Funde des Tages
-    days[dateIso].funde.sort((a, b) => new Date(a.ts) - new Date(b.ts)).forEach(f => {
-      html += renderFundCard(f);
+    days[dateIso].funde.forEach(f => {
+      dayItems.push({ kind: 'fund', sortTs: new Date(f.ts).getTime(), data: f });
+    });
+    dayItems.sort((a, b) => b.sortTs - a.sortTs);
+    dayItems.forEach(item => {
+      if (item.kind === 'entry') {
+        html += renderTripEntryCard(item.data);
+      } else {
+        html += renderFundCard(item.data);
+      }
     });
     html += `</div>`;
   });
@@ -16142,187 +15777,6 @@ function renderMenschenList() {
   }).join('');
 }
 
-/* ===== FRAGEN-POOL für nahestehende Menschen ===== */
-const FRAGEN_TONES = [
-  { key: 'tief',       label: 'Tief',       order: 1 },
-  { key: 'alltag',     label: 'Alltag',     order: 2 },
-  { key: 'beziehung',  label: 'Beziehung',  order: 3 }
-];
-// merkt offene Akkordeon-Blöcke nur für die Session
-let fragenAkkordeonOpen = {};
-// merkt aktiven Inline-Edit
-let fragenEditingId = null;
-
-function renderMenschenFragen() {
-  const root = document.getElementById('menschen-fragen-akkordeon');
-  if (!root) return;
-  const fragen = Array.isArray(state.menschenFragen) ? state.menschenFragen : [];
-
-  root.innerHTML = '';
-  FRAGEN_TONES.forEach(t => {
-    const fragenDieser = fragen.filter(f => f.tone === t.key);
-    const isOpen = !!fragenAkkordeonOpen[t.key];
-
-    const block = document.createElement('div');
-    block.className = 'fragen-tone-block' + (isOpen ? ' open' : '');
-
-    // Header
-    const header = document.createElement('div');
-    header.className = 'fragen-tone-header';
-    header.innerHTML = `
-      <div style="display:flex;align-items:baseline;gap:8px;flex:1;">
-        <span class="fragen-tone-title">${t.label}</span>
-        <span class="fragen-tone-count">${fragenDieser.length}</span>
-      </div>
-      <span class="fragen-tone-arrow">▸</span>
-    `;
-    header.addEventListener('click', () => {
-      fragenAkkordeonOpen[t.key] = !fragenAkkordeonOpen[t.key];
-      renderMenschenFragen();
-    });
-    block.appendChild(header);
-
-    // Body
-    const body = document.createElement('div');
-    body.className = 'fragen-tone-body';
-
-    if (fragenDieser.length === 0) {
-      const empty = document.createElement('p');
-      empty.className = 'muted-note';
-      empty.style.cssText = 'text-align:center;padding:8px 0;font-style:italic;font-size:0.88rem;';
-      empty.textContent = 'Noch keine Frage in dieser Tonart.';
-      body.appendChild(empty);
-    } else {
-      fragenDieser.forEach(f => {
-        body.appendChild(buildFrageItem(f, t.key));
-      });
-    }
-
-    // Hinzufüge-Zeile
-    const addRow = document.createElement('div');
-    addRow.className = 'frage-add-row';
-    const addInput = document.createElement('input');
-    addInput.type = 'text';
-    addInput.className = 'frage-add-input';
-    addInput.placeholder = 'Eigene Frage in „' + t.label + '"…';
-    const addBtn = document.createElement('button');
-    addBtn.className = 'btn small';
-    addBtn.textContent = '+';
-    const commit = () => {
-      const txt = (addInput.value || '').trim();
-      if (!txt) return;
-      addMenschenFrage(txt, t.key);
-      addInput.value = '';
-    };
-    addBtn.addEventListener('click', commit);
-    addInput.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
-    });
-    addRow.appendChild(addInput);
-    addRow.appendChild(addBtn);
-    body.appendChild(addRow);
-
-    block.appendChild(body);
-    root.appendChild(block);
-  });
-}
-
-function buildFrageItem(f, toneKey) {
-  const item = document.createElement('div');
-  item.className = 'frage-item';
-
-  // Edit-Modus?
-  if (fragenEditingId === f.id) {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'flex:1;width:100%;';
-    const ta = document.createElement('textarea');
-    ta.className = 'frage-edit-textarea';
-    ta.value = f.text;
-    const actions = document.createElement('div');
-    actions.style.cssText = 'display:flex;gap:6px;margin-top:6px;';
-    const okBtn = document.createElement('button');
-    okBtn.className = 'btn small';
-    okBtn.textContent = 'Speichern';
-    okBtn.addEventListener('click', () => {
-      const newTxt = (ta.value || '').trim();
-      if (newTxt) {
-        updateMenschenFrage(f.id, { text: newTxt });
-      }
-      fragenEditingId = null;
-      renderMenschenFragen();
-    });
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'btn secondary small';
-    cancelBtn.textContent = 'Abbrechen';
-    cancelBtn.addEventListener('click', () => {
-      fragenEditingId = null;
-      renderMenschenFragen();
-    });
-    actions.appendChild(okBtn);
-    actions.appendChild(cancelBtn);
-    wrap.appendChild(ta);
-    wrap.appendChild(actions);
-    item.appendChild(wrap);
-    setTimeout(() => ta.focus(), 30);
-    return item;
-  }
-
-  // Lese-Modus
-  const txtEl = document.createElement('div');
-  txtEl.className = 'frage-item-text';
-  txtEl.textContent = f.text;
-
-  const actions = document.createElement('div');
-  actions.className = 'frage-item-actions';
-  const editBtn = document.createElement('button');
-  editBtn.className = 'frage-item-btn';
-  editBtn.textContent = 'Ändern';
-  editBtn.addEventListener('click', () => {
-    fragenEditingId = f.id;
-    renderMenschenFragen();
-  });
-  const delBtn = document.createElement('button');
-  delBtn.className = 'frage-item-btn danger';
-  delBtn.textContent = 'Löschen';
-  delBtn.addEventListener('click', () => {
-    if (typeof askConfirm === 'function') {
-      askConfirm('Diese Frage löschen?', () => deleteMenschenFrage(f.id));
-    } else if (confirm('Diese Frage löschen?')) {
-      deleteMenschenFrage(f.id);
-    }
-  });
-  actions.appendChild(editBtn);
-  actions.appendChild(delBtn);
-
-  item.appendChild(txtEl);
-  item.appendChild(actions);
-  return item;
-}
-
-function addMenschenFrage(text, tone) {
-  if (!Array.isArray(state.menschenFragen)) state.menschenFragen = [];
-  const id = 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
-  state.menschenFragen.push({ id, text, tone });
-  saveState();
-  fragenAkkordeonOpen[tone] = true;
-  renderMenschenFragen();
-}
-
-function updateMenschenFrage(id, patch) {
-  if (!Array.isArray(state.menschenFragen)) return;
-  const f = state.menschenFragen.find(x => x.id === id);
-  if (!f) return;
-  Object.assign(f, patch);
-  saveState();
-}
-
-function deleteMenschenFrage(id) {
-  if (!Array.isArray(state.menschenFragen)) return;
-  state.menschenFragen = state.menschenFragen.filter(x => x.id !== id);
-  saveState();
-  renderMenschenFragen();
-}
-
 // "Lange nicht"-Echo — leise, nie als Vorwurf
 function computeLongTimeLabel(m) {
   const begegnungen = Array.isArray(m.begegnungen) ? m.begegnungen : [];
@@ -16341,6 +15795,23 @@ function computeLongTimeLabel(m) {
   if (diffDays < 180) return 'lange nicht';
   if (diffDays < 365) return 'schon eine Weile';
   return 'lange her';
+}
+
+// Zeitangabe für eine Begegnung — entweder Tageszeit-Wort oder konkrete Uhrzeit.
+// Liefert leeren String, wenn keine sinnvolle Zeitangabe vorhanden.
+function formatBegegnungTime(b) {
+  if (!b || !b.ts) return '';
+  if (b.dayPart) return b.dayPart;
+  const d = new Date(b.ts);
+  const hh = d.getHours();
+  const mm = d.getMinutes();
+  // Heuristik: Wenn der Zeitstempel exakt 12:00:00 (Mittag-Default für reine Datumsangaben)
+  // oder 00:00:00 ist, zeigen wir keine Uhrzeit an — Nutzer hatte keine angegeben.
+  const sec = d.getSeconds();
+  if ((hh === 12 && mm === 0 && sec === 0) || (hh === 0 && mm === 0 && sec === 0)) {
+    return '';
+  }
+  return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
 }
 
 function formatGiftRelative(d) {
@@ -16515,6 +15986,8 @@ async function renderBegegnungenList() {
   // Erst HTML-Gerüst — ohne Bilder
   list.innerHTML = begegnungen.map(b => {
     const dateStr = formatGiftRelative(new Date(b.ts));
+    const timeStr = formatBegegnungTime(b);
+    const timePart = timeStr ? ` · ${escapeHtml(timeStr)}` : '';
     const artStr = b.art
       ? ` <span class="begegnung-art">· ${escapeHtml(b.art)}</span>`
       : '';
@@ -16529,14 +16002,14 @@ async function renderBegegnungenList() {
       return `<div class="begegnung-item has-photo" onclick="openBegegnungEditor('${b.id}')">
         <img class="begegnung-thumb" data-media-id="${b.mediaId}" data-caption="${escapeHtml(b.mediaCaption || b.notiz || '')}" alt="" onclick="event.stopPropagation(); openLightbox(this.dataset.mediaId, this.dataset.caption);">
         <div>
-          <div class="begegnung-meta">${dateStr}${artStr}</div>
+          <div class="begegnung-meta">${dateStr}${timePart}${artStr}</div>
           ${notiz}
           ${captionLine}
         </div>
       </div>`;
     }
     return `<div class="begegnung-item" onclick="openBegegnungEditor('${b.id}')">
-      <div class="begegnung-meta">${dateStr}${artStr}</div>
+      <div class="begegnung-meta">${dateStr}${timePart}${artStr}</div>
       ${notiz}
     </div>`;
   }).join('');
@@ -16578,11 +16051,25 @@ function deleteCurrentMensch() {
 
 /* ----- Begegnungs-Editor ----- */
 
+// Tageszeit-Chips (analog zu FUND_DAYPARTS)
+const BEGEGNUNG_DAYPARTS = [
+  { key: 'morgens', label: 'morgens', defaultHour: 8 },
+  { key: 'vormittags', label: 'vormittags', defaultHour: 10 },
+  { key: 'mittags', label: 'mittags', defaultHour: 12 },
+  { key: 'nachmittags', label: 'nachmittags', defaultHour: 15 },
+  { key: 'abends', label: 'abends', defaultHour: 20 },
+  { key: 'nachts', label: 'nachts', defaultHour: 23 }
+];
+
 let begegnungEditorCurrentId = null; // null = neu, sonst ID des bearbeiteten Eintrags
 let begegnungEditorSelectedArt = null;
+let begegnungEditorOriginalTs = null; // ursprünglicher Zeitstempel beim Öffnen — bewahrt Uhrzeit, wenn Datum unverändert
+let begegnungEditorDayPart = null;    // 'morgens' | 'abends' | ... oder null
 let begegnungImageDraft = null;     // aktuell gewählte mediaId
 let begegnungImagePrevious = null;  // mediaId beim Öffnen — für refs-Diff
 let begegnungCaptionPrevious = null; // Caption beim Öffnen
+let begegnungMitPersonen = [];       // IDs der zusätzlich ausgewählten Menschen (nur bei neuen Begegnungen)
+let mitPersonenPickerSelection = []; // temporäre Auswahl im Picker
 
 function triggerBegegnungImageSelect() {
   document.getElementById('begegnung-photo-file-input').click();
@@ -16667,28 +16154,38 @@ function openBegegnungEditor(existingId) {
   if (!menschDetailCurrentId) return;
   begegnungEditorCurrentId = existingId || null;
   begegnungEditorSelectedArt = null;
+  begegnungEditorOriginalTs = null;
+  begegnungEditorDayPart = null;
   begegnungImageDraft = null;
   begegnungImagePrevious = null;
   begegnungCaptionPrevious = null;
+  begegnungMitPersonen = [];
 
   const titleEl = document.getElementById('begegnung-editor-title');
   const notizEl = document.getElementById('begegnung-notiz');
   const dateEl = document.getElementById('begegnung-date');
+  const timeEl = document.getElementById('begegnung-time');
   const dateRow = document.getElementById('begegnung-date-row');
   const dateToggleWrap = document.getElementById('begegnung-date-toggle-wrap');
   const moreRow = document.getElementById('begegnung-more-row');
   const moreToggleWrap = document.getElementById('begegnung-more-toggle-wrap');
   const deleteWrap = document.getElementById('begegnung-editor-delete-wrap');
   const captionEl = document.getElementById('begegnung-caption');
+  const mitSection = document.getElementById('begegnung-mit-section');
 
   // Defaults: heute, Felder leer, alles geschlossen
   notizEl.value = '';
   dateEl.value = isoDateOnly(new Date());
+  if (timeEl) timeEl.value = '';
   dateRow.style.display = 'none';
   dateToggleWrap.style.display = '';
   moreRow.style.display = 'none';
   moreToggleWrap.style.display = '';
   if (captionEl) captionEl.value = '';
+  // Mit-Personen-Sektion nur bei neuen Begegnungen
+  if (mitSection) mitSection.style.display = existingId ? 'none' : '';
+  renderMitPersonenChips();
+  renderBegegnungDayPartChips();
 
   // Chips zurücksetzen
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => c.classList.remove('selected'));
@@ -16704,11 +16201,34 @@ function openBegegnungEditor(existingId) {
       notizEl.value = b.notiz || '';
       const d = new Date(b.ts);
       dateEl.value = isoDateOnly(d);
-      // Wenn Datum nicht heute → Datum-Zeile öffnen
-      if (dateEl.value !== isoDateOnly(new Date())) {
+      begegnungEditorOriginalTs = b.ts; // für Datum-Erhaltung beim Speichern
+
+      // Uhrzeit + Tageszeit aus Eintrag laden
+      // Uhrzeit: Stunde:Minute des gespeicherten ts
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      // Nur anzeigen, wenn ts NICHT der "Mittag-Default" (12:00:00) ist —
+      // sonst füllen wir das Zeit-Feld mit nichts (User hatte keine Uhrzeit gesetzt)
+      const isMiddayDefault = d.getHours() === 12 && d.getMinutes() === 0 && d.getSeconds() === 0;
+      if (timeEl) {
+        timeEl.value = isMiddayDefault && !b.dayPart ? '' : `${hh}:${mm}`;
+      }
+      if (b.dayPart) {
+        begegnungEditorDayPart = b.dayPart;
+        renderBegegnungDayPartChips();
+      }
+
+      // Datum-Bereich automatisch öffnen, wenn:
+      // - Datum nicht heute, ODER
+      // - Uhrzeit gesetzt, ODER
+      // - Tageszeit-Chip gesetzt
+      const hasTime = timeEl && timeEl.value !== '';
+      const datumNichtHeute = dateEl.value !== isoDateOnly(new Date());
+      if (datumNichtHeute || hasTime || begegnungEditorDayPart) {
         dateRow.style.display = '';
         dateToggleWrap.style.display = 'none';
       }
+
       // Wenn Art gesetzt → mehr-Bereich öffnen
       if (b.art) {
         moreRow.style.display = '';
@@ -16753,9 +16273,12 @@ async function closeBegegnungEditor() {
   document.getElementById('begegnung-editor-overlay').classList.remove('visible');
   begegnungEditorCurrentId = null;
   begegnungEditorSelectedArt = null;
+  begegnungEditorOriginalTs = null;
+  begegnungEditorDayPart = null;
   begegnungImageDraft = null;
   begegnungImagePrevious = null;
   begegnungCaptionPrevious = null;
+  begegnungMitPersonen = [];
 }
 
 function toggleBegegnungDate() {
@@ -16784,6 +16307,119 @@ function selectBegegnungArt(art) {
   });
 }
 
+/* ----- Tageszeit-Chips ----- */
+
+function renderBegegnungDayPartChips() {
+  const wrap = document.getElementById('begegnung-daypart-chips');
+  if (!wrap) return;
+  wrap.innerHTML = BEGEGNUNG_DAYPARTS.map(dp => {
+    const sel = dp.key === begegnungEditorDayPart ? 'selected' : '';
+    return `<button type="button" class="art-chip ${sel}" data-daypart="${dp.key}" onclick="selectBegegnungDayPart('${dp.key}')">${escapeHtml(dp.label)}</button>`;
+  }).join('');
+}
+
+function selectBegegnungDayPart(key) {
+  if (begegnungEditorDayPart === key) {
+    // Abwählen
+    begegnungEditorDayPart = null;
+  } else {
+    begegnungEditorDayPart = key;
+    // Uhrzeit auf den Default der Tageszeit setzen
+    const dp = BEGEGNUNG_DAYPARTS.find(d => d.key === key);
+    if (dp) {
+      const timeEl = document.getElementById('begegnung-time');
+      if (timeEl) timeEl.value = `${String(dp.defaultHour).padStart(2,'0')}:00`;
+    }
+  }
+  renderBegegnungDayPartChips();
+}
+
+// Wenn Nutzer manuell die Uhrzeit eintippt: Tageszeit-Chip nicht zwingend abwählen,
+// aber den dayPart auf Basis der neuen Uhrzeit aktualisieren, damit es konsistent bleibt
+function onBegegnungTimeManualChange() {
+  // Bewusst nichts tun — Verhalten wie bei Funden:
+  // dayPart bleibt erhalten, auch wenn Uhrzeit manuell verschoben wird.
+  // (Falls inkonsistent: Nutzer kann den Chip selbst abwählen.)
+}
+
+/* ----- Mit-Personen-Picker ----- */
+
+function renderMitPersonenChips() {
+  const container = document.getElementById('begegnung-mit-chips');
+  const addBtn = document.getElementById('begegnung-mit-add-btn');
+  if (!container) return;
+  if (!begegnungMitPersonen.length) {
+    container.innerHTML = '';
+    if (addBtn) addBtn.textContent = '+ Person hinzufügen';
+    return;
+  }
+  if (addBtn) addBtn.textContent = '+ weitere Person';
+  const liste = state.menschen || [];
+  container.innerHTML = begegnungMitPersonen.map(id => {
+    const p = liste.find(x => x.id === id);
+    if (!p) return '';
+    return `<span class="mit-person-chip">
+      ${escapeHtml(p.name)}
+      <button type="button" class="mit-person-chip-remove" onclick="removeMitPerson('${id}')" aria-label="Entfernen">✕</button>
+    </span>`;
+  }).join('');
+}
+
+function removeMitPerson(id) {
+  begegnungMitPersonen = begegnungMitPersonen.filter(x => x !== id);
+  renderMitPersonenChips();
+}
+
+function openMitPersonenPicker() {
+  // Alle Menschen außer dem aktuellen
+  const liste = (state.menschen || []).filter(m => m.id !== menschDetailCurrentId);
+  if (!liste.length) {
+    showToast('Keine weiteren Menschen in deiner Liste.');
+    return;
+  }
+  // Aktuelle Auswahl als Startwert
+  mitPersonenPickerSelection = begegnungMitPersonen.slice();
+  renderMitPersonenPickerList();
+  document.getElementById('mit-personen-picker-overlay').classList.add('visible');
+}
+
+function closeMitPersonenPicker() {
+  document.getElementById('mit-personen-picker-overlay').classList.remove('visible');
+  mitPersonenPickerSelection = [];
+}
+
+function renderMitPersonenPickerList() {
+  const list = document.getElementById('mit-personen-picker-list');
+  if (!list) return;
+  const liste = (state.menschen || [])
+    .filter(m => m.id !== menschDetailCurrentId)
+    .slice()
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  list.innerHTML = liste.map(m => {
+    const sel = mitPersonenPickerSelection.includes(m.id) ? 'selected' : '';
+    const checkMark = mitPersonenPickerSelection.includes(m.id) ? '✓' : '';
+    return `<div class="mit-personen-picker-item ${sel}" onclick="toggleMitPersonenPickerItem('${m.id}')">
+      <div class="mit-personen-picker-check">${checkMark}</div>
+      <div class="mit-personen-picker-name">${escapeHtml(m.name)}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleMitPersonenPickerItem(id) {
+  if (mitPersonenPickerSelection.includes(id)) {
+    mitPersonenPickerSelection = mitPersonenPickerSelection.filter(x => x !== id);
+  } else {
+    mitPersonenPickerSelection.push(id);
+  }
+  renderMitPersonenPickerList();
+}
+
+function confirmMitPersonenPicker() {
+  begegnungMitPersonen = mitPersonenPickerSelection.slice();
+  closeMitPersonenPicker();
+  renderMitPersonenChips();
+}
+
 async function saveBegegnungEditor() {
   if (!menschDetailCurrentId) return;
   const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
@@ -16801,49 +16437,117 @@ async function saveBegegnungEditor() {
     return;
   }
 
-  // Datum mit Uhrzeit kombinieren — heute = jetzt, andere Tage = Mittag (Zeitzone-sicher)
+  // Datum + Zeit zusammenbauen
+  // Wenn Nutzer Uhrzeit eingegeben hat → diese nehmen
+  // Wenn dayPart gewählt aber keine manuelle Uhrzeit → defaultHour aus dayPart
+  // Wenn weder noch:
+  //   - Bestehende Begegnung, Datum unverändert → ursprünglichen ts behalten
+  //   - Bestehende Begegnung, Datum geändert → 12:00 des neuen Tages
+  //   - Neue Begegnung, heute → jetzt
+  //   - Neue Begegnung, anderer Tag → 12:00
+  const timeStr = (document.getElementById('begegnung-time').value || '').trim();
+  const dayPart = begegnungEditorDayPart || null;
   let ts;
   const todayIso = isoDateOnly(new Date());
-  if (dateStr === todayIso) {
-    ts = new Date().toISOString();
+
+  function buildTs(dateStr, hh, mm) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setHours(hh, mm, 0, 0);
+    return d.toISOString();
+  }
+
+  if (timeStr) {
+    // Manuelle Uhrzeit
+    const [hhStr, mmStr] = timeStr.split(':');
+    ts = buildTs(dateStr, parseInt(hhStr, 10) || 0, parseInt(mmStr, 10) || 0);
+  } else if (dayPart) {
+    // Tageszeit ohne explizite Uhrzeit → defaultHour
+    const dp = BEGEGNUNG_DAYPARTS.find(x => x.key === dayPart);
+    const hh = dp ? dp.defaultHour : 12;
+    ts = buildTs(dateStr, hh, 0);
+  } else if (begegnungEditorCurrentId && begegnungEditorOriginalTs) {
+    // Bearbeiten ohne Zeit-Änderung
+    const originalDateStr = isoDateOnly(new Date(begegnungEditorOriginalTs));
+    if (dateStr === originalDateStr) {
+      ts = begegnungEditorOriginalTs; // unverändert
+    } else {
+      ts = buildTs(dateStr, 12, 0);
+    }
   } else {
-    ts = new Date(dateStr + 'T12:00:00').toISOString();
+    // Neue Begegnung ohne Zeit-Angabe
+    if (dateStr === todayIso) {
+      ts = new Date().toISOString();
+    } else {
+      ts = buildTs(dateStr, 12, 0);
+    }
   }
 
   if (!Array.isArray(m.begegnungen)) m.begegnungen = [];
 
   let savedBegegnungId = begegnungEditorCurrentId;
+  // Liste der Menschen, bei denen die Begegnung gespeichert wird
+  // (für die Foto-Refs später wichtig)
+  const allRecipients = []; // [{menschId, begegnungId}]
+
   if (begegnungEditorCurrentId) {
     const b = m.begegnungen.find(x => x.id === begegnungEditorCurrentId);
     if (b) {
       b.notiz = notiz;
       b.art = art || null;
       b.ts = ts;
+      b.dayPart = dayPart;
       b.mediaId = mediaId;
       b.mediaCaption = caption || null;
     }
+    allRecipients.push({ menschId: menschDetailCurrentId, begegnungId: begegnungEditorCurrentId });
   } else {
+    // Neue Begegnung beim aktuellen Menschen
     savedBegegnungId = 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
     m.begegnungen.push({
       id: savedBegegnungId,
       ts: ts,
       art: art || null,
       notiz: notiz,
+      dayPart: dayPart,
       mediaId: mediaId,
       mediaCaption: caption || null
     });
+    allRecipients.push({ menschId: menschDetailCurrentId, begegnungId: savedBegegnungId });
+
+    // Bei zusätzlichen Mit-Personen: jeweils eine Kopie anlegen (eigene id, gleiche Daten)
+    for (const otherId of begegnungMitPersonen) {
+      const other = (state.menschen || []).find(x => x.id === otherId);
+      if (!other) continue;
+      if (!Array.isArray(other.begegnungen)) other.begegnungen = [];
+      const copyId = 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+      other.begegnungen.push({
+        id: copyId,
+        ts: ts,
+        art: art || null,
+        notiz: notiz,
+        dayPart: dayPart,
+        mediaId: mediaId,
+        mediaCaption: caption || null
+      });
+      allRecipients.push({ menschId: otherId, begegnungId: copyId });
+    }
   }
 
   saveState();
 
   // Refs aktualisieren (Garbage-Collection-Schutz)
-  const refKey = 'begegnung:' + menschDetailCurrentId + ':' + savedBegegnungId;
+  // Beim neuen Foto: für jede Begegnung (Original + Kopien) je einen Ref hinzufügen
   if (begegnungImageDraft && begegnungImageDraft !== begegnungImagePrevious) {
-    try { await addImageRef(begegnungImageDraft, refKey); } catch(e) {}
+    for (const r of allRecipients) {
+      const refKey = 'begegnung:' + r.menschId + ':' + r.begegnungId;
+      try { await addImageRef(begegnungImageDraft, refKey); } catch(e) {}
+    }
   }
+  // Altes Foto: nur Ref des aktuellen (bearbeiteten) Eintrags entfernen
   if (begegnungImagePrevious && begegnungImagePrevious !== begegnungImageDraft) {
+    const oldRefKey = 'begegnung:' + menschDetailCurrentId + ':' + (begegnungEditorCurrentId || savedBegegnungId);
     try {
-      await removeImageRef(begegnungImagePrevious, refKey);
+      await removeImageRef(begegnungImagePrevious, oldRefKey);
       invalidateImageCache(begegnungImagePrevious);
     } catch(e) {}
   }
@@ -16852,10 +16556,21 @@ async function saveBegegnungEditor() {
   // weil es jetzt gespeichert ist. Reset des "Previous" verhindert das.
   begegnungImagePrevious = begegnungImageDraft;
 
+  // Toast-Nachricht: Anzahl der betroffenen Menschen
+  let toastMsg;
+  if (begegnungEditorCurrentId) {
+    toastMsg = 'Geändert.';
+  } else if (begegnungMitPersonen.length > 0) {
+    const total = 1 + begegnungMitPersonen.length;
+    toastMsg = `Bei ${total} Menschen notiert.`;
+  } else {
+    toastMsg = 'Notiert.';
+  }
+
   await closeBegegnungEditor();
   renderBegegnungenList();
   renderMenschenList(); // wegen "lange nicht"-Echo
-  showToast(begegnungEditorCurrentId ? 'Geändert.' : 'Notiert.');
+  showToast(toastMsg);
 }
 
 function deleteCurrentBegegnung() {
