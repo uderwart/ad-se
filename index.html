@@ -5917,6 +5917,7 @@ textarea, input {
         Eine kleine Liste von Menschen, die dir wichtig sind. Nützlich beim Weitergeben von Ad se — und ein stilles Andenken, wer schon dabei ist.
       </p>
       <div id="menschen-list" style="margin-bottom:10px;"></div>
+      <button class="btn secondary full" style="margin-bottom:8px;" onclick="openQuickBegegnung()">Begegnung mit jemand Neuem</button>
       <button class="btn secondary full" onclick="openMenschEditor()">Jemanden hinzufügen</button>
     </div>
   </div>
@@ -6449,6 +6450,39 @@ textarea, input {
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeMitPersonenPicker()">Abbrechen</button>
       <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="confirmMitPersonenPicker()">Übernehmen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== QUICK-BEGEGNUNG: Name eingeben für neuen Menschen ====== -->
+<div class="entry-overlay" id="quick-begegnung-overlay">
+  <div class="entry-modal" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Mit wem war's?</h2>
+      <button onclick="closeQuickBegegnung()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" style="margin:0 0 12px;font-size:0.85rem;line-height:1.5;">Name eingeben — die Person wird zu deiner Liste hinzugefügt, und du kommst direkt zum Begegnungs-Editor.</p>
+    <input type="text" id="quick-begegnung-name" placeholder="Name" autocomplete="off"
+      style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1.05rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:14px;">
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeQuickBegegnung()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="confirmQuickBegegnung()">Weiter</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== QUICK-BEGEGNUNG: Duplikat gefunden ====== -->
+<div class="entry-overlay" id="quick-begegnung-dup-overlay">
+  <div class="entry-modal" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h2 style="margin:0;">Vielleicht schon dabei?</h2>
+      <button onclick="closeQuickBegegnungDup()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
+    <p class="muted-note" id="quick-begegnung-dup-text" style="margin:0 0 10px;font-size:0.85rem;line-height:1.5;"></p>
+    <div id="quick-begegnung-dup-list" class="mit-personen-picker-list"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeQuickBegegnungDup()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="confirmQuickBegegnungAsNew()">Trotzdem neu</button>
     </div>
   </div>
 </div>
@@ -16550,6 +16584,106 @@ function confirmMitPersonenPicker() {
   begegnungMitPersonen = mitPersonenPickerSelection.slice();
   closeMitPersonenPicker();
   renderMitPersonenChips();
+}
+
+/* ----- Schnell-Begegnung mit neuer Person ----- */
+
+let quickBegegnungPendingName = ''; // gemerkter Name für den Duplikat-Dialog
+
+function openQuickBegegnung() {
+  const input = document.getElementById('quick-begegnung-name');
+  if (input) input.value = '';
+  document.getElementById('quick-begegnung-overlay').classList.add('visible');
+  setTimeout(() => { if (input) input.focus(); }, 200);
+}
+
+function closeQuickBegegnung() {
+  document.getElementById('quick-begegnung-overlay').classList.remove('visible');
+}
+
+function confirmQuickBegegnung() {
+  const input = document.getElementById('quick-begegnung-name');
+  const name = (input?.value || '').trim();
+  if (!name) {
+    showToast('Bitte einen Namen eintragen.');
+    return;
+  }
+  // Ähnliche Namen suchen (Substring, case-insensitive in beide Richtungen)
+  const nameLower = name.toLowerCase();
+  const matches = (state.menschen || []).filter(m => {
+    const mn = (m.name || '').toLowerCase();
+    return mn === nameLower || mn.includes(nameLower) || nameLower.includes(mn);
+  });
+  if (matches.length > 0) {
+    // Duplikat-Dialog zeigen
+    quickBegegnungPendingName = name;
+    closeQuickBegegnung();
+    openQuickBegegnungDup(matches, name);
+    return;
+  }
+  // Direkt anlegen und Begegnungs-Editor öffnen
+  createMenschAndStartBegegnung(name);
+}
+
+function openQuickBegegnungDup(matches, typedName) {
+  const text = document.getElementById('quick-begegnung-dup-text');
+  const list = document.getElementById('quick-begegnung-dup-list');
+  if (text) text.textContent = `Du hast „${typedName}" eingegeben. Diese Person(en) sind ähnlich:`;
+  if (list) {
+    list.innerHTML = matches.map(m => {
+      const sub = m.relation ? `<div style="font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);">${escapeHtml(m.relation)}</div>` : '';
+      return `<div class="mit-personen-picker-item" onclick="useExistingMenschForQuick('${m.id}')">
+        <div class="mit-personen-picker-check">›</div>
+        <div>
+          <div class="mit-personen-picker-name">${escapeHtml(m.name)}</div>
+          ${sub}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('quick-begegnung-dup-overlay').classList.add('visible');
+}
+
+function closeQuickBegegnungDup() {
+  document.getElementById('quick-begegnung-dup-overlay').classList.remove('visible');
+  quickBegegnungPendingName = '';
+}
+
+function useExistingMenschForQuick(menschId) {
+  // Bei bestehender Person → direkt deren Detail öffnen und Begegnung anhängen
+  closeQuickBegegnungDup();
+  quickBegegnungPendingName = '';
+  openMenschDetail(menschId);
+  // Kurz warten bis Overlay sichtbar, dann Begegnungs-Editor öffnen
+  setTimeout(() => openBegegnungEditor(), 250);
+}
+
+function confirmQuickBegegnungAsNew() {
+  const name = quickBegegnungPendingName;
+  closeQuickBegegnungDup();
+  quickBegegnungPendingName = '';
+  if (!name) return;
+  createMenschAndStartBegegnung(name);
+}
+
+function createMenschAndStartBegegnung(name) {
+  if (!Array.isArray(state.menschen)) state.menschen = [];
+  const newId = uid();
+  state.menschen.push({
+    id: newId,
+    name: name,
+    relation: '',
+    note: '',
+    giftedAt: null,
+    begegnungen: []
+  });
+  saveState();
+  renderMenschenList();
+  updateSettingsSummaries();
+  showToast('Hinzugefügt.');
+  // Detail öffnen → Begegnungs-Editor öffnen
+  openMenschDetail(newId);
+  setTimeout(() => openBegegnungEditor(), 250);
 }
 
 async function saveBegegnungEditor() {
