@@ -6402,6 +6402,34 @@ textarea, input {
         <button class="art-chip" data-art="gedacht an" onclick="selectBegegnungArt('gedacht an')">gedacht an</button>
       </div>
 
+      <!-- Ort (optional) -->
+      <div style="margin-top:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Ort (optional)</div>
+        <input type="text" id="begegnung-ort" placeholder="z.B. Café Bohne, zu Hause, unterwegs"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          oninput="renderBegegnungOrtSuggestions(this.value.trim())">
+        <div id="begegnung-ort-suggestions" style="display:none;margin-top:6px;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+
+      <!-- Stimmung (optional) -->
+      <div style="margin-top:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:8px;">Stimmung (optional)</div>
+        <div class="art-chips" id="begegnung-stimmung-chips">
+          <button class="art-chip" data-stimmung="angenehm" onclick="selectBegegnungStimmung('angenehm')">angenehm</button>
+          <button class="art-chip" data-stimmung="neutral" onclick="selectBegegnungStimmung('neutral')">neutral</button>
+          <button class="art-chip" data-stimmung="unangenehm" onclick="selectBegegnungStimmung('unangenehm')">unangenehm</button>
+        </div>
+      </div>
+
+      <!-- Verknüpfung mit Weg oder Aktivität (optional) -->
+      <div style="margin-top:14px;" id="begegnung-link-wrap">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Gehört zu (optional)</div>
+        <select id="begegnung-link"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+          <option value="">— kein Bezug —</option>
+        </select>
+      </div>
+
       <!-- Mit-Personen (nur bei neuen Begegnungen) -->
       <div id="begegnung-mit-section" style="margin-top:14px;">
         <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Dabei waren auch (optional)</div>
@@ -16157,6 +16185,15 @@ async function renderBegegnungenList() {
     const artStr = b.art
       ? ` <span class="begegnung-art">· ${escapeHtml(b.art)}</span>`
       : '';
+    const ortStr = b.ort
+      ? ` <span class="begegnung-art">· ${escapeHtml(b.ort)}</span>`
+      : '';
+    const stimmungStr = b.stimmung
+      ? ` <span class="begegnung-art">· ${escapeHtml(b.stimmung)}</span>`
+      : '';
+    const linkStr = (b.link && b.link.label)
+      ? `<div class="begegnung-link" style="font-size:0.78rem;color:var(--accent-deep);opacity:0.8;margin-top:3px;font-style:italic;">→ ${b.link.type === 'goal' ? 'Weg' : 'Aktivität'}: ${escapeHtml(b.link.label)}</div>`
+      : '';
     const notiz = b.notiz
       ? `<div class="begegnung-notiz">${escapeHtml(b.notiz)}</div>`
       : '';
@@ -16168,15 +16205,17 @@ async function renderBegegnungenList() {
       return `<div class="begegnung-item has-photo" onclick="openBegegnungEditor('${b.id}')">
         <img class="begegnung-thumb" data-media-id="${b.mediaId}" data-caption="${escapeHtml(b.mediaCaption || b.notiz || '')}" alt="" onclick="event.stopPropagation(); openLightbox(this.dataset.mediaId, this.dataset.caption);">
         <div>
-          <div class="begegnung-meta">${dateStr}${timePart}${artStr}</div>
+          <div class="begegnung-meta">${dateStr}${timePart}${artStr}${ortStr}${stimmungStr}</div>
           ${notiz}
+          ${linkStr}
           ${captionLine}
         </div>
       </div>`;
     }
     return `<div class="begegnung-item" onclick="openBegegnungEditor('${b.id}')">
-      <div class="begegnung-meta">${dateStr}${timePart}${artStr}</div>
+      <div class="begegnung-meta">${dateStr}${timePart}${artStr}${ortStr}${stimmungStr}</div>
       ${notiz}
+      ${linkStr}
     </div>`;
   }).join('');
 
@@ -16229,6 +16268,7 @@ const BEGEGNUNG_DAYPARTS = [
 
 let begegnungEditorCurrentId = null; // null = neu, sonst ID des bearbeiteten Eintrags
 let begegnungEditorSelectedArt = null;
+let begegnungEditorSelectedStimmung = null;
 let begegnungEditorOriginalTs = null; // ursprünglicher Zeitstempel beim Öffnen — bewahrt Uhrzeit, wenn Datum unverändert
 let begegnungEditorDayPart = null;    // 'morgens' | 'abends' | ... oder null
 let begegnungImageDraft = null;     // aktuell gewählte mediaId
@@ -16320,6 +16360,7 @@ function openBegegnungEditor(existingId) {
   if (!menschDetailCurrentId) return;
   begegnungEditorCurrentId = existingId || null;
   begegnungEditorSelectedArt = null;
+  begegnungEditorSelectedStimmung = null;
   begegnungEditorOriginalTs = null;
   begegnungEditorDayPart = null;
   begegnungImageDraft = null;
@@ -16338,6 +16379,8 @@ function openBegegnungEditor(existingId) {
   const deleteWrap = document.getElementById('begegnung-editor-delete-wrap');
   const captionEl = document.getElementById('begegnung-caption');
   const mitSection = document.getElementById('begegnung-mit-section');
+  const ortEl = document.getElementById('begegnung-ort');
+  const linkEl = document.getElementById('begegnung-link');
 
   // Defaults: heute, Felder leer, alles geschlossen
   notizEl.value = '';
@@ -16348,13 +16391,18 @@ function openBegegnungEditor(existingId) {
   moreRow.style.display = 'none';
   moreToggleWrap.style.display = '';
   if (captionEl) captionEl.value = '';
+  if (ortEl) ortEl.value = '';
   // Mit-Personen-Sektion nur bei neuen Begegnungen
   if (mitSection) mitSection.style.display = existingId ? 'none' : '';
   renderMitPersonenChips();
   renderBegegnungDayPartChips();
+  renderBegegnungOrtSuggestions('');
+  populateBegegnungLinkSelect();
+  if (linkEl) linkEl.value = '';
 
-  // Chips zurücksetzen
+  // Chips zurücksetzen (Art + Stimmung)
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#begegnung-stimmung-chips .art-chip').forEach(c => c.classList.remove('selected'));
 
   if (existingId) {
     titleEl.textContent = 'Begegnung bearbeiten';
@@ -16395,13 +16443,48 @@ function openBegegnungEditor(existingId) {
         dateToggleWrap.style.display = 'none';
       }
 
-      // Wenn Art gesetzt → mehr-Bereich öffnen
-      if (b.art) {
+      // Wenn Art/Stimmung/Ort/Link gesetzt → mehr-Bereich öffnen
+      const hasMoreData = b.art || b.stimmung || b.ort || b.link;
+      if (hasMoreData) {
         moreRow.style.display = '';
         moreToggleWrap.style.display = 'none';
+      }
+      if (b.art) {
         begegnungEditorSelectedArt = b.art;
         const chip = document.querySelector(`#begegnung-art-chips .art-chip[data-art="${b.art}"]`);
         if (chip) chip.classList.add('selected');
+      }
+      if (b.stimmung) {
+        begegnungEditorSelectedStimmung = b.stimmung;
+        const chip = document.querySelector(`#begegnung-stimmung-chips .art-chip[data-stimmung="${b.stimmung}"]`);
+        if (chip) chip.classList.add('selected');
+      }
+      if (b.ort && ortEl) {
+        ortEl.value = b.ort;
+      }
+      if (b.link && b.link.type && b.link.id && linkEl) {
+        // Im Dropdown vorhandenen Wert setzen — falls passendes <option> existiert
+        const value = b.link.type + ':' + b.link.id;
+        // Prüfen, ob die Option im Dropdown ist (kann fehlen, wenn ein Weg/Aktivität gelöscht wurde
+        // oder eine Aktivität nicht in den letzten 10 ist)
+        const exists = Array.from(linkEl.options).some(o => o.value === value);
+        if (exists) {
+          linkEl.value = value;
+        } else {
+          // Fehlende Option dynamisch ergänzen, damit Bezug nicht verloren geht
+          const optgroupLabel = b.link.type === 'goal' ? 'Wege' : 'Aktivitäten';
+          let optgroup = Array.from(linkEl.querySelectorAll('optgroup')).find(g => g.label === optgroupLabel);
+          if (!optgroup) {
+            optgroup = document.createElement('optgroup');
+            optgroup.label = optgroupLabel;
+            linkEl.appendChild(optgroup);
+          }
+          const opt = document.createElement('option');
+          opt.value = value;
+          opt.textContent = b.link.label || b.link.id;
+          optgroup.appendChild(opt);
+          linkEl.value = value;
+        }
       }
       // Bestehendes Foto übernehmen
       if (b.mediaId) {
@@ -16471,6 +16554,106 @@ function selectBegegnungArt(art) {
       c.classList.remove('selected');
     }
   });
+}
+
+function selectBegegnungStimmung(stimmung) {
+  // Toggle-Verhalten: nochmal klicken = abwählen
+  if (begegnungEditorSelectedStimmung === stimmung) {
+    begegnungEditorSelectedStimmung = null;
+  } else {
+    begegnungEditorSelectedStimmung = stimmung;
+  }
+  document.querySelectorAll('#begegnung-stimmung-chips .art-chip').forEach(c => {
+    if (c.dataset.stimmung === begegnungEditorSelectedStimmung) {
+      c.classList.add('selected');
+    } else {
+      c.classList.remove('selected');
+    }
+  });
+}
+
+// Sammelt alle bereits eingetragenen Orte aus allen Begegnungen — dedupliziert.
+function collectAllBegegnungOrte() {
+  const orte = new Set();
+  (state.menschen || []).forEach(m => {
+    (m.begegnungen || []).forEach(b => {
+      if (b.ort && typeof b.ort === 'string' && b.ort.trim()) {
+        orte.add(b.ort.trim());
+      }
+    });
+  });
+  return Array.from(orte);
+}
+
+function renderBegegnungOrtSuggestions(filter) {
+  const wrap = document.getElementById('begegnung-ort-suggestions');
+  if (!wrap) return;
+  const alle = collectAllBegegnungOrte();
+  const f = (filter || '').toLowerCase();
+  // Nur Vorschläge zeigen, wenn der User schon tippt — sonst nur die Top-5 als sanfte Anregung
+  let matches;
+  if (f) {
+    matches = alle.filter(o => o.toLowerCase().includes(f) && o.toLowerCase() !== f).slice(0, 5);
+  } else {
+    matches = alle.slice(0, 5);
+  }
+  if (!matches.length) {
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.style.display = 'flex';
+  wrap.innerHTML = matches.map(o =>
+    `<button class="art-chip" type="button" onclick="pickBegegnungOrt('${escapeHtml(o).replace(/'/g, "\\'")}')">${escapeHtml(o)}</button>`
+  ).join('');
+}
+
+function pickBegegnungOrt(ort) {
+  const input = document.getElementById('begegnung-ort');
+  if (input) {
+    input.value = ort;
+    renderBegegnungOrtSuggestions(ort);
+  }
+}
+
+// Befüllt das "Gehört zu"-Dropdown mit Wegen und den letzten ~10 Aktivitäten
+function populateBegegnungLinkSelect() {
+  const select = document.getElementById('begegnung-link');
+  if (!select) return;
+  let opts = '<option value="">— kein Bezug —</option>';
+
+  // Wege
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  if (goals.length) {
+    opts += '<optgroup label="Wege">';
+    goals.forEach(g => {
+      opts += `<option value="goal:${escapeHtml(g.id)}">${escapeHtml(g.title)}</option>`;
+    });
+    opts += '</optgroup>';
+  }
+
+  // Letzte distinct Aktivitäten (max 10, nach Namen entdoppelt)
+  const acts = Array.isArray(state.activityLog) ? state.activityLog : [];
+  const seen = new Set();
+  const recentActs = [];
+  for (const a of acts) {
+    const key = (a.name || '').trim();
+    if (!key) continue;
+    const keyLower = key.toLowerCase();
+    if (seen.has(keyLower)) continue;
+    seen.add(keyLower);
+    recentActs.push(key);
+    if (recentActs.length >= 10) break;
+  }
+  if (recentActs.length) {
+    opts += '<optgroup label="Aktivitäten">';
+    recentActs.forEach(name => {
+      opts += `<option value="activity:${escapeHtml(name)}">${escapeHtml(name)}</option>`;
+    });
+    opts += '</optgroup>';
+  }
+
+  select.innerHTML = opts;
 }
 
 /* ----- Tageszeit-Chips ----- */
@@ -16694,12 +16877,28 @@ async function saveBegegnungEditor() {
   const notiz = (document.getElementById('begegnung-notiz').value || '').trim();
   const dateStr = document.getElementById('begegnung-date').value;
   const art = begegnungEditorSelectedArt;
+  const stimmung = begegnungEditorSelectedStimmung;
+  const ort = (document.getElementById('begegnung-ort')?.value || '').trim();
+  const linkVal = document.getElementById('begegnung-link')?.value || '';
+  let link = null;
+  if (linkVal && linkVal.includes(':')) {
+    const idx = linkVal.indexOf(':');
+    const type = linkVal.substring(0, idx);
+    const id = linkVal.substring(idx + 1);
+    // Label für Robustheit gegen spätere Löschungen mitspeichern
+    let label = id;
+    if (type === 'goal') {
+      const g = (state.goals || []).find(x => x.id === id);
+      if (g) label = g.title;
+    }
+    link = { type, id, label };
+  }
   const captionEl = document.getElementById('begegnung-caption');
   const caption = captionEl ? (captionEl.value || '').trim() : '';
   const mediaId = begegnungImageDraft || null;
 
-  if (!notiz && !art && !mediaId) {
-    showToast('Ein Satz, eine Art oder ein Foto reicht.');
+  if (!notiz && !art && !stimmung && !ort && !link && !mediaId) {
+    showToast('Ein Satz, eine Art, eine Stimmung, ein Ort oder ein Foto reicht.');
     return;
   }
 
@@ -16760,6 +16959,9 @@ async function saveBegegnungEditor() {
     if (b) {
       b.notiz = notiz;
       b.art = art || null;
+      b.stimmung = stimmung || null;
+      b.ort = ort || null;
+      b.link = link;
       b.ts = ts;
       b.dayPart = dayPart;
       b.mediaId = mediaId;
@@ -16773,6 +16975,9 @@ async function saveBegegnungEditor() {
       id: savedBegegnungId,
       ts: ts,
       art: art || null,
+      stimmung: stimmung || null,
+      ort: ort || null,
+      link: link,
       notiz: notiz,
       dayPart: dayPart,
       mediaId: mediaId,
@@ -16790,6 +16995,9 @@ async function saveBegegnungEditor() {
         id: copyId,
         ts: ts,
         art: art || null,
+        stimmung: stimmung || null,
+        ort: ort || null,
+        link: link,
         notiz: notiz,
         dayPart: dayPart,
         mediaId: mediaId,
