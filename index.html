@@ -2193,6 +2193,30 @@ h3 {
   line-height: 1.5;
   color: var(--ink);
 }
+.begegnung-mit-line {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 4px;
+  font-style: italic;
+}
+.begegnung-befinden {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+.mit-person-link {
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  font-style: normal;
+}
+.mit-person-link:active {
+  opacity: 0.6;
+}
 .begegnung-empty {
   font-family: 'EB Garamond', serif;
   font-style: italic;
@@ -5916,6 +5940,11 @@ textarea, input {
       <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
         Eine kleine Liste von Menschen, die dir wichtig sind. Nützlich beim Weitergeben von Ad se — und ein stilles Andenken, wer schon dabei ist.
       </p>
+      <div id="menschen-search-wrap" style="display:none;margin-bottom:10px;">
+        <input type="text" id="menschen-search" placeholder="🔍 suchen…"
+          style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          oninput="filterMenschenList(this.value)">
+      </div>
       <div id="menschen-list" style="margin-bottom:10px;"></div>
       <button class="btn secondary full" style="margin-bottom:8px;" onclick="openQuickBegegnung()">Begegnung mit jemand Neuem</button>
       <button class="btn secondary full" onclick="openMenschEditor()">Jemanden hinzufügen</button>
@@ -6345,6 +6374,7 @@ textarea, input {
       <h3 style="margin:0;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);">Begegnungen</h3>
       <span class="muted-note" id="mensch-detail-begegnungen-count" style="font-size:0.78rem;"></span>
     </div>
+    <div id="mensch-detail-zeitliche-tiefe" style="display:none;font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;color:var(--muted);margin-bottom:10px;line-height:1.5;"></div>
     <div id="mensch-detail-begegnungen-list" style="margin-bottom:14px;"></div>
 
     <button class="btn secondary full" style="margin-bottom:18px;" onclick="openBegegnungEditor()">+ Begegnung notieren</button>
@@ -6411,14 +6441,23 @@ textarea, input {
         <div id="begegnung-ort-suggestions" style="display:none;margin-top:6px;flex-wrap:wrap;gap:6px;"></div>
       </div>
 
-      <!-- Stimmung (optional) -->
+      <!-- Wie war es für mich? (optional) -->
       <div style="margin-top:14px;">
-        <div class="muted-note" style="font-size:0.78rem;margin-bottom:8px;">Stimmung (optional)</div>
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:8px;">Wie war es für mich? (optional)</div>
         <div class="art-chips" id="begegnung-stimmung-chips">
           <button class="art-chip" data-stimmung="angenehm" onclick="selectBegegnungStimmung('angenehm')">angenehm</button>
           <button class="art-chip" data-stimmung="neutral" onclick="selectBegegnungStimmung('neutral')">neutral</button>
           <button class="art-chip" data-stimmung="unangenehm" onclick="selectBegegnungStimmung('unangenehm')">unangenehm</button>
         </div>
+      </div>
+
+      <!-- Wie ging es ihr/ihm? (optional) -->
+      <div style="margin-top:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Wie ging es ihr/ihm? (optional)</div>
+        <input type="text" id="begegnung-befinden" placeholder="z.B. erschöpft, aufgekratzt, still…"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+          oninput="renderBegegnungBefindenSuggestions(this.value.trim())">
+        <div id="begegnung-befinden-suggestions" style="display:none;margin-top:6px;flex-wrap:wrap;gap:6px;"></div>
       </div>
 
       <!-- Verknüpfung mit Weg oder Aktivität (optional) -->
@@ -7205,6 +7244,7 @@ function loadState() {
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
     personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
+    menschenBefindenWords: [],  // ['erschöpft', 'aufgekratzt', ...] — gemerkte Worte für "Wie ging es ihr/ihm?"
     funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
     fundeCategories: ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'],
     trips: [],                  // Reisen — Spec v02, Mai 2026
@@ -7223,7 +7263,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -7231,6 +7271,7 @@ function loadState() {
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
     if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
+    if (!Array.isArray(saved.menschenBefindenWords)) saved.menschenBefindenWords = [];
     if (!Array.isArray(saved.funde)) saved.funde = [];
     if (!Array.isArray(saved.fundeCategories) || saved.fundeCategories.length === 0) {
       saved.fundeCategories = ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'];
@@ -15899,15 +15940,51 @@ function uid() {
   return 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
 
+// Wird vom Suchfeld in der Menschen-Liste aufgerufen — filtert nach Name, Beziehung, Notiz
+function filterMenschenList(_query) {
+  // Wir lesen den aktuellen Filter direkt aus dem Feld beim Rendern.
+  // Diese Funktion existiert nur, um renderMenschenList() zu triggern.
+  renderMenschenList();
+}
+
 function renderMenschenList() {
   const container = document.getElementById('menschen-list');
   if (!container) return;
   const liste = Array.isArray(state.menschen) ? state.menschen : [];
+
+  // Suchfeld zeigen ab 8 Menschen — bei wenigen ist Suchen unnötig
+  const searchWrap = document.getElementById('menschen-search-wrap');
+  if (searchWrap) {
+    searchWrap.style.display = liste.length >= 8 ? '' : 'none';
+  }
+
+  // Aktuellen Suchfilter aus dem Feld lesen (falls vorhanden)
+  const searchInput = document.getElementById('menschen-search');
+  const filter = searchInput ? (searchInput.value || '').trim().toLowerCase() : '';
+
   if (!liste.length) {
     container.innerHTML = `<p class="muted-note" style="text-align:center;padding:12px 0;font-style:italic;">Noch niemand notiert.</p>`;
     return;
   }
-  container.innerHTML = liste.map((m) => {
+
+  // Filter anwenden: Name, Beziehung, Notiz
+  const gefiltert = filter
+    ? liste.filter(m => {
+        const hay = [
+          m.name || '',
+          m.relation || '',
+          m.note || ''
+        ].join(' ').toLowerCase();
+        return hay.includes(filter);
+      })
+    : liste;
+
+  if (!gefiltert.length) {
+    container.innerHTML = `<p class="muted-note" style="text-align:center;padding:12px 0;font-style:italic;">Niemand passt zu „${escapeHtml(filter)}".</p>`;
+    return;
+  }
+
+  container.innerHTML = gefiltert.map((m) => {
     // Jüngste Begegnung (falls vorhanden) finden
     const begegnungen = Array.isArray(m.begegnungen) ? m.begegnungen : [];
     let lastBegegnung = null;
@@ -16146,6 +16223,7 @@ function openMenschDetail(id) {
     giftedEl.style.display = 'none';
   }
 
+  // Sprachliche zeitliche Tiefe wird in renderBegegnungenList() befüllt
   renderBegegnungenList();
 
   document.getElementById('mensch-detail-overlay').classList.add('visible');
@@ -16156,12 +16234,107 @@ function closeMenschDetail() {
   menschDetailCurrentId = null;
 }
 
+// Berechnet eine kurze, in Worten formulierte Beschreibung der zeitlichen Lage einer
+// Verbindung zu einem Menschen — gibt null zurück, wenn nichts zu sagen ist.
+// Verwendet keine Zahlen, keine Tage-Counter, keine Aufforderungen.
+function computeMenschZeitlicheTiefe(mensch) {
+  if (!mensch) return null;
+  const begegnungen = Array.isArray(mensch.begegnungen) ? mensch.begegnungen : [];
+  if (!begegnungen.length) return null;
+
+  const now = Date.now();
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+  // Tage seit letzter Begegnung
+  let neuestTs = 0;
+  begegnungen.forEach(b => {
+    const t = new Date(b.ts).getTime();
+    if (t > neuestTs) neuestTs = t;
+  });
+  const tageSeitLetzter = Math.floor((now - neuestTs) / ONE_DAY_MS);
+
+  // Aktivitäts-Maß (gleitende Halbwertszeit 28 Tage)
+  // — gleiche Berechnung wie später in der Landschaft (Phase d)
+  const halbwertszeitMs = 28 * ONE_DAY_MS;
+  const ln2 = Math.log(2);
+  let aktivitaet = 0;
+  begegnungen.forEach(b => {
+    const dt = now - new Date(b.ts).getTime();
+    if (dt < 0) return;
+    aktivitaet += Math.exp(-(dt / halbwertszeitMs) * ln2);
+  });
+
+  // Sprachliche "Wann zuletzt"-Brücke
+  let wann = null;
+  if (tageSeitLetzter <= 0) wann = 'heute';
+  else if (tageSeitLetzter === 1) wann = 'gestern';
+  else if (tageSeitLetzter <= 7) wann = 'diese Woche';
+  else if (tageSeitLetzter <= 14) wann = 'vor zwei Wochen';
+  else if (tageSeitLetzter <= 30) wann = 'in den letzten Wochen';
+  else if (tageSeitLetzter <= 60) wann = 'vor einigen Wochen';
+  else if (tageSeitLetzter <= 120) wann = 'vor Monaten';
+  else if (tageSeitLetzter <= 365) wann = 'lange her';
+  else wann = 'sehr lange her';
+
+  // Sprachzustand wählen — kombiniert Aktivität (Lebendigkeit) und Frische
+  // Aktivitäts-Schwellen sind grob: ~3+ = regelmäßig, ~1.5+ = gelegentlich, <0.5 = selten
+  let satz;
+  if (begegnungen.length === 1) {
+    // Nur eine Begegnung
+    satz = `Einmal gesehen — ${wann}.`;
+  } else if (begegnungen.length <= 3 && tageSeitLetzter > 60) {
+    // Wenige Begegnungen, lange her
+    satz = `Ihr habt euch ein paarmal gesehen, zuletzt ${wann}.`;
+  } else if (aktivitaet >= 3 && tageSeitLetzter <= 14) {
+    satz = `Ihr seht euch regelmäßig — zuletzt ${wann}.`;
+  } else if (aktivitaet >= 1.5 && tageSeitLetzter <= 30) {
+    satz = `Ihr habt Kontakt — zuletzt ${wann}.`;
+  } else if (aktivitaet >= 1 && tageSeitLetzter <= 60) {
+    satz = `Ihr seht euch ab und zu — zuletzt ${wann}.`;
+  } else if (tageSeitLetzter <= 90) {
+    satz = `Zuletzt ${wann}.`;
+  } else {
+    // Lange her
+    satz = `Es ist eine Weile her — zuletzt ${wann}.`;
+  }
+
+  return satz;
+}
+
+// Findet alle Menschen, die zu einer treffenId gehören — außer dem angegebenen aktuellen Menschen.
+// Gibt Array aus {id, name} zurück, oder leeres Array, wenn niemand verlinkt ist.
+function findTreffenBeteiligte(treffenId, excludeMenschId) {
+  if (!treffenId) return [];
+  const ergebnisse = [];
+  (state.menschen || []).forEach(m => {
+    if (m.id === excludeMenschId) return;
+    if (!Array.isArray(m.begegnungen)) return;
+    const treffer = m.begegnungen.find(b => b.treffenId === treffenId);
+    if (treffer) {
+      ergebnisse.push({ id: m.id, name: m.name || 'ohne Namen' });
+    }
+  });
+  return ergebnisse;
+}
+
 async function renderBegegnungenList() {
   const m = (state.menschen || []).find(x => x.id === menschDetailCurrentId);
   if (!m) return;
   const list = document.getElementById('mensch-detail-begegnungen-list');
   const countEl = document.getElementById('mensch-detail-begegnungen-count');
   const begegnungen = Array.isArray(m.begegnungen) ? m.begegnungen.slice() : [];
+
+  // Zeitliche Tiefe aktualisieren (kleine Sprach-Zeile über der Liste)
+  const tiefeEl = document.getElementById('mensch-detail-zeitliche-tiefe');
+  if (tiefeEl) {
+    const satz = computeMenschZeitlicheTiefe(m);
+    if (satz) {
+      tiefeEl.textContent = satz;
+      tiefeEl.style.display = '';
+    } else {
+      tiefeEl.style.display = 'none';
+    }
+  }
 
   if (countEl) {
     countEl.textContent = begegnungen.length === 0
@@ -16197,9 +16370,25 @@ async function renderBegegnungenList() {
     const notiz = b.notiz
       ? `<div class="begegnung-notiz">${escapeHtml(b.notiz)}</div>`
       : '';
+    const befindenLine = b.seinBefinden
+      ? `<div class="begegnung-befinden">∼ ${escapeHtml(b.seinBefinden)}</div>`
+      : '';
     const captionLine = b.mediaCaption
       ? `<div class="begegnung-photo-caption">${escapeHtml(b.mediaCaption)}</div>`
       : '';
+
+    // Mit-Personen-Zeile: nur wenn treffenId gesetzt und andere dabei sind
+    let mitLine = '';
+    if (b.treffenId) {
+      const andere = findTreffenBeteiligte(b.treffenId, menschDetailCurrentId);
+      if (andere.length) {
+        const namenHtml = andere.map(p =>
+          `<span class="mit-person-link" onclick="event.stopPropagation(); openMenschDetail('${p.id}');">${escapeHtml(p.name)}</span>`
+        ).join(', ');
+        mitLine = `<div class="begegnung-mit-line">Auch dabei: ${namenHtml}</div>`;
+      }
+    }
+
     const hasPhoto = !!b.mediaId;
     if (hasPhoto) {
       return `<div class="begegnung-item has-photo" onclick="openBegegnungEditor('${b.id}')">
@@ -16207,7 +16396,9 @@ async function renderBegegnungenList() {
         <div>
           <div class="begegnung-meta">${dateStr}${timePart}${artStr}${ortStr}${stimmungStr}</div>
           ${notiz}
+          ${befindenLine}
           ${linkStr}
+          ${mitLine}
           ${captionLine}
         </div>
       </div>`;
@@ -16215,7 +16406,9 @@ async function renderBegegnungenList() {
     return `<div class="begegnung-item" onclick="openBegegnungEditor('${b.id}')">
       <div class="begegnung-meta">${dateStr}${timePart}${artStr}${ortStr}${stimmungStr}</div>
       ${notiz}
+      ${befindenLine}
       ${linkStr}
+      ${mitLine}
     </div>`;
   }).join('');
 
@@ -16381,6 +16574,7 @@ function openBegegnungEditor(existingId) {
   const mitSection = document.getElementById('begegnung-mit-section');
   const ortEl = document.getElementById('begegnung-ort');
   const linkEl = document.getElementById('begegnung-link');
+  const befindenEl = document.getElementById('begegnung-befinden');
 
   // Defaults: heute, Felder leer, alles geschlossen
   notizEl.value = '';
@@ -16392,11 +16586,13 @@ function openBegegnungEditor(existingId) {
   moreToggleWrap.style.display = '';
   if (captionEl) captionEl.value = '';
   if (ortEl) ortEl.value = '';
+  if (befindenEl) befindenEl.value = '';
   // Mit-Personen-Sektion nur bei neuen Begegnungen
   if (mitSection) mitSection.style.display = existingId ? 'none' : '';
   renderMitPersonenChips();
   renderBegegnungDayPartChips();
   renderBegegnungOrtSuggestions('');
+  renderBegegnungBefindenSuggestions('');
   populateBegegnungLinkSelect();
   if (linkEl) linkEl.value = '';
 
@@ -16443,8 +16639,8 @@ function openBegegnungEditor(existingId) {
         dateToggleWrap.style.display = 'none';
       }
 
-      // Wenn Art/Stimmung/Ort/Link gesetzt → mehr-Bereich öffnen
-      const hasMoreData = b.art || b.stimmung || b.ort || b.link;
+      // Wenn Art/Stimmung/Ort/Link/Befinden gesetzt → mehr-Bereich öffnen
+      const hasMoreData = b.art || b.stimmung || b.ort || b.link || b.seinBefinden;
       if (hasMoreData) {
         moreRow.style.display = '';
         moreToggleWrap.style.display = 'none';
@@ -16461,6 +16657,9 @@ function openBegegnungEditor(existingId) {
       }
       if (b.ort && ortEl) {
         ortEl.value = b.ort;
+      }
+      if (b.seinBefinden && befindenEl) {
+        befindenEl.value = b.seinBefinden;
       }
       if (b.link && b.link.type && b.link.id && linkEl) {
         // Im Dropdown vorhandenen Wert setzen — falls passendes <option> existiert
@@ -16613,6 +16812,60 @@ function pickBegegnungOrt(ort) {
   if (input) {
     input.value = ort;
     renderBegegnungOrtSuggestions(ort);
+  }
+}
+
+// === Befinden-Vorschläge (zweites Stimmungs-Feld: "Wie ging es ihr/ihm?") ===
+// Speicher: state.menschenBefindenWords (gemerkte Worte, neueste zuerst)
+
+function renderBegegnungBefindenSuggestions(filter) {
+  const wrap = document.getElementById('begegnung-befinden-suggestions');
+  if (!wrap) return;
+  const alle = Array.isArray(state.menschenBefindenWords) ? state.menschenBefindenWords : [];
+  const f = (filter || '').toLowerCase();
+  // Bei leerem Feld: die zuletzt verwendeten zeigen (sanfte Anregung)
+  // Beim Tippen: filtern, exakte Treffer ausblenden
+  let matches;
+  if (f) {
+    matches = alle.filter(w => w.toLowerCase().includes(f) && w.toLowerCase() !== f).slice(0, 6);
+  } else {
+    matches = alle.slice(0, 6);
+  }
+  if (!matches.length) {
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.style.display = 'flex';
+  wrap.innerHTML = matches.map(w =>
+    `<button class="art-chip" type="button" onclick="pickBegegnungBefinden('${escapeHtml(w).replace(/'/g, "\\'")}')">${escapeHtml(w)}</button>`
+  ).join('');
+}
+
+function pickBegegnungBefinden(wort) {
+  const input = document.getElementById('begegnung-befinden');
+  if (input) {
+    input.value = wort;
+    renderBegegnungBefindenSuggestions(wort);
+  }
+}
+
+// Speichert ein neues Befinden-Wort im Wort-Speicher (neueste zuerst).
+// Wird beim Speichern einer Begegnung aufgerufen, wenn das Feld gefüllt ist.
+function rememberBefindenWord(wort) {
+  if (!wort || typeof wort !== 'string') return;
+  const w = wort.trim();
+  if (!w) return;
+  if (!Array.isArray(state.menschenBefindenWords)) state.menschenBefindenWords = [];
+  // Schon vorhanden? Dann nach vorn schieben (Recency)
+  const existingIdx = state.menschenBefindenWords.findIndex(x => x.toLowerCase() === w.toLowerCase());
+  if (existingIdx >= 0) {
+    state.menschenBefindenWords.splice(existingIdx, 1);
+  }
+  state.menschenBefindenWords.unshift(w);
+  // Maximal 50 Worte merken
+  if (state.menschenBefindenWords.length > 50) {
+    state.menschenBefindenWords = state.menschenBefindenWords.slice(0, 50);
   }
 }
 
@@ -16879,6 +17132,7 @@ async function saveBegegnungEditor() {
   const art = begegnungEditorSelectedArt;
   const stimmung = begegnungEditorSelectedStimmung;
   const ort = (document.getElementById('begegnung-ort')?.value || '').trim();
+  const seinBefinden = (document.getElementById('begegnung-befinden')?.value || '').trim();
   const linkVal = document.getElementById('begegnung-link')?.value || '';
   let link = null;
   if (linkVal && linkVal.includes(':')) {
@@ -16897,10 +17151,13 @@ async function saveBegegnungEditor() {
   const caption = captionEl ? (captionEl.value || '').trim() : '';
   const mediaId = begegnungImageDraft || null;
 
-  if (!notiz && !art && !stimmung && !ort && !link && !mediaId) {
-    showToast('Ein Satz, eine Art, eine Stimmung, ein Ort oder ein Foto reicht.');
+  if (!notiz && !art && !stimmung && !ort && !seinBefinden && !link && !mediaId) {
+    showToast('Ein Satz, eine Art, eine Stimmung, ein Ort, ein Befinden oder ein Foto reicht.');
     return;
   }
+
+  // Befinden-Wort merken (für künftige Vorschläge)
+  if (seinBefinden) rememberBefindenWord(seinBefinden);
 
   // Datum + Zeit zusammenbauen
   // Wenn Nutzer Uhrzeit eingegeben hat → diese nehmen
@@ -16957,19 +17214,61 @@ async function saveBegegnungEditor() {
   if (begegnungEditorCurrentId) {
     const b = m.begegnungen.find(x => x.id === begegnungEditorCurrentId);
     if (b) {
+      // Wenn diese Begegnung Teil eines Treffens ist: andere Beteiligte ermitteln
+      const treffenId = b.treffenId;
+      const andere = treffenId ? findTreffenBeteiligte(treffenId, menschDetailCurrentId) : [];
+
+      // Daten am aktuellen Eintrag aktualisieren
       b.notiz = notiz;
       b.art = art || null;
       b.stimmung = stimmung || null;
       b.ort = ort || null;
+      b.seinBefinden = seinBefinden || null;
       b.link = link;
       b.ts = ts;
       b.dayPart = dayPart;
       b.mediaId = mediaId;
       b.mediaCaption = caption || null;
+
+      // Bei Mit-Personen: fragen, ob die Änderung auch dort gelten soll
+      // (Befinden ist person-spezifisch und wird NICHT propagiert)
+      if (andere.length) {
+        const namenStr = andere.map(p => p.name).join(', ');
+        const auchÄndern = confirm(`Diese Begegnung war auch bei ${namenStr}.\n\nÄnderungen auch dort übernehmen?\n\n(Das Befinden bleibt person-spezifisch und wird nicht übertragen.)`);
+        if (auchÄndern) {
+          // In allen anderen Kopien dieselben Daten setzen — außer seinBefinden
+          andere.forEach(p => {
+            const other = (state.menschen || []).find(x => x.id === p.id);
+            if (!other || !Array.isArray(other.begegnungen)) return;
+            const kopie = other.begegnungen.find(x => x.treffenId === treffenId);
+            if (!kopie) return;
+            kopie.notiz = notiz;
+            kopie.art = art || null;
+            kopie.stimmung = stimmung || null;
+            kopie.ort = ort || null;
+            // kopie.seinBefinden bleibt unverändert (person-spezifisch)
+            kopie.link = link;
+            kopie.ts = ts;
+            kopie.dayPart = dayPart;
+            kopie.mediaId = mediaId;
+            kopie.mediaCaption = caption || null;
+            allRecipients.push({ menschId: p.id, begegnungId: kopie.id });
+          });
+        } else {
+          // Nutzer will nur diese Kopie ändern → treffenId aus DIESER Kopie entfernen
+          // Die anderen behalten ihre treffenId untereinander
+          b.treffenId = null;
+        }
+      }
     }
     allRecipients.push({ menschId: menschDetailCurrentId, begegnungId: begegnungEditorCurrentId });
   } else {
     // Neue Begegnung beim aktuellen Menschen
+    // Wenn Mit-Personen dabei sind: gemeinsame treffenId für alle Kopien generieren
+    const sharedTreffenId = begegnungMitPersonen.length > 0
+      ? 'tref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8)
+      : null;
+
     savedBegegnungId = 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
     m.begegnungen.push({
       id: savedBegegnungId,
@@ -16977,15 +17276,18 @@ async function saveBegegnungEditor() {
       art: art || null,
       stimmung: stimmung || null,
       ort: ort || null,
+      seinBefinden: seinBefinden || null,
       link: link,
       notiz: notiz,
       dayPart: dayPart,
       mediaId: mediaId,
-      mediaCaption: caption || null
+      mediaCaption: caption || null,
+      treffenId: sharedTreffenId
     });
     allRecipients.push({ menschId: menschDetailCurrentId, begegnungId: savedBegegnungId });
 
-    // Bei zusätzlichen Mit-Personen: jeweils eine Kopie anlegen (eigene id, gleiche Daten)
+    // Bei zusätzlichen Mit-Personen: jeweils eine Kopie anlegen (eigene id, gleiche treffenId)
+    // ABER: seinBefinden ist person-spezifisch → in den Kopien anderer Menschen bleibt es leer
     for (const otherId of begegnungMitPersonen) {
       const other = (state.menschen || []).find(x => x.id === otherId);
       if (!other) continue;
@@ -16997,11 +17299,13 @@ async function saveBegegnungEditor() {
         art: art || null,
         stimmung: stimmung || null,
         ort: ort || null,
+        seinBefinden: null,    // person-spezifisch — bleibt bei den anderen leer
         link: link,
         notiz: notiz,
         dayPart: dayPart,
         mediaId: mediaId,
-        mediaCaption: caption || null
+        mediaCaption: caption || null,
+        treffenId: sharedTreffenId
       });
       allRecipients.push({ menschId: otherId, begegnungId: copyId });
     }
@@ -17051,20 +17355,49 @@ function deleteCurrentBegegnung() {
   if (!menschDetailCurrentId || !begegnungEditorCurrentId) return;
   const begegnungIdToDelete = begegnungEditorCurrentId;
   const menschId = menschDetailCurrentId;
+  // Prüfen, ob diese Begegnung Teil eines Treffens mit anderen ist
+  const m = (state.menschen || []).find(x => x.id === menschId);
+  const b = m && Array.isArray(m.begegnungen) ? m.begegnungen.find(x => x.id === begegnungIdToDelete) : null;
+  const treffenId = b ? b.treffenId : null;
+  const andere = treffenId ? findTreffenBeteiligte(treffenId, menschId) : [];
+
   askConfirm('Diese Begegnung wirklich entfernen?', async () => {
-    const m = (state.menschen || []).find(x => x.id === menschId);
-    if (m && Array.isArray(m.begegnungen)) {
-      const b = m.begegnungen.find(x => x.id === begegnungIdToDelete);
+    const m2 = (state.menschen || []).find(x => x.id === menschId);
+    if (m2 && Array.isArray(m2.begegnungen)) {
+      const b2 = m2.begegnungen.find(x => x.id === begegnungIdToDelete);
       // Foto-Referenz entfernen — Bild verschwindet beim nächsten Cleanup
-      if (b && b.mediaId) {
+      if (b2 && b2.mediaId) {
         try {
-          await removeImageRef(b.mediaId, 'begegnung:' + menschId + ':' + begegnungIdToDelete);
-          invalidateImageCache(b.mediaId);
+          await removeImageRef(b2.mediaId, 'begegnung:' + menschId + ':' + begegnungIdToDelete);
+          invalidateImageCache(b2.mediaId);
         } catch(e) {}
       }
-      m.begegnungen = m.begegnungen.filter(x => x.id !== begegnungIdToDelete);
-      saveState();
+      m2.begegnungen = m2.begegnungen.filter(x => x.id !== begegnungIdToDelete);
     }
+
+    // Bei Mit-Personen: fragen, ob auch dort gelöscht werden soll
+    if (andere.length) {
+      const namenStr = andere.map(p => p.name).join(', ');
+      const auchLoeschen = confirm(`Diese Begegnung war auch bei ${namenStr}.\n\nAuch dort entfernen?`);
+      if (auchLoeschen) {
+        for (const p of andere) {
+          const other = (state.menschen || []).find(x => x.id === p.id);
+          if (!other || !Array.isArray(other.begegnungen)) continue;
+          const kopie = other.begegnungen.find(x => x.treffenId === treffenId);
+          if (!kopie) continue;
+          if (kopie.mediaId) {
+            try {
+              await removeImageRef(kopie.mediaId, 'begegnung:' + p.id + ':' + kopie.id);
+              invalidateImageCache(kopie.mediaId);
+            } catch(e) {}
+          }
+          other.begegnungen = other.begegnungen.filter(x => x.id !== kopie.id);
+        }
+      }
+      // Wenn "Nein": andere Kopien behalten ihre treffenId untereinander (die hier ist eh weg)
+    }
+
+    saveState();
     // closeBegegnungEditor darf das gespeicherte Draft-Bild NICHT erneut löschen
     begegnungImagePrevious = begegnungImageDraft;
     await closeBegegnungEditor();
@@ -17552,7 +17885,7 @@ function replaceStateFromImport(imported, meta) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
