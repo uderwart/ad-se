@@ -2134,6 +2134,22 @@ h3 {
   font-size: 1.05rem;
   color: var(--ink);
 }
+.mensch-tod-mark {
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 4px;
+  font-size: 0.95em;
+}
+.mensch-geburtstag-heute {
+  font-size: 0.95em;
+  margin-right: 4px;
+}
+.mensch-item.verstorben .mensch-item-name {
+  color: var(--muted);
+}
+.mensch-item.verstorben {
+  opacity: 0.85;
+}
 .mensch-item-meta {
   font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
@@ -4541,6 +4557,7 @@ textarea, input {
   <div class="greeting-block">
     <h1 id="home-greeting">Willkommen</h1>
     <div class="greeting-sub" id="home-date"></div>
+    <div id="home-geburtstag" style="display:none;margin-top:8px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;color:var(--accent-deep);line-height:1.5;"></div>
   </div>
 
   <!-- Reise-Streifen (Home), nur sichtbar wenn aktive Reise -->
@@ -5684,7 +5701,7 @@ textarea, input {
 <div id="section-funde" class="section">
   <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
-    <h1>Funde</h1>
+    <h1>Momente</h1>
     <div class="greeting-sub">Was dich berührt hat — Worte, Klänge, Bilder, Begegnungen.</div>
   </div>
 
@@ -5702,7 +5719,7 @@ textarea, input {
     <button class="chip" id="funde-tab-random" onclick="setFundeView('random')">Zufallskarte</button>
   </div>
 
-  <button class="btn full" onclick="openFundEditor()" style="margin-bottom:14px;">+ Fund eintragen</button>
+  <button class="btn full" onclick="openFundEditor()" style="margin-bottom:14px;">+ Moment eintragen</button>
 
   <div id="funde-list-wrap"></div>
 </div>
@@ -5777,7 +5794,7 @@ textarea, input {
     </div>
 
     <button class="btn full" onclick="saveFund()">Speichern</button>
-    <button class="btn secondary full" id="fund-delete-btn" onclick="deleteFund(editingFundId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Fund löschen</button>
+    <button class="btn secondary full" id="fund-delete-btn" onclick="deleteFund(editingFundId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Moment löschen</button>
   </div>
 </div>
 
@@ -5918,14 +5935,14 @@ textarea, input {
   <div class="card collapsible" id="funde-cats-collapsible">
     <div class="collapsible-header" onclick="toggleSettingsCard('funde-cats')">
       <div style="flex:1;">
-        <h2 style="margin-bottom:2px;">Funde — Kategorien</h2>
+        <h2 style="margin-bottom:2px;">Momente — Kategorien</h2>
         <p class="muted-note" id="funde-cats-summary" style="margin:0;font-size:0.85rem;"></p>
       </div>
       <span class="collapsible-arrow">▸</span>
     </div>
     <div class="collapsible-body" id="funde-cats-body" style="display:none;">
       <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
-        Kategorien helfen, Funde zu sortieren. Du kannst sie hier anpassen — alte Funde behalten ihre Kategorie, auch wenn du sie umbenennst.
+        Kategorien helfen, Momente zu sortieren. Du kannst sie hier anpassen — alte Momente behalten ihre Kategorie, auch wenn du sie umbenennst.
       </p>
       <div id="funde-cats-list" style="margin-bottom:12px;display:flex;flex-direction:column;gap:6px;"></div>
       <div style="display:flex;gap:8px;">
@@ -6337,7 +6354,7 @@ textarea, input {
   </button>
   <button id="nav-funde" onclick="showSection('funde')">
     <span class="nav-icon">✦</span>
-    <span>Funde</span>
+    <span>Momente</span>
   </button>
   <button id="nav-settings" onclick="showSection('settings')">
     <span class="nav-icon">⋯</span>
@@ -6418,9 +6435,48 @@ textarea, input {
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;resize:none;background:var(--bg);color:var(--ink);outline:none;"></textarea>
     </div>
 
+    <!-- Geburtsdatum — optional, dezent -->
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Geburtstag (optional)</div>
+      <input type="date" id="mensch-geburtsdatum"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+
+    <!-- Todes-Bereich — verborgen, nur über bewussten Klick zugänglich -->
+    <div id="mensch-tod-wrap" style="margin-bottom:14px;">
+      <button type="button" id="mensch-tod-toggle" onclick="openMenschTodDialog()"
+        style="background:none;border:none;padding:0;font-family:'Inter',sans-serif;font-size:0.82rem;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">
+        Ist dieser Mensch gegangen?
+      </button>
+      <div id="mensch-tod-anzeige" style="display:none;font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;color:var(--muted);line-height:1.5;">
+        <span id="mensch-tod-anzeige-text"></span>
+        <button type="button" onclick="removeMenschTod()" title="Tod-Markierung entfernen"
+          style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;margin-left:8px;text-decoration:underline;text-underline-offset:2px;">rückgängig</button>
+      </div>
+    </div>
+
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeMenschEditor()">Abbrechen</button>
       <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="saveMenschEditor()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+<!-- Todes-Dialog: bewusste Geste mit Datums-Eingabe -->
+<div class="entry-overlay" id="mensch-tod-dialog">
+  <div class="entry-modal" style="max-width:380px;">
+    <h2 style="margin:0 0 12px;">Markieren als gegangen</h2>
+    <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+      Möchtest du markieren, dass dieser Mensch verstorben ist? Sie oder er bleibt in deiner Welt — der Eintrag wird ruhiger.
+    </p>
+    <div style="margin-bottom:14px;">
+      <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Todesdatum (optional)</div>
+      <input type="date" id="mensch-tod-datum"
+        style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeMenschTodDialog()">Abbrechen</button>
+      <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="confirmMenschTod()">Markieren</button>
     </div>
   </div>
 </div>
@@ -6432,6 +6488,7 @@ textarea, input {
       <div style="flex:1;min-width:0;">
         <h2 style="margin:0 0 2px;" id="mensch-detail-name"></h2>
         <p class="muted-note" id="mensch-detail-relation" style="margin:0;font-size:0.85rem;"></p>
+        <p class="muted-note" id="mensch-detail-lebensbogen" style="margin:2px 0 0;font-size:0.8rem;display:none;"></p>
       </div>
       <button onclick="closeMenschDetail()" style="background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
     </div>
@@ -7592,6 +7649,25 @@ function renderHome() {
   document.getElementById('home-date').textContent = now.toLocaleDateString('de-DE', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
+
+  // Geburtstag heute? — stille Zeile (nur Menschen, die nicht verstorben sind)
+  const geburtstagEl = document.getElementById('home-geburtstag');
+  if (geburtstagEl) {
+    const menschen = Array.isArray(state.menschen) ? state.menschen : [];
+    const geburtstagsKinder = menschen.filter(m => !m.todesdatum && isGeburtstagHeute(m.geburtsdatum));
+    if (geburtstagsKinder.length === 0) {
+      geburtstagEl.style.display = 'none';
+    } else if (geburtstagsKinder.length === 1) {
+      geburtstagEl.textContent = `🌱 Heute hat ${geburtstagsKinder[0].name} Geburtstag.`;
+      geburtstagEl.style.display = '';
+    } else {
+      const namen = geburtstagsKinder.map(m => m.name);
+      const letzter = namen.pop();
+      const namenStr = namen.length ? `${namen.join(', ')} und ${letzter}` : letzter;
+      geburtstagEl.textContent = `🌱 Heute haben ${namenStr} Geburtstag.`;
+      geburtstagEl.style.display = '';
+    }
+  }
 
   // Identität
   const idCard = document.getElementById('identity-card');
@@ -14657,7 +14733,7 @@ function renderFunde() {
   const funde = Array.isArray(state.funde) ? state.funde : [];
   if (funde.length === 0) {
     wrap.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:30px 16px;line-height:1.6;">
-      Noch keine Funde gesammelt. Trage deinen ersten Fund ein — einen Satz, ein Lied, einen Moment, der dich berührt hat.
+      Noch keine Momente gesammelt. Trage deinen ersten Moment ein — einen Satz, ein Lied, einen Augenblick, der dich berührt hat.
     </p>`;
     return;
   }
@@ -14711,7 +14787,7 @@ function renderFunde() {
       const group = monthsMap[mk];
       const isExp = fundeExpandedMonths.has(mk);
       const expClass = isExp ? 'expanded' : '';
-      const countLabel = group.funde.length === 1 ? '1 Fund' : `${group.funde.length} Funde`;
+      const countLabel = group.funde.length === 1 ? '1 Moment' : `${group.funde.length} Momente`;
       const body = isExp ? group.funde.map(f => renderFundCard(f)).join('') : '';
       html += `<div class="funde-group ${expClass}">
         <div class="funde-group-header" onclick="toggleFundeMonth('${mk}')">
@@ -14755,7 +14831,7 @@ function renderFunde() {
       // Bei aktiver Suche: alle aufklappen, damit Treffer sichtbar werden
       const isExp = !!query || fundeExpandedCategories.has(cat);
       const expClass = isExp ? 'expanded' : '';
-      const countLabel = list.length === 1 ? '1 Fund' : `${list.length} Funde`;
+      const countLabel = list.length === 1 ? '1 Moment' : `${list.length} Momente`;
       const body = isExp ? sorted.map(f => renderFundCard(f)).join('') : '';
       html += `<div class="funde-group ${expClass}">
         <div class="funde-group-header" onclick="toggleFundeCategory('${escapeHtml(cat).replace(/'/g, '&#39;')}')">
@@ -14780,7 +14856,7 @@ function renderFunde() {
     }
     wrap.innerHTML = `
       ${renderFundCard(fundeRandomShown, true)}
-      <button class="btn secondary full" onclick="fundeRandomShown=null; renderFunde();" style="margin-top:14px;">Anderen Fund zeigen</button>
+      <button class="btn secondary full" onclick="fundeRandomShown=null; renderFunde();" style="margin-top:14px;">Anderen Moment zeigen</button>
     `;
     attachFundCardClicks(wrap);
     return;
@@ -14827,7 +14903,7 @@ function setFundeView(view) {
   // Knopf "Fund eintragen" nur bei Funde-Ansichten zeigen
   const fundButtons = document.querySelectorAll('#section-funde > button.btn.full');
   fundButtons.forEach(b => {
-    if (b.textContent.includes('Fund eintragen')) {
+    if (b.textContent.includes('Moment eintragen')) {
       b.style.display = (view === 'trips') ? 'none' : '';
     }
   });
@@ -14914,7 +14990,7 @@ function openFundEditor(existingId) {
   if (existingId) {
     const f = (state.funde || []).find(x => x.id === existingId);
     if (f) {
-      titleEl.textContent = 'Fund bearbeiten';
+      titleEl.textContent = 'Moment bearbeiten';
       text.value = f.text || '';
       source.value = f.source || '';
       place.value = f.place || '';
@@ -15227,7 +15303,7 @@ async function saveFund() {
 }
 
 function deleteFund(fundId) {
-  askConfirm('Diesen Fund wirklich löschen?', async () => {
+  askConfirm('Diesen Moment wirklich löschen?', async () => {
     const f = (state.funde || []).find(x => x.id === fundId);
     if (f && f.mediaId) {
       try {
@@ -15269,7 +15345,7 @@ function renderTripsList(wrap) {
 
   if (trips.length === 0) {
     html += `<p class="muted-note" style="font-style:italic;text-align:center;padding:30px 16px;line-height:1.6;">
-      Noch keine Reisen angelegt. Eine Reise bündelt Tageseinträge und Funde aus einem Zeitraum.
+      Noch keine Reisen angelegt. Eine Reise bündelt Tageseinträge und Momente aus einem Zeitraum.
     </p>`;
     wrap.innerHTML = html;
     return;
@@ -15293,7 +15369,7 @@ function renderTripsList(wrap) {
     let metaPieces = [];
     if (range) metaPieces.push(escapeHtml(range));
     metaPieces.push(`${entries.length} ${entries.length === 1 ? 'Eintrag' : 'Einträge'}`);
-    metaPieces.push(`${fundCount} ${fundCount === 1 ? 'Fund' : 'Funde'}`);
+    metaPieces.push(`${fundCount} ${fundCount === 1 ? 'Moment' : 'Momente'}`);
     if (imageCount > 0) {
       metaPieces.push(`${imageCount} ${imageCount === 1 ? 'Bild' : 'Bilder'}`);
     }
@@ -15388,7 +15464,7 @@ function confirmDeleteTrip() {
   if (!t) return;
   const entryCount = entriesForTrip(editingTripId).length;
   const msg = entryCount > 0
-    ? `Reise "${t.name}" wirklich löschen? ${entryCount} ${entryCount === 1 ? 'Tageseintrag wird' : 'Tageseinträge werden'} mitgelöscht. Funde aus dem Zeitraum bleiben.`
+    ? `Reise "${t.name}" wirklich löschen? ${entryCount} ${entryCount === 1 ? 'Tageseintrag wird' : 'Tageseinträge werden'} mitgelöscht. Momente aus dem Zeitraum bleiben.`
     : `Reise "${t.name}" wirklich löschen?`;
   askConfirm(msg, () => {
     const id = editingTripId;
@@ -15453,7 +15529,7 @@ function renderTripDetail() {
   if (allDates.length === 0) {
     wrap.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:24px 16px;line-height:1.6;">
       Noch nichts in dieser Reise.<br>
-      Schreib einen Tageseintrag — oder sammle einen Fund (er landet automatisch hier, wenn er ins Datum fällt).
+      Schreib einen Tageseintrag — oder sammle einen Moment (er landet automatisch hier, wenn er ins Datum fällt).
     </p>`;
     return;
   }
@@ -15990,7 +16066,7 @@ function removeFundCategory(idx) {
   // Hat sie Funde?
   const usedCount = (state.funde || []).filter(f => f.category === cat).length;
   const msg = usedCount > 0
-    ? `Kategorie „${cat}" entfernen? ${usedCount} Funde werden auf „Sonstiges" gesetzt.`
+    ? `Kategorie „${cat}" entfernen? ${usedCount} Momente werden auf „Sonstiges" gesetzt.`
     : `Kategorie „${cat}" entfernen?`;
   askConfirm(msg, () => {
     state.fundeCategories.splice(idx, 1);
@@ -16259,9 +16335,19 @@ function renderMenschenList() {
       ? `<span class="mensch-longtime">${longTimeLabel}</span>`
       : '';
 
-    return `<div class="mensch-item clickable" onclick="openMenschDetail('${m.id}')">
+    // Verstorbene: † am Namen, gedämpft
+    const verstorben = !!m.todesdatum;
+    const todZeichen = verstorben ? ' <span class="mensch-tod-mark">†</span>' : '';
+
+    // Geburtstag heute? — kleines stilles Zeichen
+    const istGeburtstagHeute = isGeburtstagHeute(m.geburtsdatum);
+    const geburtstagZeichen = istGeburtstagHeute
+      ? `<span class="mensch-geburtstag-heute" title="Heute Geburtstag">🌱</span> `
+      : '';
+
+    return `<div class="mensch-item clickable${verstorben ? ' verstorben' : ''}" onclick="openMenschDetail('${m.id}')">
       <div class="mensch-item-name-row">
-        <div class="mensch-item-name">${escapeHtml(m.name)}</div>
+        <div class="mensch-item-name">${geburtstagZeichen}${escapeHtml(m.name)}${todZeichen}</div>
         ${longTimeBadge}
       </div>
       ${relLine}
@@ -16270,6 +16356,15 @@ function renderMenschenList() {
       ${giftedLine}
     </div>`;
   }).join('');
+}
+
+// Prüft, ob heute der Geburtstag ist — Geburtsjahr ist egal, Monat und Tag entscheiden.
+function isGeburtstagHeute(geburtsdatum) {
+  if (!geburtsdatum) return false;
+  const d = new Date(geburtsdatum);
+  if (isNaN(d.getTime())) return false;
+  const now = new Date();
+  return d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
 }
 
 // "Lange nicht"-Echo — leise, nie als Vorwurf
@@ -16337,13 +16432,41 @@ let menschEditorCurrentId = null;
 function openMenschEditor(existingId) {
   const existing = existingId ? (state.menschen || []).find(m => m.id === existingId) : null;
   menschEditorCurrentId = existingId || null;
+  window._menschTodProvisorisch = null;
   document.getElementById('mensch-editor-title').textContent = existing ? 'Bearbeiten' : 'Jemanden hinzufügen';
   document.getElementById('mensch-name').value = existing?.name || '';
   document.getElementById('mensch-relation').value = existing?.relation || '';
   document.getElementById('mensch-note').value = existing?.note || '';
+  document.getElementById('mensch-geburtsdatum').value = existing?.geburtsdatum || '';
+
+  // Tod-Bereich: anzeigen, ob bereits markiert
+  refreshMenschTodAnzeige(existing);
+
   const ov = document.getElementById('mensch-editor-overlay');
   ov.classList.add('visible');
   setTimeout(() => document.getElementById('mensch-name').focus(), 200);
+}
+
+// Hilfsfunktion: schaltet Tod-Link vs Anzeige im Editor je nach Status
+function refreshMenschTodAnzeige(mensch) {
+  const toggle = document.getElementById('mensch-tod-toggle');
+  const anzeige = document.getElementById('mensch-tod-anzeige');
+  const anzeigeText = document.getElementById('mensch-tod-anzeige-text');
+  if (!toggle || !anzeige) return;
+  if (mensch && mensch.todesdatum) {
+    toggle.style.display = 'none';
+    anzeige.style.display = '';
+    // "† 2024" oder "† 14.03.2024", je nach Format
+    const d = new Date(mensch.todesdatum);
+    if (!isNaN(d.getTime())) {
+      anzeigeText.textContent = `† ${d.getFullYear()}`;
+    } else {
+      anzeigeText.textContent = '† gegangen';
+    }
+  } else {
+    toggle.style.display = '';
+    anzeige.style.display = 'none';
+  }
 }
 
 function closeMenschEditor() {
@@ -16356,6 +16479,7 @@ function saveMenschEditor() {
   const name = document.getElementById('mensch-name').value.trim();
   const relation = document.getElementById('mensch-relation').value.trim();
   const note = document.getElementById('mensch-note').value.trim();
+  const geburtsdatum = document.getElementById('mensch-geburtsdatum').value || null;
   if (!name) {
     showToast('Ein Name fehlt.');
     return;
@@ -16367,6 +16491,8 @@ function saveMenschEditor() {
       existing.name = name;
       existing.relation = relation;
       existing.note = note;
+      existing.geburtsdatum = geburtsdatum;
+      // todesdatum wird über die separate Tod-Funktion gepflegt, nicht hier
     }
     } else {
     const newId = uid();
@@ -16375,9 +16501,12 @@ function saveMenschEditor() {
       name: name,
       relation: relation,
       note: note,
+      geburtsdatum: geburtsdatum,
+      todesdatum: window._menschTodProvisorisch || null,
       giftedAt: null,
       begegnungen: []
     });
+    window._menschTodProvisorisch = null;
     saveState();
     renderMenschenList();
     updateSettingsSummaries();
@@ -16397,6 +16526,72 @@ function saveMenschEditor() {
 }
 
 function editMensch(id) { openMenschEditor(id); }
+
+// === Tod-Markierung — bewusste Handlung ===
+
+function openMenschTodDialog() {
+  // Vorhandenes Todesdatum laden, falls existiert (Editor-Korrektur-Fall)
+  const id = menschEditorCurrentId;
+  const existing = id ? (state.menschen || []).find(m => m.id === id) : null;
+  const datumEl = document.getElementById('mensch-tod-datum');
+  if (datumEl) datumEl.value = existing?.todesdatum || '';
+  const dlg = document.getElementById('mensch-tod-dialog');
+  if (dlg) dlg.classList.add('visible');
+}
+
+function closeMenschTodDialog() {
+  const dlg = document.getElementById('mensch-tod-dialog');
+  if (dlg) dlg.classList.remove('visible');
+}
+
+function confirmMenschTod() {
+  // Tod-Datum übernehmen und im aktuellen Editor sichtbar machen.
+  // Speicherung in state passiert erst beim Speichern des Editors — außer
+  // beim Bearbeiten eines bestehenden Menschen: dort sofort speichern.
+  const datumEl = document.getElementById('mensch-tod-datum');
+  const dateValue = datumEl ? (datumEl.value || '').trim() : '';
+  // Auch leeres Datum ist erlaubt — die Person ist gegangen, ohne dass ein Datum bekannt ist
+  // Wir markieren dann mit einem Platzhalter-Wert "unknown"
+  const todesdatum = dateValue || 'unknown';
+
+  const id = menschEditorCurrentId;
+  if (id) {
+    // Bearbeiten-Fall: direkt in state schreiben
+    const existing = (state.menschen || []).find(m => m.id === id);
+    if (existing) {
+      existing.todesdatum = todesdatum;
+      saveState();
+      refreshMenschTodAnzeige(existing);
+      renderMenschenList();
+    }
+  } else {
+    // Neuer Mensch: Anzeige für späteres Speichern vormerken
+    // Wir speichern provisorisch in einer Closure-Variable und im Editor-Status
+    window._menschTodProvisorisch = todesdatum;
+    refreshMenschTodAnzeige({ todesdatum });
+  }
+  closeMenschTodDialog();
+  showToast('Markiert.');
+}
+
+function removeMenschTod() {
+  askConfirm('Tod-Markierung wirklich rückgängig machen?', () => {
+    const id = menschEditorCurrentId;
+    if (id) {
+      const existing = (state.menschen || []).find(m => m.id === id);
+      if (existing) {
+        existing.todesdatum = null;
+        saveState();
+        refreshMenschTodAnzeige(existing);
+        renderMenschenList();
+      }
+    } else {
+      window._menschTodProvisorisch = null;
+      refreshMenschTodAnzeige({ todesdatum: null });
+    }
+    showToast('Rückgängig.');
+  }, { title: 'Rückgängig?', yesText: 'Rückgängig' });
+}
 
 function deleteMensch(id) {
   const m = (state.menschen || []).find(x => x.id === id);
@@ -16438,6 +16633,40 @@ function openMenschDetail(id) {
     relEl.style.display = '';
   } else {
     relEl.style.display = 'none';
+  }
+
+  // Lebensbogen: Geburt + ggf. Tod
+  const lebensbogenEl = document.getElementById('mensch-detail-lebensbogen');
+  if (lebensbogenEl) {
+    const teile = [];
+    if (m.geburtsdatum) {
+      const d = new Date(m.geburtsdatum);
+      if (!isNaN(d.getTime())) {
+        teile.push(`* ${d.getFullYear()}`);
+      }
+    }
+    if (m.todesdatum) {
+      if (m.todesdatum === 'unknown') {
+        teile.push('†');
+      } else {
+        const d = new Date(m.todesdatum);
+        if (!isNaN(d.getTime())) {
+          teile.push(`† ${d.getFullYear()}`);
+        } else {
+          teile.push('†');
+        }
+      }
+    }
+    // Heutiger Geburtstag → kleines stilles Zeichen
+    if (isGeburtstagHeute(m.geburtsdatum) && !m.todesdatum) {
+      teile.push('— Heute Geburtstag');
+    }
+    if (teile.length) {
+      lebensbogenEl.textContent = teile.join(' ');
+      lebensbogenEl.style.display = '';
+    } else {
+      lebensbogenEl.style.display = 'none';
+    }
   }
 
   const noteEl = document.getElementById('mensch-detail-note');
