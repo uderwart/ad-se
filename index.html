@@ -224,6 +224,53 @@ h3 {
   box-shadow: var(--shadow);
 }
 
+/* Verteiler-Kacheln auf der Mehr-Seite */
+.verteiler-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.verteiler-kachel {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 16px 14px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 110px;
+  border: 1.5px solid transparent;
+}
+.verteiler-kachel:active {
+  transform: scale(0.98);
+}
+.verteiler-kachel:hover {
+  border-color: var(--accent-soft);
+}
+.verteiler-kachel-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--accent-deep);
+}
+.verteiler-kachel-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0;
+}
+.verteiler-kachel-preview {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
 .muted-note {
   font-size: 0.82rem;
   color: var(--muted);
@@ -5830,7 +5877,7 @@ textarea, input {
   <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
     <h1>Mehr</h1>
-    <div class="greeting-sub">Einstellungen, Sammlungen, Rituale.</div>
+    <div class="greeting-sub">Räume in Ad se — Menschen, Rückblicke, Gedanken, Einstellungen.</div>
   </div>
 
   <!-- Verlauf-Karte: prominent oben, weil oft genutzt -->
@@ -5841,6 +5888,30 @@ textarea, input {
       <p class="muted-note" style="margin:0;">Heatmap und alle Einträge der letzten Wochen.</p>
     </div>
     <div style="color:var(--muted);font-size:1.1rem;flex-shrink:0;">›</div>
+  </div>
+
+  <!-- Verteiler-Kacheln — Räume in der App -->
+  <div class="verteiler-grid">
+    <div class="verteiler-kachel" onclick="jumpToVerteiler('menschen')">
+      <span class="verteiler-kachel-icon">◍</span>
+      <h3 class="verteiler-kachel-title">Menschen</h3>
+      <p class="verteiler-kachel-preview" id="verteiler-preview-menschen">…</p>
+    </div>
+    <div class="verteiler-kachel" onclick="jumpToVerteiler('rueckblicke')">
+      <span class="verteiler-kachel-icon">❋</span>
+      <h3 class="verteiler-kachel-title">Rückblicke</h3>
+      <p class="verteiler-kachel-preview" id="verteiler-preview-rueckblicke">…</p>
+    </div>
+    <div class="verteiler-kachel" onclick="jumpToVerteiler('gedanken')">
+      <span class="verteiler-kachel-icon">✑</span>
+      <h3 class="verteiler-kachel-title">Gedanken</h3>
+      <p class="verteiler-kachel-preview" id="verteiler-preview-gedanken">…</p>
+    </div>
+    <div class="verteiler-kachel" onclick="jumpToVerteiler('settings')">
+      <span class="verteiler-kachel-icon">⋯</span>
+      <h3 class="verteiler-kachel-title">Einstellungen</h3>
+      <p class="verteiler-kachel-preview">Töne, Theme, Daten, Rituale</p>
+    </div>
   </div>
 
   <!-- Funde: Kategorien verwalten -->
@@ -13175,13 +13246,175 @@ function renderSettings() {
   if (nameEl) nameEl.value = state.profile?.name || '';
   if (partnerEl) partnerEl.value = state.partner?.name || '';
   if (clearBtn) clearBtn.style.display = state.partner?.name ? '' : 'none';
+
+  // Verteiler-Logik: beim Öffnen der Mehr-Seite alle Cards schließen,
+  // damit nur die Kacheln + ggf. eine später aufgeklappte Card zu sehen sind.
+  document.querySelectorAll('#section-settings .card.collapsible').forEach(c => {
+    c.classList.remove('open');
+    const body = c.querySelector('.collapsible-body');
+    if (body) body.style.display = 'none';
+  });
+
   renderMomentSettings();
   renderAllQuotesList();
   renderFundeCategoriesSettings();
   updateSettingsSummaries();
+  updateVerteilerPreviews();
 }
 
 /* ===== KLAPPBARE KARTEN (Einstellungen) ===== */
+// === Verteiler-Kacheln auf der Mehr-Seite ===
+// Tap auf eine Kachel: scrolle zur entsprechenden Card, klappe sie auf,
+// hebe sie kurz sanft hervor.
+
+const VERTEILER_TARGETS = {
+  menschen:    { cardKey: 'menschen' },
+  rueckblicke: { cardKey: 'rueckblick-settings' },
+  gedanken:    { cardKey: 'gedanken' },
+  // 'settings' = die erste echte Einstellungs-Card (alles, was nicht Menschen/Rückblicke/Gedanken ist)
+  settings:    { cardKey: 'funde-cats' }
+};
+
+function jumpToVerteiler(target) {
+  const conf = VERTEILER_TARGETS[target];
+  if (!conf) return;
+  const card = document.getElementById(conf.cardKey + '-collapsible');
+  const body = document.getElementById(conf.cardKey + '-body');
+  if (!card) return;
+
+  // Verteiler-Logik: alle Cards in der Mehr-Seite schließen — nur die Ziel-Card bleibt offen.
+  // "settings"-Kachel ist Sonderfall: sie zeigt alle Einstellungs-Cards (außer Menschen/Rückblicke/Gedanken)
+  const settingsCardKeys = [
+    'funde-cats', 'rituals', 'quotes', 'moment', 'questions', 'gifts', 'letgo',
+    'suggestions'
+  ];
+  // Alle bekannten Collapsible-Cards in der Mehr-Seite
+  const allCardKeys = [
+    'menschen', 'rueckblick-settings', 'gedanken',
+    ...settingsCardKeys
+  ];
+
+  if (target === 'settings') {
+    // Settings-Kachel: Menschen/Rückblicke/Gedanken schließen, die erste Einstellungs-Card öffnen
+    ['menschen', 'rueckblick-settings', 'gedanken'].forEach(k => {
+      const c = document.getElementById(k + '-collapsible');
+      const b = document.getElementById(k + '-body');
+      if (c) c.classList.remove('open');
+      if (b) b.style.display = 'none';
+    });
+  } else {
+    // Andere Kacheln: alle Cards schließen außer der Ziel-Card
+    allCardKeys.forEach(k => {
+      if (k === conf.cardKey) return;
+      const c = document.getElementById(k + '-collapsible');
+      const b = document.getElementById(k + '-body');
+      if (c) c.classList.remove('open');
+      if (b) b.style.display = 'none';
+    });
+  }
+
+  // Ziel-Card aufklappen
+  if (body) {
+    card.classList.add('open');
+    body.style.display = '';
+  }
+
+  // Sanft hinscrollen + kurze Hervorhebung
+  setTimeout(() => {
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    card.style.transition = 'box-shadow 0.4s';
+    const oldShadow = card.style.boxShadow;
+    card.style.boxShadow = '0 0 0 3px var(--accent-soft), ' + (oldShadow || 'var(--shadow)');
+    setTimeout(() => {
+      card.style.boxShadow = oldShadow;
+    }, 1200);
+  }, 50);
+}
+
+function updateVerteilerPreviews() {
+  // Menschen-Vorschau
+  const menschenEl = document.getElementById('verteiler-preview-menschen');
+  if (menschenEl) {
+    const menschen = Array.isArray(state.menschen) ? state.menschen : [];
+    if (!menschen.length) {
+      menschenEl.textContent = 'Noch niemand notiert';
+    } else {
+      // Letzte Begegnung über alle Menschen finden
+      let letztesTs = 0;
+      menschen.forEach(m => {
+        (m.begegnungen || []).forEach(b => {
+          const t = new Date(b.ts).getTime();
+          if (t > letztesTs) letztesTs = t;
+        });
+      });
+      const anzahl = menschen.length;
+      const anzahlStr = anzahl === 1 ? '1 Mensch' : `${anzahl} Menschen`;
+      if (!letztesTs) {
+        menschenEl.textContent = anzahlStr;
+      } else {
+        const tageHer = Math.floor((Date.now() - letztesTs) / (24 * 60 * 60 * 1000));
+        let wann;
+        if (tageHer <= 0) wann = 'heute';
+        else if (tageHer === 1) wann = 'gestern';
+        else if (tageHer <= 7) wann = 'diese Woche';
+        else if (tageHer <= 30) wann = 'in den letzten Wochen';
+        else wann = 'länger her';
+        menschenEl.textContent = `${anzahlStr} · zuletzt ${wann}`;
+      }
+    }
+  }
+
+  // Rückblicke-Vorschau
+  const rueckblickeEl = document.getElementById('verteiler-preview-rueckblicke');
+  if (rueckblickeEl) {
+    const rueckblicke = Array.isArray(state.rueckblicke) ? state.rueckblicke : [];
+    if (!rueckblicke.length) {
+      rueckblickeEl.textContent = 'Noch nichts aufgeschrieben';
+    } else {
+      // Neuester Rückblick — wann?
+      let neuestTs = 0;
+      rueckblicke.forEach(r => {
+        const t = new Date(r.ts || r.createdAt || 0).getTime();
+        if (t > neuestTs) neuestTs = t;
+      });
+      if (!neuestTs) {
+        rueckblickeEl.textContent = rueckblicke.length === 1 ? '1 Rückblick' : `${rueckblicke.length} Rückblicke`;
+      } else {
+        const tageHer = Math.floor((Date.now() - neuestTs) / (24 * 60 * 60 * 1000));
+        let wann;
+        if (tageHer <= 0) wann = 'heute';
+        else if (tageHer === 1) wann = 'gestern';
+        else if (tageHer <= 7) wann = 'diese Woche';
+        else if (tageHer <= 30) wann = 'in den letzten Wochen';
+        else wann = 'länger her';
+        const cnt = rueckblicke.length;
+        const cntStr = cnt === 1 ? '1 Rückblick' : `${cnt} Rückblicke`;
+        rueckblickeEl.textContent = `${cntStr} · zuletzt ${wann}`;
+      }
+    }
+  }
+
+  // Gedanken-Vorschau
+  const gedankenEl = document.getElementById('verteiler-preview-gedanken');
+  if (gedankenEl) {
+    const gedanken = Array.isArray(state.gedankenLog) ? state.gedankenLog : [];
+    if (!gedanken.length) {
+      gedankenEl.textContent = 'Noch nichts aufgeschrieben';
+    } else {
+      // Anzahl in den letzten 7 Tagen
+      const siebenTage = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      const recent = gedanken.filter(g => new Date(g.ts || 0).getTime() > siebenTage).length;
+      if (recent === 0) {
+        gedankenEl.textContent = gedanken.length === 1 ? '1 Notiz' : `${gedanken.length} Notizen`;
+      } else if (recent === 1) {
+        gedankenEl.textContent = '1 Notiz diese Woche';
+      } else {
+        gedankenEl.textContent = `${recent} Notizen diese Woche`;
+      }
+    }
+  }
+}
+
 function toggleSettingsCard(key) {
   const card = document.getElementById(key + '-collapsible');
   const body = document.getElementById(key + '-body');
