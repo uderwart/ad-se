@@ -5864,6 +5864,32 @@ textarea, input {
   </div>
 </div>
 
+<!-- ====== MENSCHEN-LANDSCHAFT (Phase d, Etappe 1) ====== -->
+<div id="section-menschen-landschaft" class="section">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+    <h1 style="margin:0;">Menschen</h1>
+    <button onclick="closeMenschenLandschaft()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+  </div>
+  <div class="greeting-sub" style="margin-bottom:16px;">Wer dich begleitet.</div>
+
+  <!-- SVG-Landschaft -->
+  <div id="menschen-landschaft-wrap" style="width:100%;aspect-ratio:1/1;max-width:560px;margin:0 auto;position:relative;">
+    <svg id="menschen-landschaft-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+      <!-- wird von JS gefüllt -->
+    </svg>
+  </div>
+
+  <!-- Fallback bei leerer Liste -->
+  <div id="menschen-landschaft-empty" style="display:none;text-align:center;padding:40px 16px;color:var(--muted);font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;line-height:1.55;">
+    Noch niemand notiert.
+  </div>
+
+  <!-- Toggle zur Liste -->
+  <div style="text-align:center;margin-top:20px;">
+    <button class="btn secondary" onclick="openMenschenListeFromLandschaft()" style="font-size:0.85rem;padding:8px 16px;">Als Liste anzeigen</button>
+  </div>
+</div>
+
 <!-- ====== TAGESEINTRAG-EDITOR (Block-Editor) ====== -->
 <div class="entry-overlay" id="trip-entry-editor-overlay">
   <div class="entry-modal" style="max-width:520px;">
@@ -5919,7 +5945,7 @@ textarea, input {
 
   <!-- Verteiler-Kacheln — Räume in der App -->
   <div class="verteiler-grid">
-    <div class="verteiler-kachel" onclick="jumpToVerteiler('menschen')">
+    <div class="verteiler-kachel" onclick="openMenschenLandschaft()">
       <span class="verteiler-kachel-icon">◍</span>
       <h3 class="verteiler-kachel-title">Menschen</h3>
       <p class="verteiler-kachel-preview" id="verteiler-preview-menschen">…</p>
@@ -9174,38 +9200,6 @@ function openBodyDetail(kind, key) {
   } else {
     entries = log.filter(e => e.zone === 'Allgemein' && Array.isArray(e.types) && e.types.includes(key));
   }
-
-  // === TEMPORÄRER DEBUG-AUSDRUCK ===
-  // Hilft beim Aufspüren von Zähler-Inkonsistenzen.
-  // Vergleicht die Detail-Filterung mit der Übersichts-Zählung
-  let debugInfo = `Detail-Filter findet: ${entries.length} Eintrag/Einträge`;
-  if (kind === 'general') {
-    let countInOverview = 0;
-    log.forEach(e => {
-      if (e.zone === 'Allgemein' && Array.isArray(e.types)) {
-        e.types.forEach(t => {
-          if (t === key) countInOverview++;
-        });
-      }
-    });
-    debugInfo += ` · Übersicht zählt: ${countInOverview}`;
-
-    // Wenn unterschiedlich: alle ähnlichen Schlüssel suchen
-    if (countInOverview !== entries.length) {
-      const allKeys = new Set();
-      log.forEach(e => {
-        if (e.zone === 'Allgemein' && Array.isArray(e.types)) {
-          e.types.forEach(t => {
-            if (t && t.toLowerCase().includes(key.toLowerCase())) {
-              allKeys.add(`"${t}" (länge ${t.length})`);
-            }
-          });
-        }
-      });
-      debugInfo += `<br>Ähnliche Schlüssel im Log: ${Array.from(allKeys).join(', ')}`;
-    }
-  }
-  // === ENDE DEBUG ===
   const sortedAsc = [...entries].sort((a,b) => new Date(a.ts) - new Date(b.ts));
   const sortedDesc = [...entries].sort((a,b) => new Date(b.ts) - new Date(a.ts));
 
@@ -9223,9 +9217,6 @@ function openBodyDetail(kind, key) {
   }
 
   let html = `<div class="body-chart-summary">${escapeHtml(summary)}</div>`;
-
-  // Temporärer Debug-Block sichtbar im Dialog
-  html += `<div style="font-size:0.78rem;color:#a14b38;padding:8px 10px;background:rgba(161,75,56,0.08);border:1px solid rgba(161,75,56,0.2);border-radius:8px;margin-bottom:10px;line-height:1.5;">${debugInfo}</div>`;
 
   // Hilfsfunktion: hole Intensität für einen bestimmten Typ aus einem Eintrag
   // Wenn intensities-Objekt vorhanden, nimm den Typ-spezifischen Wert
@@ -13488,6 +13479,175 @@ function renderSettings() {
 // === Verteiler-Kacheln auf der Mehr-Seite ===
 // Tap auf eine Kachel: scrolle zur entsprechenden Card, klappe sie auf,
 // hebe sie kurz sanft hervor.
+
+// ===== MENSCHEN-LANDSCHAFT (Phase d, Etappe 1) =====
+// Berechnet einen Aktivitäts-Wert für einen Menschen — gleitende Halbwertszeit.
+// Identisch zur Berechnung in computeMenschZeitlicheTiefe (Patch c).
+function computeMenschAktivitaet(mensch) {
+  if (!mensch) return 0;
+  const begegnungen = Array.isArray(mensch.begegnungen) ? mensch.begegnungen : [];
+  if (!begegnungen.length) return 0;
+  const now = Date.now();
+  const halbwertszeitMs = 28 * 24 * 60 * 60 * 1000; // 28 Tage
+  const ln2 = Math.log(2);
+  let aktivitaet = 0;
+  begegnungen.forEach(b => {
+    const dt = now - new Date(b.ts).getTime();
+    if (dt < 0) return;
+    aktivitaet += Math.exp(-(dt / halbwertszeitMs) * ln2);
+  });
+  return aktivitaet;
+}
+
+// Öffnet die Landschaft als eigene Sektion
+function openMenschenLandschaft() {
+  showSection('menschen-landschaft');
+  // Kleiner Frame-Delay, damit das SVG sichtbar ist, bevor wir zeichnen
+  requestAnimationFrame(() => renderMenschenLandschaft());
+}
+
+function closeMenschenLandschaft() {
+  showSection('settings');
+}
+
+// Wird vom Toggle-Knopf "Als Liste anzeigen" aufgerufen
+function openMenschenListeFromLandschaft() {
+  showSection('settings');
+  // Verteiler "Menschen" auslösen → springt zur Menschen-Card
+  setTimeout(() => jumpToVerteiler('menschen'), 100);
+}
+
+// Zeichnet die SVG-Landschaft
+function renderMenschenLandschaft() {
+  const svg = document.getElementById('menschen-landschaft-svg');
+  const empty = document.getElementById('menschen-landschaft-empty');
+  const wrap = document.getElementById('menschen-landschaft-wrap');
+  if (!svg) return;
+
+  const liste = Array.isArray(state.menschen) ? state.menschen : [];
+
+  if (!liste.length) {
+    svg.innerHTML = '';
+    if (empty) empty.style.display = '';
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (wrap) wrap.style.display = '';
+
+  // viewBox: 0..400 in beide Richtungen
+  const W = 400, H = 400;
+  const cx = W / 2, cy = H / 2;
+  // Äußere Linie: leicht unregelmäßig, weich
+  const outerRadius = 188;
+  // Innerer Bereich für Kreise: etwas Abstand zum Rand
+  const innerMaxRadius = outerRadius - 28;
+
+  // Aktivitäts-Werte berechnen
+  const items = liste.map(m => ({
+    mensch: m,
+    aktivitaet: computeMenschAktivitaet(m),
+    verstorben: !!m.todesdatum
+  }));
+  const maxAkt = Math.max(...items.map(i => i.aktivitaet), 1);
+
+  // Größe-Mapping: Mindest-Radius 8, max ~24 (Verhältnis ~1:3)
+  const minR = 8, maxR = 24;
+  // Logarithmisches Mapping, damit kleine Unterschiede bei wenig aktiven nicht überwertet werden
+  const sizeFor = akt => {
+    if (akt <= 0) return minR;
+    const t = Math.log(1 + akt) / Math.log(1 + maxAkt);
+    return minR + (maxR - minR) * Math.min(1, t);
+  };
+
+  // Farbe-Mapping: 5 Stufen — sehr blass bis warm
+  // Basis-Farben werden später per CSS-Variable abgegriffen, für jetzt fest
+  const farbStufen = [
+    'rgba(180, 165, 155, 0.45)',  // 0 - sehr blass
+    'rgba(190, 145, 120, 0.6)',   // 1
+    'rgba(195, 125, 95, 0.75)',   // 2
+    'rgba(190, 100, 70, 0.85)',   // 3
+    'rgba(180, 80, 55, 0.95)'     // 4 - warm
+  ];
+  const farbeFor = akt => {
+    if (akt <= 0) return farbStufen[0];
+    const t = Math.log(1 + akt) / Math.log(1 + maxAkt);
+    const stufe = Math.min(4, Math.floor(t * 5));
+    return farbStufen[stufe];
+  };
+
+  // Layout: zufällige Position mit Kollisions-Vermeidung
+  // (Etappe 1 — kein Force-Directed, kein Herz)
+  const placed = []; // { x, y, r }
+  items.forEach((it, idx) => {
+    const r = sizeFor(it.aktivitaet);
+    let x, y, tries = 0;
+    let ok = false;
+    // Maximal 80 Versuche, einen freien Platz zu finden
+    while (tries < 80 && !ok) {
+      // Zufällige Polar-Koordinaten innerhalb innerMaxRadius
+      // Quadratwurzel für gleichmäßigere Verteilung
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.sqrt(Math.random()) * (innerMaxRadius - r - 4);
+      x = cx + Math.cos(angle) * dist;
+      y = cy + Math.sin(angle) * dist;
+      // Kollision prüfen
+      ok = true;
+      for (const p of placed) {
+        const dx = p.x - x;
+        const dy = p.y - y;
+        const minDist = p.r + r + 3;
+        if (dx * dx + dy * dy < minDist * minDist) { ok = false; break; }
+      }
+      tries++;
+    }
+    placed.push({ x, y, r, item: it });
+  });
+
+  // SVG aufbauen
+  let svgInner = '';
+
+  // Äußere Linie — leicht unregelmäßig (sanfter Polygon-Pfad)
+  const lineSegments = 24;
+  const linePoints = [];
+  for (let i = 0; i < lineSegments; i++) {
+    const angle = (i / lineSegments) * Math.PI * 2;
+    // Leichte Unregelmäßigkeit (deterministisch, pseudo-zufällig)
+    const wobble = 1 + Math.sin(i * 1.7) * 0.015 + Math.cos(i * 2.3) * 0.012;
+    const r = outerRadius * wobble;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r;
+    linePoints.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  svgInner += `<polygon points="${linePoints.join(' ')}" fill="none" stroke="var(--accent-deep)" stroke-width="1.2" opacity="0.4" stroke-linejoin="round"/>`;
+
+  // Kreise zeichnen
+  placed.forEach(p => {
+    const m = p.item.mensch;
+    const farbe = farbeFor(p.item.aktivitaet);
+    const stroke = p.item.verstorben ? 'rgba(120,110,100,0.6)' : 'transparent';
+    const strokeWidth = p.item.verstorben ? 1.5 : 0;
+    // Klickbarer Kreis mit data-id, Click-Handler später per Delegation
+    svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${farbe}" stroke="${stroke}" stroke-width="${strokeWidth}" style="cursor:pointer;"/>`;
+    // Name als kleines Label darunter — wenn der Kreis groß genug
+    if (p.r >= 12) {
+      const fontSize = Math.max(8, Math.min(11, p.r * 0.55));
+      svgInner += `<text x="${p.x.toFixed(1)}" y="${(p.y + p.r + fontSize + 1).toFixed(1)}" text-anchor="middle" font-family="EB Garamond, serif" font-size="${fontSize.toFixed(1)}" fill="var(--ink)" opacity="0.7" style="pointer-events:none;user-select:none;">${escapeHtml(m.name || '')}</text>`;
+    }
+  });
+
+  svg.innerHTML = svgInner;
+
+  // Click-Delegation: Tap auf Kreis → Mensch-Detailseite
+  svg.querySelectorAll('.landschaft-kreis').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.getAttribute('data-mensch-id');
+      if (!id) return;
+      openMenschDetail(id);
+    });
+  });
+}
+
 
 const VERTEILER_TARGETS = {
   menschen:    { cardKey: 'menschen' },
