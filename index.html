@@ -13560,20 +13560,11 @@ function renderMenschenLandschaft() {
     return minR + (maxR - minR) * Math.min(1, t);
   };
 
-  // Farbe-Mapping: 5 Stufen — sehr blass bis warm
-  // Basis-Farben werden später per CSS-Variable abgegriffen, für jetzt fest
-  const farbStufen = [
-    'rgba(180, 165, 155, 0.45)',  // 0 - sehr blass
-    'rgba(190, 145, 120, 0.6)',   // 1
-    'rgba(195, 125, 95, 0.75)',   // 2
-    'rgba(190, 100, 70, 0.85)',   // 3
-    'rgba(180, 80, 55, 0.95)'     // 4 - warm
-  ];
-  const farbeFor = akt => {
-    if (akt <= 0) return farbStufen[0];
+  // Aktivitäts-Stufe 0..4 (für Verlauf-Wahl)
+  const stufeFor = akt => {
+    if (akt <= 0) return 0;
     const t = Math.log(1 + akt) / Math.log(1 + maxAkt);
-    const stufe = Math.min(4, Math.floor(t * 5));
-    return farbStufen[stufe];
+    return Math.min(4, Math.floor(t * 5));
   };
 
   // Layout: zufällige Position mit Kollisions-Vermeidung
@@ -13607,55 +13598,100 @@ function renderMenschenLandschaft() {
   // SVG aufbauen
   let svgInner = '';
 
-  // SVG-Defs: Verlauf + Schatten-Filter für den "Atem-Kugel"-Look (Test bei einem Kreis)
+  // SVG-Defs: 5 Verläufe (je Aktivitäts-Stufe) + Schatten für Kreise + Glow für äußere Linie
   svgInner += `
     <defs>
-      <!-- Radial-Gradient: Lichtquelle oben links — wie bei der Atem-Kugel -->
-      <radialGradient id="kreisVerlauf" cx="35%" cy="35%" r="65%">
-        <stop offset="0%" stop-color="#b89a6b" />
-        <stop offset="100%" stop-color="#7d6338" />
+      <!-- Stufe 0: keine Aktivität — fast monochrom hellgrau -->
+      <radialGradient id="kreisVerlauf0" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#cdc3b8" />
+        <stop offset="100%" stop-color="#9e9385" />
       </radialGradient>
-      <!-- Sanfter Schatten unter dem Kreis -->
+      <!-- Stufe 1: wenig — blasses warmes Beige -->
+      <radialGradient id="kreisVerlauf1" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#d8b89c" />
+        <stop offset="100%" stop-color="#a08068" />
+      </radialGradient>
+      <!-- Stufe 2: mittel — das Goldbraun der Atem-Kugel -->
+      <radialGradient id="kreisVerlauf2" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#c89572" />
+        <stop offset="100%" stop-color="#8c5e3d" />
+      </radialGradient>
+      <!-- Stufe 3: aktiv — warmes Rotbraun -->
+      <radialGradient id="kreisVerlauf3" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#c47554" />
+        <stop offset="100%" stop-color="#7d3a26" />
+      </radialGradient>
+      <!-- Stufe 4: sehr aktiv — kräftiges, lebendiges Rotbraun -->
+      <radialGradient id="kreisVerlauf4" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#b85a3f" />
+        <stop offset="100%" stop-color="#6b2818" />
+      </radialGradient>
+      <!-- Sanfter Schatten unter den Kreisen (skaliert pro Kreis durch stdDeviation) -->
       <filter id="kreisSchatten" x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#3d3527" flood-opacity="0.35"/>
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#3d3527" flood-opacity="0.3"/>
+      </filter>
+      <!-- Zarter Schatten für kleine Kreise (Mini-Kreise ohne Aktivität) -->
+      <filter id="kreisSchattenKlein" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#3d3527" flood-opacity="0.2"/>
+      </filter>
+      <!-- Zarter Glow für die äußere Linie -->
+      <filter id="linieGlow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
       </filter>
     </defs>
   `;
 
-  // Äußere Linie — leicht unregelmäßig (sanfter Polygon-Pfad)
+  // Äußere Linie — weiche geschlossene Kurve mit zartem Glow
   const lineSegments = 24;
-  const linePoints = [];
+  const linePts = [];
   for (let i = 0; i < lineSegments; i++) {
     const angle = (i / lineSegments) * Math.PI * 2;
     // Leichte Unregelmäßigkeit (deterministisch, pseudo-zufällig)
-    const wobble = 1 + Math.sin(i * 1.7) * 0.015 + Math.cos(i * 2.3) * 0.012;
+    const wobble = 1 + Math.sin(i * 1.7) * 0.018 + Math.cos(i * 2.3) * 0.014;
     const r = outerRadius * wobble;
     const x = cx + Math.cos(angle) * r;
     const y = cy + Math.sin(angle) * r;
-    linePoints.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+    linePts.push({ x, y });
   }
-  svgInner += `<polygon points="${linePoints.join(' ')}" fill="none" stroke="var(--accent-deep)" stroke-width="1.2" opacity="0.4" stroke-linejoin="round"/>`;
+  // Geschlossener Catmull-Rom-Pfad → konvertiert zu Cubic-Bézier
+  // Damit wird der Polygonzug zu einer weichen, fließenden Kurve
+  const n = linePts.length;
+  const get = (i) => linePts[((i % n) + n) % n];
+  let pathD = `M ${get(0).x.toFixed(1)},${get(0).y.toFixed(1)} `;
+  for (let i = 0; i < n; i++) {
+    const p0 = get(i - 1);
+    const p1 = get(i);
+    const p2 = get(i + 1);
+    const p3 = get(i + 2);
+    // Cubic-Bézier Kontrollpunkte aus Catmull-Rom (Tension 0.5)
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    pathD += `C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)} `;
+  }
+  pathD += 'Z';
+  // Zwei Linien übereinander: erst ein weicher breiter Schein (Glow), dann die klare dünne Linie
+  svgInner += `<path d="${pathD}" fill="none" stroke="var(--accent-deep)" stroke-width="5" opacity="0.12" stroke-linejoin="round" stroke-linecap="round"/>`;
+  svgInner += `<path d="${pathD}" fill="none" stroke="var(--accent-deep)" stroke-width="1.3" opacity="0.55" stroke-linejoin="round" stroke-linecap="round"/>`;
 
-  // Den Test-Kreis bestimmen: der größte (höchste Aktivität)
-  let testIdx = -1, testAkt = -1;
-  placed.forEach((p, i) => {
-    if (p.item.aktivitaet > testAkt) { testAkt = p.item.aktivitaet; testIdx = i; }
-  });
-
-  // Kreise zeichnen
-  placed.forEach((p, idx) => {
+  // Kreise zeichnen — alle im plastischen Atem-Kugel-Look mit Aktivitäts-Farbstufe
+  placed.forEach((p) => {
     const m = p.item.mensch;
-    const farbe = farbeFor(p.item.aktivitaet);
-    const stroke = p.item.verstorben ? 'rgba(120,110,100,0.6)' : 'transparent';
-    const strokeWidth = p.item.verstorben ? 1.5 : 0;
+    const stufe = stufeFor(p.item.aktivitaet);
+    const verlauf = `kreisVerlauf${stufe}`;
+    // Kleine Kreise (Mini-Kreise ohne Aktivität) bekommen einen zarteren Schatten
+    const schattenFilter = p.r < 10 ? 'kreisSchattenKlein' : 'kreisSchatten';
+    // Verstorbene: zarter grauer Rand zusätzlich zum Verlauf
+    const strokeAttr = p.item.verstorben
+      ? ` stroke="rgba(120,110,100,0.7)" stroke-width="1.2"`
+      : '';
 
-    if (idx === testIdx && !p.item.verstorben) {
-      // Test-Kreis: Atem-Kugel-Look mit Verlauf + Schatten
-      svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#kreisVerlauf)" filter="url(#kreisSchatten)" style="cursor:pointer;"/>`;
-    } else {
-      // Alle anderen: flache Füllung wie bisher
-      svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${farbe}" stroke="${stroke}" stroke-width="${strokeWidth}" style="cursor:pointer;"/>`;
-    }
+    svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#${verlauf})" filter="url(#${schattenFilter})"${strokeAttr} style="cursor:pointer;"/>`;
 
     // Name als kleines Label darunter — wenn der Kreis groß genug
     if (p.r >= 12) {
