@@ -9174,6 +9174,38 @@ function openBodyDetail(kind, key) {
   } else {
     entries = log.filter(e => e.zone === 'Allgemein' && Array.isArray(e.types) && e.types.includes(key));
   }
+
+  // === TEMPORÄRER DEBUG-AUSDRUCK ===
+  // Hilft beim Aufspüren von Zähler-Inkonsistenzen.
+  // Vergleicht die Detail-Filterung mit der Übersichts-Zählung
+  let debugInfo = `Detail-Filter findet: ${entries.length} Eintrag/Einträge`;
+  if (kind === 'general') {
+    let countInOverview = 0;
+    log.forEach(e => {
+      if (e.zone === 'Allgemein' && Array.isArray(e.types)) {
+        e.types.forEach(t => {
+          if (t === key) countInOverview++;
+        });
+      }
+    });
+    debugInfo += ` · Übersicht zählt: ${countInOverview}`;
+
+    // Wenn unterschiedlich: alle ähnlichen Schlüssel suchen
+    if (countInOverview !== entries.length) {
+      const allKeys = new Set();
+      log.forEach(e => {
+        if (e.zone === 'Allgemein' && Array.isArray(e.types)) {
+          e.types.forEach(t => {
+            if (t && t.toLowerCase().includes(key.toLowerCase())) {
+              allKeys.add(`"${t}" (länge ${t.length})`);
+            }
+          });
+        }
+      });
+      debugInfo += `<br>Ähnliche Schlüssel im Log: ${Array.from(allKeys).join(', ')}`;
+    }
+  }
+  // === ENDE DEBUG ===
   const sortedAsc = [...entries].sort((a,b) => new Date(a.ts) - new Date(b.ts));
   const sortedDesc = [...entries].sort((a,b) => new Date(b.ts) - new Date(a.ts));
 
@@ -9191,6 +9223,9 @@ function openBodyDetail(kind, key) {
   }
 
   let html = `<div class="body-chart-summary">${escapeHtml(summary)}</div>`;
+
+  // Temporärer Debug-Block sichtbar im Dialog
+  html += `<div style="font-size:0.78rem;color:#a14b38;padding:8px 10px;background:rgba(161,75,56,0.08);border:1px solid rgba(161,75,56,0.2);border-radius:8px;margin-bottom:10px;line-height:1.5;">${debugInfo}</div>`;
 
   // Hilfsfunktion: hole Intensität für einen bestimmten Typ aus einem Eintrag
   // Wenn intensities-Objekt vorhanden, nimm den Typ-spezifischen Wert
