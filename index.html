@@ -222,6 +222,7 @@ h3 {
   padding: 18px 18px;
   margin-bottom: 16px;
   box-shadow: var(--shadow);
+  position: relative;
 }
 
 /* Verteiler-Kacheln auf der Mehr-Seite */
@@ -4623,8 +4624,11 @@ textarea, input {
     </div>
   </div>
 
-  <!-- Gefühls-Matrix -->
-  <div class="card matrix-card collapsible" id="matrix-collapsible">
+  <!-- Gefühls-Matrix — versteckt, wird über Satellit "Gefühl" sichtbar gemacht -->
+  <div class="card matrix-card collapsible" id="matrix-collapsible" style="display:none;">
+    <div style="position:absolute;top:8px;right:8px;z-index:2;">
+      <button onclick="hideMatrixCard()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
     <div class="collapsible-header" onclick="toggleMatrix()">
       <div style="flex:1;">
         <h2 style="margin-bottom:2px;">Wie fühlst du dich?</h2>
@@ -4699,8 +4703,11 @@ textarea, input {
     </div>
   </div>
 
-  <!-- Vorhaben für heute -->
-  <div class="card collapsible" id="vorhaben-collapsible">
+  <!-- Vorhaben für heute — versteckt, wird über Satellit "Vorhaben" sichtbar gemacht -->
+  <div class="card collapsible" id="vorhaben-collapsible" style="display:none;">
+    <div style="position:absolute;top:8px;right:8px;z-index:2;">
+      <button onclick="hideVorhabenCard()" style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    </div>
     <div class="collapsible-header" onclick="toggleVorhaben()">
       <div style="flex:1;">
         <h2 style="margin-bottom:2px;">Vorhaben</h2>
@@ -4735,6 +4742,11 @@ textarea, input {
     <div class="weekly-title" id="weekly-home-title">Wochenreflexion</div>
     <div class="weekly-sub" id="weekly-home-sub">Wenn ihr Zeit findet — ein Rückblick.</div>
     <button class="weekly-btn" id="weekly-home-btn" onclick="openWeekly()">Beginnen</button>
+  </div>
+
+  <!-- Verlaufs-Heatmap als symbolisches Sein — keine Beschriftung, kein Tooltip, nur Raster -->
+  <div id="home-heatmap-wrap" style="margin:20px auto;max-width:520px;cursor:pointer;" onclick="showSection('verlauf')">
+    <div class="heatmap" id="home-heatmap"></div>
   </div>
 
   <!-- Abendstunde (nur abends sichtbar) -->
@@ -7722,6 +7734,11 @@ function renderHome() {
   if (typeof renderMenschenLandschaft === 'function') {
     requestAnimationFrame(() => renderMenschenLandschaft('home-landschaft'));
   }
+
+  // Verlaufs-Heatmap auf Home rendern (still, ohne Tooltip)
+  if (typeof renderHeatmap === 'function') {
+    renderHeatmap('home-heatmap');
+  }
 }
 
 /* ===== KLAPPBARE KARTEN (Home-Screen) ===== */
@@ -10272,10 +10289,13 @@ function saveEditBody() {
 }
 
 /* ===== HEATMAP ===== */
-function renderHeatmap() {
-  const container = document.getElementById('heatmap');
+// containerId default 'heatmap' (Verlauf-Seite), 'home-heatmap' (Home, ohne Tooltip-Interaktion)
+function renderHeatmap(containerId) {
+  const cid = containerId || 'heatmap';
+  const container = document.getElementById(cid);
   if (!container) return;
   container.innerHTML = '';
+  const isHome = (cid === 'home-heatmap');
 
   // Zähle Einträge pro Tag
   const counts = {};
@@ -10342,8 +10362,10 @@ function renderHeatmap() {
     cell.dataset.day = dk;
     cell.dataset.count = String(c);
     cell.dataset.dateLabel = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
-    cell.style.cursor = 'pointer';
-    cell.addEventListener('click', onHeatmapCellClick);
+    if (!isHome) {
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('click', onHeatmapCellClick);
+    }
     container.appendChild(cell);
   }
 }
@@ -13513,13 +13535,14 @@ const LANDSCHAFT_SATELLITEN = [
   { id: 'sanduhr',    symbol: '⧖', label: 'Sanduhr',     onTap: 'openHourglassPicker()' }
 ];
 
-// Springt zur Gefühlsmatrix-Card und klappt sie auf
+// Springt zur Gefühlsmatrix-Card, macht sie sichtbar und klappt sie auf
 function jumpToFeelingMatrix() {
   showSection('home');
   setTimeout(() => {
     const card = document.getElementById('matrix-collapsible');
     const body = document.getElementById('matrix-body');
     if (card && body) {
+      card.style.display = '';  // sichtbar machen
       if (!card.classList.contains('open')) {
         card.classList.add('open');
         body.style.display = '';
@@ -13530,19 +13553,42 @@ function jumpToFeelingMatrix() {
   }, 100);
 }
 
-// Springt zur Vorhaben-Card und klappt sie auf
+// Versteckt die Gefühlsmatrix-Card wieder
+function hideMatrixCard() {
+  const card = document.getElementById('matrix-collapsible');
+  const body = document.getElementById('matrix-body');
+  if (card) {
+    card.classList.remove('open');
+    card.style.display = 'none';
+  }
+  if (body) body.style.display = 'none';
+}
+
+// Springt zur Vorhaben-Card, macht sie sichtbar und klappt sie auf
 function jumpToVorhaben() {
   showSection('home');
   setTimeout(() => {
     const card = document.getElementById('vorhaben-collapsible');
     const body = document.getElementById('vorhaben-body');
     if (card && body) {
+      card.style.display = '';  // sichtbar machen
       if (!card.classList.contains('open')) {
         toggleVorhaben();
       }
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, 100);
+}
+
+// Versteckt die Vorhaben-Card wieder
+function hideVorhabenCard() {
+  const card = document.getElementById('vorhaben-collapsible');
+  const body = document.getElementById('vorhaben-body');
+  if (card) {
+    card.classList.remove('open');
+    card.style.display = 'none';
+  }
+  if (body) body.style.display = 'none';
 }
 
 // containerPrefix: 'menschen-landschaft' (Sektion) oder 'home-landschaft' (Home)
@@ -13567,8 +13613,12 @@ function renderMenschenLandschaft(containerPrefix) {
   // viewBox: 0..400 in beide Richtungen
   const W = 400, H = 400;
   const cx = W / 2, cy = H / 2;
+  // Satelliten nur auf Home, nicht in der separaten Sektion
+  const satellitenAnzeigen = (prefix === 'home-landschaft');
   // Äußere Linie: leicht unregelmäßig, weich
-  const outerRadius = 188;
+  // Bei Satelliten muss zusätzlich Platz für sie selbst (~16px Radius + Label) bleiben.
+  // Ohne Satelliten: 188 (mehr Platz für die Kreise innen)
+  const outerRadius = satellitenAnzeigen ? 168 : 188;
   // Innerer Bereich für Kreise: etwas Abstand zum Rand
   const innerMaxRadius = outerRadius - 28;
 
@@ -13711,7 +13761,6 @@ function renderMenschenLandschaft(containerPrefix) {
   // === SATELLITEN auf der Bézier-Linie — wie Perlen auf einer Schnur ===
   // Nur auf Home-Landschaft anzeigen, nicht in der separaten Sektion
   // (sonst doppelt: Sektion zeigt Vollbild ohne Satelliten, Home zeigt Vollbild mit Satelliten)
-  const satellitenAnzeigen = (prefix === 'home-landschaft');
   if (satellitenAnzeigen) {
     const sat = LANDSCHAFT_SATELLITEN;
     const sR = 16; // Satelliten-Radius
