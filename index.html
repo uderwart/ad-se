@@ -4577,6 +4577,16 @@ textarea, input {
     <div id="partner-text"></div>
   </div>
 
+  <!-- ====== MENSCHEN-LANDSCHAFT auf Home ====== -->
+  <div id="home-landschaft-wrap" style="width:100%;aspect-ratio:1/1;max-width:520px;margin:14px auto;position:relative;">
+    <svg id="home-landschaft-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+      <!-- wird von JS gefüllt -->
+    </svg>
+  </div>
+  <div id="home-landschaft-empty" style="display:none;text-align:center;padding:24px 16px;color:var(--muted);font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;line-height:1.55;">
+    Du beginnst, eine Welt zu sammeln.
+  </div>
+
   <!-- Morgenstunde (nur morgens sichtbar) -->
   <div class="morning-card" id="morning-home-card" style="display:none;">
     <div class="morning-label">Morgenstunde</div>
@@ -4592,11 +4602,7 @@ textarea, input {
     </div>
   </div>
 
-  <!-- Ein Moment mit mir (immer verfügbar) -->
-  <div class="moment-card" onclick="openMoment()">
-    <div class="moment-label">Ein Moment mit mir</div>
-    <div class="moment-sub">Einen Atemzug lang bei sich sein.</div>
-  </div>
+  <!-- Ein Moment mit mir — entfernt aus Home, ist jetzt Satellit auf der Menschen-Landschaft -->
 
   <!-- Einen Gedanken untersuchen (nur wenn aktiviert) -->
   <div class="gedanken-card" id="gedanken-home-card" style="display:none;">
@@ -4720,34 +4726,8 @@ textarea, input {
     </div>
   </div>
 
-  <!-- Schnell-Eintrag -->
-  <div class="card">
-    <h2>Kurz notieren</h2>
-    <p class="muted-note" style="margin-bottom:12px;">Eine Aktivität, Dankbarkeit, oder etwas zum Körper.</p>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-      <button class="quick-btn" onclick="openQuickEntry('activity')">
-        <span class="qb-icon">◭</span>
-        <span class="qb-label">Aktivität</span>
-      </button>
-      <button class="quick-btn" onclick="openQuickEntry('gratitude')">
-        <span class="qb-icon">☆</span>
-        <span class="qb-label">Dankbarkeit</span>
-      </button>
-      <button class="quick-btn" onclick="showSection('body')">
-        <span class="qb-icon">◉</span>
-        <span class="qb-label">Körper</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Sanduhr -->
-  <div class="card hourglass-card" onclick="openHourglassPicker()">
-    <div class="hourglass-card-icon">⧖</div>
-    <div class="hourglass-card-text">
-      <h2 style="margin:0 0 4px;">Sanduhr</h2>
-      <p class="muted-note" style="margin:0;">Drei Minuten still sein. Oder zehn.</p>
-    </div>
-  </div>
+  <!-- Schnell-Eintrag (Aktivität, Dankbarkeit) entfernt aus Home — Aktivität und Dankbarkeit sind jetzt Satelliten -->
+  <!-- Sanduhr entfernt aus Home — ist jetzt Satellit auf der Menschen-Landschaft -->
 
   <!-- Wochenstunde (Ritual-Karte) -->
   <div class="weekly-card" id="weekly-home-card">
@@ -7737,6 +7717,11 @@ function renderHome() {
   renderRueckblickHomeCard();
   renderTripHomeStrip();
   updateCollapsibleSummaries();
+
+  // Menschen-Landschaft auf Home rendern (mit Satelliten)
+  if (typeof renderMenschenLandschaft === 'function') {
+    requestAnimationFrame(() => renderMenschenLandschaft('home-landschaft'));
+  }
 }
 
 /* ===== KLAPPBARE KARTEN (Home-Screen) ===== */
@@ -13518,10 +13503,54 @@ function openMenschenListeFromLandschaft() {
 }
 
 // Zeichnet die SVG-Landschaft
-function renderMenschenLandschaft() {
-  const svg = document.getElementById('menschen-landschaft-svg');
-  const empty = document.getElementById('menschen-landschaft-empty');
-  const wrap = document.getElementById('menschen-landschaft-wrap');
+// Konfiguration der Satelliten — fix für Schritt 1, später konfigurierbar
+const LANDSCHAFT_SATELLITEN = [
+  { id: 'moment',     symbol: '◯', label: 'Moment',      onTap: 'openMoment()' },
+  { id: 'gefuehl',    symbol: '◇', label: 'Gefühl',      onTap: 'jumpToFeelingMatrix()' },
+  { id: 'vorhaben',   symbol: '◆', label: 'Vorhaben',    onTap: 'jumpToVorhaben()' },
+  { id: 'aktivitaet', symbol: '◭', label: 'Aktivität',   onTap: "openQuickEntry('activity')" },
+  { id: 'dankbarkeit',symbol: '☆', label: 'Dankbarkeit', onTap: "openQuickEntry('gratitude')" },
+  { id: 'sanduhr',    symbol: '⧖', label: 'Sanduhr',     onTap: 'openHourglassPicker()' }
+];
+
+// Springt zur Gefühlsmatrix-Card und klappt sie auf
+function jumpToFeelingMatrix() {
+  showSection('home');
+  setTimeout(() => {
+    const card = document.getElementById('matrix-collapsible');
+    const body = document.getElementById('matrix-body');
+    if (card && body) {
+      if (!card.classList.contains('open')) {
+        card.classList.add('open');
+        body.style.display = '';
+        renderFeelingMatrix();
+      }
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+}
+
+// Springt zur Vorhaben-Card und klappt sie auf
+function jumpToVorhaben() {
+  showSection('home');
+  setTimeout(() => {
+    const card = document.getElementById('vorhaben-collapsible');
+    const body = document.getElementById('vorhaben-body');
+    if (card && body) {
+      if (!card.classList.contains('open')) {
+        toggleVorhaben();
+      }
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+}
+
+// containerPrefix: 'menschen-landschaft' (Sektion) oder 'home-landschaft' (Home)
+function renderMenschenLandschaft(containerPrefix) {
+  const prefix = containerPrefix || 'menschen-landschaft';
+  const svg = document.getElementById(prefix + '-svg');
+  const empty = document.getElementById(prefix + '-empty');
+  const wrap = document.getElementById(prefix + '-wrap');
   if (!svg) return;
 
   const liste = Array.isArray(state.menschen) ? state.menschen : [];
@@ -13679,6 +13708,31 @@ function renderMenschenLandschaft() {
   svgInner += `<path d="${pathD}" fill="none" stroke="var(--accent-deep)" stroke-width="5" opacity="0.12" stroke-linejoin="round" stroke-linecap="round"/>`;
   svgInner += `<path d="${pathD}" fill="none" stroke="var(--accent-deep)" stroke-width="1.3" opacity="0.55" stroke-linejoin="round" stroke-linecap="round"/>`;
 
+  // === SATELLITEN auf der Bézier-Linie — wie Perlen auf einer Schnur ===
+  // Nur auf Home-Landschaft anzeigen, nicht in der separaten Sektion
+  // (sonst doppelt: Sektion zeigt Vollbild ohne Satelliten, Home zeigt Vollbild mit Satelliten)
+  const satellitenAnzeigen = (prefix === 'home-landschaft');
+  if (satellitenAnzeigen) {
+    const sat = LANDSCHAFT_SATELLITEN;
+    const sR = 16; // Satelliten-Radius
+    // Verteilung: 6 gleichmäßige Stellen auf der Linie, leicht versetzt
+    // (sodass kein Satellit ganz oben sitzt, sondern bei -90° + Offset beginnt)
+    sat.forEach((s, i) => {
+      // Index in linePts — gleichmäßig verteilt
+      const idx = Math.round((i / sat.length) * linePts.length) % linePts.length;
+      const pt = linePts[idx];
+      // Satelliten-Kreis: kleiner als die größten Menschen, aber sichtbar
+      svgInner += `<g class="satellit" data-sat-id="${s.id}" style="cursor:pointer;">
+        <circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${sR}"
+          fill="url(#kreisVerlauf2)" filter="url(#kreisSchatten)" />
+        <text x="${pt.x.toFixed(1)}" y="${(pt.y + 4).toFixed(1)}" text-anchor="middle"
+          font-family="Inter, sans-serif" font-size="14" fill="#fff" opacity="0.95" style="pointer-events:none;user-select:none;">${s.symbol}</text>
+        <text x="${pt.x.toFixed(1)}" y="${(pt.y + sR + 11).toFixed(1)}" text-anchor="middle"
+          font-family="Inter, sans-serif" font-size="8" fill="var(--ink)" opacity="0.7" style="pointer-events:none;user-select:none;">${s.label}</text>
+      </g>`;
+    });
+  }
+
   // Kreise zeichnen — alle im plastischen Atem-Kugel-Look mit Aktivitäts-Farbstufe
   placed.forEach((p) => {
     const m = p.item.mensch;
@@ -13708,6 +13762,19 @@ function renderMenschenLandschaft() {
       const id = el.getAttribute('data-mensch-id');
       if (!id) return;
       openMenschDetail(id);
+    });
+  });
+
+  // Click-Delegation für Satelliten
+  svg.querySelectorAll('.satellit').forEach(el => {
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const satId = el.getAttribute('data-sat-id');
+      const sat = LANDSCHAFT_SATELLITEN.find(s => s.id === satId);
+      if (!sat) return;
+      // onTap ist ein String mit der Funktion — eval ist hier akzeptabel weil
+      // alle Werte vom Code stammen, nicht vom User
+      try { eval(sat.onTap); } catch(e) { console.error('Satellit-Tap-Fehler:', e); }
     });
   });
 }
