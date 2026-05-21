@@ -5275,6 +5275,16 @@ textarea, input {
         <option value="">— Kein Weg —</option>
       </select>
     </div>
+    <!-- Zeitpunkt — Datum + Uhrzeit anpassbar -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Zeitpunkt</div>
+      <div style="display:flex;gap:8px;">
+        <input type="date" id="edit-activity-date"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+        <input type="time" id="edit-activity-time"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      </div>
+    </div>
     <button class="btn full" onclick="saveEditActivity()">Speichern</button>
   </div>
 </div>
@@ -7373,6 +7383,7 @@ function loadState() {
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
     personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
     menschenBefindenWords: [],  // ['erschöpft', 'aufgekratzt', ...] — gemerkte Worte für "Wie ging es ihr/ihm?"
+    suggestionBlacklist: [],    // Vorschläge (Aktivitäten, Körper-Typen), die nicht mehr angezeigt werden sollen
     funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
     fundeCategories: ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'],
     trips: [],                  // Reisen — Spec v02, Mai 2026
@@ -7391,7 +7402,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -7400,6 +7411,7 @@ function loadState() {
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
     if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
     if (!Array.isArray(saved.menschenBefindenWords)) saved.menschenBefindenWords = [];
+    if (!Array.isArray(saved.suggestionBlacklist)) saved.suggestionBlacklist = [];
     if (!Array.isArray(saved.funde)) saved.funde = [];
     if (!Array.isArray(saved.fundeCategories) || saved.fundeCategories.length === 0) {
       saved.fundeCategories = ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'];
@@ -8796,15 +8808,20 @@ function renderBodySuggestions(zone) {
   });
 }
 
-// Vorschläge generisch rendern: nur Texte mit ≥2 Vorkommen, Top 5
+// Vorschläge generisch rendern: nur Texte mit ≥1 Vorkommen, Top 5
+// Long-Press auf einen Chip: in die Blacklist aufnehmen → wird nicht mehr vorgeschlagen
 function renderSuggestionsInto(containerId, allTexts, onPick) {
   const container = document.getElementById(containerId);
   if (!container) return;
   // Häufigkeit zählen (case-insensitive)
   const counts = {};
   const originals = {};  // Original-Schreibweise behalten (zuletzt gesehen)
+  const blacklist = Array.isArray(state.suggestionBlacklist)
+    ? state.suggestionBlacklist.map(s => s.toLowerCase())
+    : [];
   allTexts.forEach(t => {
     const key = t.toLowerCase();
+    if (blacklist.includes(key)) return;   // Blacklisted: nicht zählen
     counts[key] = (counts[key] || 0) + 1;
     originals[key] = t;
   });
@@ -8824,16 +8841,63 @@ function renderSuggestionsInto(containerId, allTexts, onPick) {
   let chipsHtml = '<div class="suggestion-label">Schon mal eingetragen:</div><div class="suggestion-chips">';
   top.forEach((txt, idx) => {
     const escaped = txt.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
-    chipsHtml += `<span class="suggestion-chip" data-suggestion-text="${escaped}">${escapeHtml(txt)}</span>`;
+    chipsHtml += `<span class="suggestion-chip" data-suggestion-text="${escaped}" data-container="${containerId}">${escapeHtml(txt)}</span>`;
   });
   chipsHtml += '</div>';
   container.innerHTML = chipsHtml;
-  // Click-Handler an Chips binden
+
+  // Click + Long-Press an Chips binden
   container.querySelectorAll('.suggestion-chip').forEach(chip => {
+    let pressTimer = null;
+    let longPressFired = false;
+
+    const startPress = () => {
+      longPressFired = false;
+      pressTimer = setTimeout(() => {
+        longPressFired = true;
+        pressTimer = null;
+        const txt = chip.dataset.suggestionText;
+        if (confirm(`Vorschlag „${txt}" aus den künftigen Anzeigen entfernen?\n\n(Bestehende Einträge bleiben erhalten.)`)) {
+          blacklistSuggestion(txt);
+          // Re-Render des aktuellen Containers
+          // Wir rufen renderSuggestionsInto erneut mit den gleichen Texten auf,
+          // aber blacklist greift jetzt
+          renderSuggestionsInto(containerId, allTexts, onPick);
+          showToast('Aus Vorschlägen entfernt.');
+        }
+      }, 600);
+    };
+    const cancelPress = () => {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    };
+
+    chip.addEventListener('touchstart', startPress, { passive: true });
+    chip.addEventListener('touchend', cancelPress);
+    chip.addEventListener('touchmove', cancelPress);
+    chip.addEventListener('mousedown', startPress);
+    chip.addEventListener('mouseup', cancelPress);
+    chip.addEventListener('mouseleave', cancelPress);
+
     chip.addEventListener('click', () => {
+      // Wenn Long-Press gerade gefeuert hat, normalen Click ignorieren
+      if (longPressFired) {
+        longPressFired = false;
+        return;
+      }
       onPick(chip.dataset.suggestionText);
     });
   });
+}
+
+// Fügt einen Text zur Vorschlags-Blacklist hinzu (case-insensitive Vergleich)
+function blacklistSuggestion(text) {
+  if (!text || typeof text !== 'string') return;
+  const t = text.trim();
+  if (!t) return;
+  if (!Array.isArray(state.suggestionBlacklist)) state.suggestionBlacklist = [];
+  if (state.suggestionBlacklist.some(x => x.toLowerCase() === t.toLowerCase())) return;
+  state.suggestionBlacklist.push(t);
+  saveState();
 }
 
 function openBodyGeneralEntry() {
@@ -8893,7 +8957,7 @@ function renderBodyIntensitySliders() {
     // Kein Typ gewählt: ein einzelner Default-Schieber
     container.innerHTML = `
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="body-intensity-val">5</span>/10</div>
-      <input type="range" class="body-intensity-slider" data-type-key="__default__" min="1" max="10" value="5"
+      <input type="range" class="body-intensity-slider" data-type-key="__default__" min="0" max="10" value="5"
         style="width:100%;"
         oninput="document.getElementById('body-intensity-val').textContent=this.value">
     `;
@@ -8912,7 +8976,7 @@ function renderBodyIntensitySliders() {
           <span><span id="${valueId}">${initialValue}</span>/10</span>
         </div>
         <input type="range" class="body-intensity-slider" data-type-key="${escapeHtml(t)}"
-          min="1" max="10" value="${initialValue}"
+          min="0" max="10" value="${initialValue}"
           style="width:100%;"
           oninput="document.getElementById('${valueId}').textContent=this.value">
       </div>
@@ -8940,14 +9004,16 @@ function saveBodyEntry() {
   const sliders = document.querySelectorAll('.body-intensity-slider');
   if (sliders.length === 1 && sliders[0].dataset.typeKey === '__default__') {
     // Default-Fall: ein Schieber, gilt für alle Typen
-    avgIntensity = parseInt(sliders[0].value, 10) || 5;
+    const v0 = parseInt(sliders[0].value, 10);
+    avgIntensity = isNaN(v0) ? 5 : v0;
     allTypes.forEach(t => { intensities[t] = avgIntensity; });
   } else {
     // Einzelne Schieber pro Typ
     let sum = 0, count = 0;
     sliders.forEach(s => {
       const key = s.dataset.typeKey;
-      const v = parseInt(s.value, 10) || 5;
+      const parsed = parseInt(s.value, 10);
+      const v = isNaN(parsed) ? 5 : parsed;
       // Nur Schieber, die zu den aktuellen Typen passen
       if (allTypes.includes(key)) {
         intensities[key] = v;
@@ -9851,6 +9917,17 @@ function openEditActivity(e) {
   document.getElementById('edit-activity-name').value = a.name || '';
   document.getElementById('edit-activity-duration').value = a.duration || '';
   document.getElementById('edit-activity-note').value = a.note || '';
+
+  // Zeitpunkt aus ts befüllen (lokale Zeit)
+  const d = new Date(a.ts);
+  if (!isNaN(d.getTime())) {
+    const pad = n => String(n).padStart(2, '0');
+    const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    document.getElementById('edit-activity-date').value = dateStr;
+    document.getElementById('edit-activity-time').value = timeStr;
+  }
+
   const goalWrap = document.getElementById('edit-activity-goal-wrap');
   const goalSelect = document.getElementById('edit-activity-goal');
   const goals = Array.isArray(state.goals) ? state.goals : [];
@@ -9877,11 +9954,48 @@ function saveEditActivity() {
   if (!a) { closeEditActivity(); return; }
   const newName = (document.getElementById('edit-activity-name').value || '').trim();
   if (!newName) { showToast('Name darf nicht leer sein.'); return; }
+
+  // Neuer Zeitstempel aus Datum + Uhrzeit
+  const dateVal = (document.getElementById('edit-activity-date').value || '').trim();
+  const timeVal = (document.getElementById('edit-activity-time').value || '').trim();
+  let newTs = a.ts; // Default: unverändert
+  if (dateVal) {
+    const t = timeVal || '12:00';
+    const d = new Date(dateVal + 'T' + t + ':00');
+    if (isNaN(d.getTime())) {
+      showToast('Ungültiger Zeitpunkt.');
+      return;
+    }
+    if (d.getTime() > Date.now()) {
+      showToast('Das liegt in der Zukunft.');
+      return;
+    }
+    newTs = d.toISOString();
+  }
+
   a.name = newName;
   a.duration = (document.getElementById('edit-activity-duration').value || '').trim() || null;
   a.note = (document.getElementById('edit-activity-note').value || '').trim() || null;
   const goalId = document.getElementById('edit-activity-goal').value;
   a.goalId = goalId || null;
+
+  // Wenn Zeitstempel geändert: aus dem Log nehmen und sortiert wieder einfügen
+  if (newTs !== a.ts) {
+    a.ts = newTs;
+    const idx = state.activityLog.findIndex(x => x === a);
+    if (idx >= 0) state.activityLog.splice(idx, 1);
+    // Sortiert einfügen (neueste zuerst)
+    let inserted = false;
+    for (let i = 0; i < state.activityLog.length; i++) {
+      if (new Date(state.activityLog[i].ts) < new Date(newTs)) {
+        state.activityLog.splice(i, 0, a);
+        inserted = true;
+        break;
+      }
+    }
+    if (!inserted) state.activityLog.push(a);
+  }
+
   saveState();
   closeEditActivity();
   renderVerlaufList();
@@ -10063,7 +10177,7 @@ function renderEditBodyIntensitySliders(originalEntry) {
   if (types.length === 0) {
     container.innerHTML = `
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Intensität: <span id="edit-body-intensity-val">5</span>/10</div>
-      <input type="range" class="body-intensity-slider" data-type-key="__default__" min="1" max="10" value="${(originalEntry && originalEntry.intensity) || 5}"
+      <input type="range" class="body-intensity-slider" data-type-key="__default__" min="0" max="10" value="${(originalEntry && typeof originalEntry.intensity === 'number') ? originalEntry.intensity : 5}"
         style="width:100%;"
         oninput="document.getElementById('edit-body-intensity-val').textContent=this.value">
     `;
@@ -10081,7 +10195,7 @@ function renderEditBodyIntensitySliders(originalEntry) {
           <span><span id="${valueId}">${initialValue}</span>/10</span>
         </div>
         <input type="range" class="body-intensity-slider" data-type-key="${escapeHtml(t)}"
-          min="1" max="10" value="${initialValue}"
+          min="0" max="10" value="${initialValue}"
           style="width:100%;"
           oninput="document.getElementById('${valueId}').textContent=this.value">
       </div>
@@ -10116,13 +10230,15 @@ function saveEditBody() {
   let avgIntensity = 5;
   const sliders = document.querySelectorAll('#edit-body-intensity-container .body-intensity-slider');
   if (sliders.length === 1 && sliders[0].dataset.typeKey === '__default__') {
-    avgIntensity = parseInt(sliders[0].value, 10) || 5;
+    const v0 = parseInt(sliders[0].value, 10);
+    avgIntensity = isNaN(v0) ? 5 : v0;
     allTypes.forEach(t => { intensities[t] = avgIntensity; });
   } else {
     let sum = 0, count = 0;
     sliders.forEach(s => {
       const key = s.dataset.typeKey;
-      const v = parseInt(s.value, 10) || 5;
+      const parsed = parseInt(s.value, 10);
+      const v = isNaN(parsed) ? 5 : parsed;
       if (allTypes.includes(key)) {
         intensities[key] = v;
         sum += v; count++;
@@ -11498,20 +11614,15 @@ const EVENING_QUESTIONS = [
     step: 'Danken',
     title: 'Wofür bist du heute dankbar?',
     sub: 'Etwas Kleines zählt am meisten.'
-  },
-  {
-    step: 'Loslassen',
-    title: 'Was nimmst du mit — und was darfst du jetzt zurücklassen?',
-    sub: 'Die offenen Dinge sind morgen noch da.'
   }
 ];
 
 let eveningStep = 0;
-let eveningAnswers = ['', '', ''];
+let eveningAnswers = ['', ''];
 
 function openEvening() {
   eveningStep = 0;
-  eveningAnswers = ['', '', ''];
+  eveningAnswers = ['', ''];
   showSection('evening');
   // ✕ wieder sichtbar, falls vorher ausgeblendet
   const closeX = document.getElementById('evening-close-x');
@@ -18347,7 +18458,7 @@ function replaceStateFromImport(imported, meta) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
