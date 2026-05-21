@@ -13607,6 +13607,21 @@ function renderMenschenLandschaft() {
   // SVG aufbauen
   let svgInner = '';
 
+  // SVG-Defs: Verlauf + Schatten-Filter für den "Atem-Kugel"-Look (Test bei einem Kreis)
+  svgInner += `
+    <defs>
+      <!-- Radial-Gradient: Lichtquelle oben links — wie bei der Atem-Kugel -->
+      <radialGradient id="kreisVerlauf" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#b89a6b" />
+        <stop offset="100%" stop-color="#7d6338" />
+      </radialGradient>
+      <!-- Sanfter Schatten unter dem Kreis -->
+      <filter id="kreisSchatten" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#3d3527" flood-opacity="0.35"/>
+      </filter>
+    </defs>
+  `;
+
   // Äußere Linie — leicht unregelmäßig (sanfter Polygon-Pfad)
   const lineSegments = 24;
   const linePoints = [];
@@ -13621,14 +13636,27 @@ function renderMenschenLandschaft() {
   }
   svgInner += `<polygon points="${linePoints.join(' ')}" fill="none" stroke="var(--accent-deep)" stroke-width="1.2" opacity="0.4" stroke-linejoin="round"/>`;
 
+  // Den Test-Kreis bestimmen: der größte (höchste Aktivität)
+  let testIdx = -1, testAkt = -1;
+  placed.forEach((p, i) => {
+    if (p.item.aktivitaet > testAkt) { testAkt = p.item.aktivitaet; testIdx = i; }
+  });
+
   // Kreise zeichnen
-  placed.forEach(p => {
+  placed.forEach((p, idx) => {
     const m = p.item.mensch;
     const farbe = farbeFor(p.item.aktivitaet);
     const stroke = p.item.verstorben ? 'rgba(120,110,100,0.6)' : 'transparent';
     const strokeWidth = p.item.verstorben ? 1.5 : 0;
-    // Klickbarer Kreis mit data-id, Click-Handler später per Delegation
-    svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${farbe}" stroke="${stroke}" stroke-width="${strokeWidth}" style="cursor:pointer;"/>`;
+
+    if (idx === testIdx && !p.item.verstorben) {
+      // Test-Kreis: Atem-Kugel-Look mit Verlauf + Schatten
+      svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#kreisVerlauf)" filter="url(#kreisSchatten)" style="cursor:pointer;"/>`;
+    } else {
+      // Alle anderen: flache Füllung wie bisher
+      svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="${farbe}" stroke="${stroke}" stroke-width="${strokeWidth}" style="cursor:pointer;"/>`;
+    }
+
     // Name als kleines Label darunter — wenn der Kreis groß genug
     if (p.r >= 12) {
       const fontSize = Math.max(8, Math.min(11, p.r * 0.55));
