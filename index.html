@@ -14045,6 +14045,8 @@ function renderMenschenLandschaft(containerPrefix) {
       : '';
 
     svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#${verlauf})" filter="url(#${schattenFilter})"${strokeAttr} style="cursor:pointer;"/>`;
+    // === TEMPORÄRER DEBUG: Radius + imHerz als Text auf jedem Kreis ===
+    svgInner += `<text x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="6" fill="#ff0000" style="pointer-events:none;font-weight:bold;">${p.r.toFixed(0)}${m.imHerz ? '♥' : ''}</text>`;
 
     // Name als kleines Label darunter — wenn der Kreis groß genug
     if (p.r >= 12) {
