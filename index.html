@@ -17230,9 +17230,11 @@ function formatGiftRelative(d) {
   if (diffDays === 0) return 'heute';
   if (diffDays === 1) return 'gestern';
   if (diffDays < 7) return `vor ${diffDays} Tagen`;
-  if (diffDays < 14) return 'vor einer Woche';
-  if (diffDays < 30) return `vor ${Math.floor(diffDays/7)} Wochen`;
-  if (diffDays < 60) return 'vor einem Monat';
+  if (diffDays <= 9) return 'vor einer Woche';
+  if (diffDays <= 13) return 'vor knapp zwei Wochen';
+  if (diffDays <= 17) return 'vor zwei Wochen';
+  if (diffDays <= 24) return 'vor drei Wochen';
+  if (diffDays <= 35) return 'vor einem Monat';
   if (diffDays < 365) return `vor ${Math.floor(diffDays/30)} Monaten`;
   return `vor ${Math.floor(diffDays/365)} Jahr${Math.floor(diffDays/365) > 1 ? 'en' : ''}`;
 }
@@ -17559,8 +17561,11 @@ function computeMenschZeitlicheTiefe(mensch) {
   if (tageSeitLetzter <= 0) wann = 'heute';
   else if (tageSeitLetzter === 1) wann = 'gestern';
   else if (tageSeitLetzter <= 7) wann = 'diese Woche';
-  else if (tageSeitLetzter <= 14) wann = 'vor zwei Wochen';
-  else if (tageSeitLetzter <= 30) wann = 'in den letzten Wochen';
+  else if (tageSeitLetzter <= 9) wann = 'vor einer Woche';
+  else if (tageSeitLetzter <= 13) wann = 'vor knapp zwei Wochen';
+  else if (tageSeitLetzter <= 17) wann = 'vor zwei Wochen';
+  else if (tageSeitLetzter <= 24) wann = 'vor drei Wochen';
+  else if (tageSeitLetzter <= 35) wann = 'vor einem Monat';
   else if (tageSeitLetzter <= 60) wann = 'vor einigen Wochen';
   else if (tageSeitLetzter <= 120) wann = 'vor Monaten';
   else if (tageSeitLetzter <= 365) wann = 'lange her';
