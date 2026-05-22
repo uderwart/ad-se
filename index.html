@@ -13819,15 +13819,16 @@ function renderMenschenLandschaft(containerPrefix) {
   }));
   const maxAkt = Math.max(...items.map(i => i.aktivitaet), 1);
 
-  // Größe-Mapping mit zwei Max-Grenzen:
-  // - Herz-Personen: max 16 (Herz-Zone ist kleiner, Position zeigt Nähe — nicht Größe)
-  // - Außen-Personen: max 22
-  // Mindest-Radius: 8 (für beide gleich)
-  const minR = 8;
+  // Größen-Mapping mit zwei Max-Grenzen und zwei Min-Grenzen:
+  // - Herz-Personen: 12–16 (auch in ruhigen Zeiten nie klein, Aktivität spielt zarte Rolle)
+  // - Außen-Personen: 8–22 (volle Aktivitäts-Spanne)
+  const minRAussen = 8;
+  const minRHerz = 12;
   const maxRHerz = 16;
   const maxRAussen = 22;
   // Logarithmisches Mapping, damit kleine Unterschiede bei wenig aktiven nicht überwertet werden
   const sizeFor = (akt, istImHerz) => {
+    const minR = istImHerz ? minRHerz : minRAussen;
     const maxR = istImHerz ? maxRHerz : maxRAussen;
     if (akt <= 0) return minR;
     const t = Math.log(1 + akt) / Math.log(1 + maxAkt);
