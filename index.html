@@ -14057,8 +14057,10 @@ function renderMenschenLandschaft(containerPrefix) {
   svg.innerHTML = svgInner;
 
   // === TEMPORÄRER DEBUG ===
-  // Zeigt: wieviele Kreise in placed[] sind, davon wieviele im Herz, wieviele außen
-  const debugMsg = `[${prefix}] placed=${placed.length}, herz=${placed.filter(p => p.imHerz).length}, aussen=${placed.filter(p => !p.imHerz).length}, outerR=${outerRadius}, innerMax=${innerMaxRadius.toFixed(1)}, aussenRingMin=${aussenRingMin.toFixed(1)}`;
+  // Zeigt: wieviele Kreise in placed[] sind, wieviele im DOM, Layout-Parameter
+  const tatsaechlicheKreise = svg.querySelectorAll('circle.landschaft-kreis').length;
+  const tatsaechlicheTexte = svg.querySelectorAll('text').length;
+  const debugMsg = `[${prefix}] placed=${placed.length}, herz=${placed.filter(p => p.imHerz).length}, aussen=${placed.filter(p => !p.imHerz).length}, DOM-Kreise=${tatsaechlicheKreise}, DOM-Texte=${tatsaechlicheTexte}, svgInner-len=${svgInner.length}`;
   console.log(debugMsg);
   // Auch sichtbar im SVG oben links zeigen
   const dbgText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
