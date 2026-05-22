@@ -4880,6 +4880,34 @@ textarea, input {
         <div class="morning-step" id="morning-step-label"></div>
         <h2 class="morning-q-title" id="morning-q-title"></h2>
         <p class="morning-q-sub" id="morning-q-sub"></p>
+
+        <!-- Goal-Step-Block: nur bei Schritt 2 (Weg-Schritt) sichtbar -->
+        <div id="morning-goal-block" style="display:none;margin-bottom:16px;">
+          <!-- Weg-Auswahl (nur bei mehreren aktiven Wegen) -->
+          <div id="morning-goal-picker" style="display:none;margin-bottom:14px;">
+            <div style="font-size:0.82rem;color:rgba(74,47,42,0.7);margin-bottom:8px;">Welcher Weg liegt heute an?</div>
+            <div id="morning-goal-options" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+          <!-- Weg-Vergegenwärtigung: Titel + Wunsch + Wenn-es-gelingt -->
+          <div id="morning-goal-display" style="display:none;background:rgba(255,255,255,0.4);border-left:3px solid rgba(74,47,42,0.4);border-radius:6px;padding:14px 16px;">
+            <h3 id="morning-goal-title" style="font-family:'EB Garamond',serif;font-style:italic;font-size:1.15rem;margin:0 0 12px;color:#3a1f1a;"></h3>
+            <div id="morning-goal-wish-wrap" style="margin-bottom:12px;">
+              <div style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(74,47,42,0.65);margin-bottom:4px;">Wunsch</div>
+              <div id="morning-goal-wish" style="font-family:'EB Garamond',serif;font-size:0.95rem;line-height:1.5;color:#4a2f2a;"></div>
+            </div>
+            <div id="morning-goal-outcome-wrap">
+              <div style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(74,47,42,0.65);margin-bottom:4px;">Wenn es gelingt</div>
+              <div id="morning-goal-outcome" style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;line-height:1.5;color:#4a2f2a;"></div>
+            </div>
+            <!-- Knopf für anderen Weg (bei mehreren) -->
+            <button id="morning-goal-switch" onclick="morningGoalSwitchBack()" style="display:none;margin-top:12px;background:none;border:1px solid rgba(74,47,42,0.4);color:#4a2f2a;padding:6px 12px;border-radius:6px;font-size:0.78rem;cursor:pointer;">Anderen Weg wählen</button>
+          </div>
+          <!-- Hinweis: keine aktiven Wege -->
+          <div id="morning-goal-empty" style="display:none;background:rgba(255,255,255,0.3);border-radius:6px;padding:14px 16px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;color:rgba(74,47,42,0.75);text-align:center;line-height:1.5;">
+            Du hast aktuell keinen Weg.<br>Lege einen unter <em>Wege</em> an, wenn du magst.
+          </div>
+        </div>
+
         <textarea id="morning-q-note" placeholder="…" rows="3" class="morning-note"></textarea>
         <div class="morning-actions">
           <button class="morning-next" id="morning-next-btn" onclick="morningNext()">Eintragen</button>
@@ -7413,7 +7441,7 @@ function loadState() {
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
     suggestionUseCounts: {},   // { "Meditation": 12, "Spaziergang": 5 } — wie oft genutzt
-    personalNeeds: [],          // ['Atem', 'Bei mir sein', ...] — eigene Bedürfniswörter
+    personalNeeds: { angenehm: [], unangenehm: [] },  // eigene Bedürfniswörter, getrennt nach Kontext
     menschenBefindenWords: [],  // ['erschöpft', 'aufgekratzt', ...] — gemerkte Worte für "Wie ging es ihr/ihm?"
     suggestionBlacklist: [],    // Vorschläge (Aktivitäten, Körper-Typen), die nicht mehr angezeigt werden sollen
     funde: [],                  // Schöne Funde (Zitate, Musik, Gespräche...)
@@ -7441,7 +7469,16 @@ function loadState() {
     if (typeof saved.momentSettings !== 'object' || saved.momentSettings === null) saved.momentSettings = defaults.momentSettings;
     if (typeof saved.lastDurations !== 'object' || saved.lastDurations === null) saved.lastDurations = {};
     if (typeof saved.suggestionUseCounts !== 'object' || saved.suggestionUseCounts === null) saved.suggestionUseCounts = {};
-    if (!Array.isArray(saved.personalNeeds)) saved.personalNeeds = [];
+    // Migration personalNeeds: altes Array → neue Struktur {angenehm:[], unangenehm:[]}
+    if (Array.isArray(saved.personalNeeds)) {
+      // Alle bestehenden Wörter in "unangenehm" — am wahrscheinlichsten richtig
+      saved.personalNeeds = { angenehm: [], unangenehm: saved.personalNeeds.slice() };
+    } else if (!saved.personalNeeds || typeof saved.personalNeeds !== 'object') {
+      saved.personalNeeds = { angenehm: [], unangenehm: [] };
+    } else {
+      if (!Array.isArray(saved.personalNeeds.angenehm)) saved.personalNeeds.angenehm = [];
+      if (!Array.isArray(saved.personalNeeds.unangenehm)) saved.personalNeeds.unangenehm = [];
+    }
     if (!Array.isArray(saved.menschenBefindenWords)) saved.menschenBefindenWords = [];
     if (!Array.isArray(saved.suggestionBlacklist)) saved.suggestionBlacklist = [];
     if (!Array.isArray(saved.funde)) saved.funde = [];
@@ -8173,7 +8210,14 @@ function showNeedsReflection(entry, logIndex) {
   const needsDiv = document.getElementById('fm-needs');
   needsDiv.classList.add('visible');
 
-  const personal = Array.isArray(state.personalNeeds) ? state.personalNeeds : [];
+  // Bucket-Wahl: bei rein angenehmen Gefühlen die "angenehm"-Liste,
+  // sonst (unangenehm oder gemischt) die "unangenehm"-Liste
+  const pnObj = (state.personalNeeds && typeof state.personalNeeds === 'object' && !Array.isArray(state.personalNeeds))
+    ? state.personalNeeds
+    : { angenehm: [], unangenehm: [] };
+  const bucket = isAllPositive ? 'angenehm' : 'unangenehm';
+  const personal = Array.isArray(pnObj[bucket]) ? pnObj[bucket] : [];
+  needsDiv.dataset.bucket = bucket;  // wird beim Speichern + Löschen gebraucht
 
   let html = `<div class="fm-needs-title">${title}</div>
               <div class="fm-needs-sub" style="margin-bottom:14px;line-height:1.5;">${explanation}</div>`;
@@ -8222,10 +8266,14 @@ function attachLongPressDeletePersonalNeed(chip, needText, logIndex, entry) {
     timer = setTimeout(() => {
       timer = null;
       askConfirm(`„${needText}" aus deinen persönlichen Bedürfnissen entfernen?`, () => {
-        if (!Array.isArray(state.personalNeeds)) return;
-        const idx = state.personalNeeds.findIndex(n => n.toLowerCase() === needText.toLowerCase());
+        // Aktuelle Bucket aus DOM lesen
+        const bucket = (document.getElementById('fm-needs')?.dataset.bucket === 'angenehm') ? 'angenehm' : 'unangenehm';
+        if (!state.personalNeeds || typeof state.personalNeeds !== 'object' || Array.isArray(state.personalNeeds)) return;
+        const list = state.personalNeeds[bucket];
+        if (!Array.isArray(list)) return;
+        const idx = list.findIndex(n => n.toLowerCase() === needText.toLowerCase());
         if (idx >= 0) {
-          state.personalNeeds.splice(idx, 1);
+          list.splice(idx, 1);
           saveState();
           showNeedsReflection(entry, logIndex);  // neu zeichnen
           showToast('Entfernt.');
@@ -8251,14 +8299,20 @@ function saveNeedsReflection(logIndex) {
   const selected = [];
   chips.forEach(c => { if (c.classList.contains('active')) selected.push(c.dataset.need); });
   const ownText = (document.getElementById('fm-needs-own')?.value || '').trim();
+  // Bucket aus dem Render-Schritt (im DOM hinterlegt)
+  const bucket = (document.getElementById('fm-needs')?.dataset.bucket === 'angenehm') ? 'angenehm' : 'unangenehm';
   // Eigenes Wort dazu (auch in selected aufnehmen + dauerhaft merken)
   if (ownText) {
     selected.push(ownText);
-    if (!Array.isArray(state.personalNeeds)) state.personalNeeds = [];
-    const exists = state.personalNeeds.some(n => n.toLowerCase() === ownText.toLowerCase());
+    // Struktur sicherstellen (falls noch alt)
+    if (!state.personalNeeds || typeof state.personalNeeds !== 'object' || Array.isArray(state.personalNeeds)) {
+      state.personalNeeds = { angenehm: [], unangenehm: [] };
+    }
+    if (!Array.isArray(state.personalNeeds[bucket])) state.personalNeeds[bucket] = [];
+    const exists = state.personalNeeds[bucket].some(n => n.toLowerCase() === ownText.toLowerCase());
     if (!exists) {
-      state.personalNeeds.unshift(ownText);
-      if (state.personalNeeds.length > 30) state.personalNeeds.pop();
+      state.personalNeeds[bucket].unshift(ownText);
+      if (state.personalNeeds[bucket].length > 30) state.personalNeeds[bucket].pop();
     }
   }
   if (selected.length) {
@@ -8470,9 +8524,9 @@ function addTodayItem() {
   refreshGoalHintForToday(text);
 }
 
-function addTodayItemText(text) {
+function addTodayItemText(text, goalId) {
   const items = getTodayItems();
-  items.push({ text, done: false, ts: new Date().toISOString(), goalId: null });
+  items.push({ text, done: false, ts: new Date().toISOString(), goalId: goalId || null });
   // merken für Vorschläge (wenn neu)
   if (!state.todaySuggestions.some(s => s.toLowerCase() === text.toLowerCase())) {
     state.todaySuggestions.unshift(text);
@@ -11784,6 +11838,12 @@ const MORNING_QUESTIONS = [
     step: 'Haltung',
     title: 'Mit welcher inneren Haltung möchtest du den heutigen Tag erleben?',
     sub: 'Nicht was du leisten willst — wie du sein willst. Ein Wort genügt.'
+  },
+  {
+    step: 'Schritt',
+    title: 'Welchen kleinen Schritt willst du heute tun?',
+    sub: 'Ein Vorhaben für deinen Weg.',
+    type: 'goalStep'  // spezieller Schritt-Typ
   }
 ];
 
@@ -12026,7 +12086,8 @@ function pickNextMorningStory() {
 
 function openMorning() {
   morningStep = 0;
-  morningAnswers = [''];
+  morningAnswers = ['', ''];  // zwei Schritte: Haltung + Schritt
+  morningSelectedGoalId = null;  // Goal-Auswahl bei jedem neuen Start zurücksetzen
   showSection('morning');
   showMorningStory();
 }
@@ -12120,15 +12181,129 @@ function showMorningQuestion() {
   document.getElementById('morning-q-sub').textContent = q.sub;
   const note = document.getElementById('morning-q-note');
   note.value = morningAnswers[morningStep] || '';
+
+  // Goal-Step-Block je nach Schritt-Typ ein-/ausblenden
+  const goalBlock = document.getElementById('morning-goal-block');
+  if (q.type === 'goalStep') {
+    goalBlock.style.display = '';
+    setupMorningGoalStep();
+    note.placeholder = 'z.B. eine Stunde spazieren gehen';
+  } else {
+    goalBlock.style.display = 'none';
+    note.placeholder = '…';
+  }
+
   setTimeout(() => note.focus(), 200);
 
   const nextBtn = document.getElementById('morning-next-btn');
   nextBtn.textContent = 'Eintragen';
 }
 
+// Bei Schritt 'Welchen kleinen Schritt willst du heute tun?':
+// - Keine Wege → Hinweis zeigen, Eingabe trotzdem möglich (als freies Vorhaben)
+// - Ein Weg → direkt anzeigen
+// - Mehrere → Auswahl, dann anzeigen
+let morningSelectedGoalId = null;
+
+function setupMorningGoalStep() {
+  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const picker = document.getElementById('morning-goal-picker');
+  const display = document.getElementById('morning-goal-display');
+  const empty = document.getElementById('morning-goal-empty');
+  const switchBtn = document.getElementById('morning-goal-switch');
+
+  picker.style.display = 'none';
+  display.style.display = 'none';
+  empty.style.display = 'none';
+  switchBtn.style.display = 'none';
+
+  if (goals.length === 0) {
+    empty.style.display = '';
+    morningSelectedGoalId = null;
+    return;
+  }
+  if (goals.length === 1) {
+    morningSelectedGoalId = goals[0].id;
+    showMorningGoalDisplay(goals[0]);
+    return;
+  }
+  // Mehrere: erst Auswahl zeigen — es sei denn schon ausgewählt
+  if (morningSelectedGoalId) {
+    const sel = goals.find(g => g.id === morningSelectedGoalId);
+    if (sel) {
+      showMorningGoalDisplay(sel);
+      switchBtn.style.display = '';
+      return;
+    }
+  }
+  // Auswahl-Kacheln aufbauen
+  picker.style.display = '';
+  const options = document.getElementById('morning-goal-options');
+  options.innerHTML = goals.map(g => `
+    <button onclick="selectMorningGoal('${g.id}')" style="background:rgba(255,255,255,0.4);border:1px solid rgba(74,47,42,0.3);border-radius:8px;padding:12px 14px;text-align:left;cursor:pointer;color:#3a1f1a;font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;">
+      ${escapeHtml(g.title || 'Unbenannter Weg')}
+    </button>
+  `).join('');
+}
+
+function selectMorningGoal(goalId) {
+  morningSelectedGoalId = goalId;
+  setupMorningGoalStep();
+}
+
+function morningGoalSwitchBack() {
+  morningSelectedGoalId = null;
+  setupMorningGoalStep();
+}
+
+function showMorningGoalDisplay(goal) {
+  const display = document.getElementById('morning-goal-display');
+  display.style.display = '';
+  document.getElementById('morning-goal-title').textContent = goal.title || 'Unbenannter Weg';
+  const wishWrap = document.getElementById('morning-goal-wish-wrap');
+  const outcomeWrap = document.getElementById('morning-goal-outcome-wrap');
+
+  // === TEMPORÄRER DEBUG ===
+  // Zeigt sichtbar an, was im Weg-Objekt drin ist
+  const debugInfo = `[Debug] Felder: ${Object.keys(goal).join(', ')} | wish="${goal.wish}" (${typeof goal.wish}, len ${goal.wish ? goal.wish.length : 0}) | outcome="${goal.outcome}" (${typeof goal.outcome})`;
+  console.log(debugInfo);
+  // In wishWrap auch sichtbar anzeigen
+  const dbgEl = document.createElement('div');
+  dbgEl.style.cssText = 'font-size:0.65rem;color:#a14b38;background:rgba(161,75,56,0.08);padding:6px 8px;border-radius:4px;margin-bottom:8px;word-break:break-all;line-height:1.4;';
+  dbgEl.textContent = debugInfo;
+  // Alte Debug-Zeile entfernen falls vorhanden
+  const oldDbg = display.querySelector('.morning-debug-info');
+  if (oldDbg) oldDbg.remove();
+  dbgEl.classList.add('morning-debug-info');
+  display.insertBefore(dbgEl, display.firstChild);
+  // === ENDE DEBUG ===
+
+  if (goal.wish && goal.wish.trim()) {
+    wishWrap.style.display = '';
+    document.getElementById('morning-goal-wish').textContent = goal.wish;
+  } else {
+    wishWrap.style.display = 'none';
+  }
+  if (goal.outcome && goal.outcome.trim()) {
+    outcomeWrap.style.display = '';
+    document.getElementById('morning-goal-outcome').textContent = goal.outcome;
+  } else {
+    outcomeWrap.style.display = 'none';
+  }
+}
+
 function morningNext() {
   const note = (document.getElementById('morning-q-note')?.value || '').trim();
   morningAnswers[morningStep] = note;
+
+  // Bei Schritt 2 (Goal-Step): Antwort als Vorhaben mit goalId speichern
+  const q = MORNING_QUESTIONS[morningStep];
+  if (q && q.type === 'goalStep' && note) {
+    // Vorhaben anlegen — Goal-ID nur setzen wenn auch wirklich ein Weg gewählt ist
+    if (typeof addTodayItemText === 'function') {
+      addTodayItemText(note, morningSelectedGoalId || null);
+    }
+  }
 
   if (morningStep < MORNING_QUESTIONS.length - 1) {
     morningStep++;
@@ -13644,10 +13819,16 @@ function renderMenschenLandschaft(containerPrefix) {
   }));
   const maxAkt = Math.max(...items.map(i => i.aktivitaet), 1);
 
-  // Größe-Mapping: Mindest-Radius 8, max ~24 (Verhältnis ~1:3)
-  const minR = 8, maxR = 24;
+  // Größe-Mapping mit zwei Max-Grenzen:
+  // - Herz-Personen: max 16 (Herz-Zone ist kleiner, Position zeigt Nähe — nicht Größe)
+  // - Außen-Personen: max 22
+  // Mindest-Radius: 8 (für beide gleich)
+  const minR = 8;
+  const maxRHerz = 16;
+  const maxRAussen = 22;
   // Logarithmisches Mapping, damit kleine Unterschiede bei wenig aktiven nicht überwertet werden
-  const sizeFor = akt => {
+  const sizeFor = (akt, istImHerz) => {
+    const maxR = istImHerz ? maxRHerz : maxRAussen;
     if (akt <= 0) return minR;
     const t = Math.log(1 + akt) / Math.log(1 + maxAkt);
     return minR + (maxR - minR) * Math.min(1, t);
@@ -13662,23 +13843,57 @@ function renderMenschenLandschaft(containerPrefix) {
 
   // Layout: zwei Zonen — Herz-Personen in zentrale Zone, andere im äußeren Ring
   // Etappe 2 — Herz als zentrale Zone für max 5 Personen (bewusste Setzung)
-  const herzRadius = innerMaxRadius * 0.38;  // innerer Bereich für Herz-Personen
+  // Positionen sind DETERMINISTISCH aus der Mensch-ID abgeleitet — die Landschaft ist
+  // ein stabiler Ort, kein Lottozug. Jeder Mensch hat IMMER seine Stelle.
+  const herzRadius = innerMaxRadius * 0.48;  // innerer Bereich für Herz-Personen (max 5)
   const aussenRingMin = herzRadius + 6;       // Mindestabstand zur Herz-Zone
 
+  // Hash-Funktion: String → 32-Bit-Integer (xmur3-Variante, deterministisch)
+  const hashString = (str) => {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 16777619) >>> 0;
+    }
+    return h;
+  };
+  // Pseudo-Zufalls-Folge aus einem Seed (mulberry32)
+  const mulberry32 = (seed) => {
+    let s = seed >>> 0;
+    return () => {
+      s = (s + 0x6D2B79F5) >>> 0;
+      let t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  };
+
+  // Reihenfolge stabil — sortiert nach ID, sonst hängt die Kollisions-Auflösung
+  // davon ab, in welcher Reihenfolge die Menschen im Array stehen
+  const sorted = items.slice().sort((a, b) => {
+    const ai = a.mensch.id || '';
+    const bi = b.mensch.id || '';
+    return ai < bi ? -1 : (ai > bi ? 1 : 0);
+  });
+
   const placed = []; // { x, y, r, item, imHerz }
-  items.forEach((it) => {
-    const r = sizeFor(it.aktivitaet);
+  sorted.forEach((it) => {
     const istImHerz = !!it.mensch.imHerz;
+    const r = sizeFor(it.aktivitaet, istImHerz);
+    // Pseudo-Zufalls-Folge aus der Mensch-ID — gleicher Seed → gleiche Folge
+    const seed = hashString(it.mensch.id || it.mensch.name || 'leer');
+    const rng = mulberry32(seed);
+
     let x, y, tries = 0;
     let ok = false;
-    // Maximal 100 Versuche, einen freien Platz zu finden
+    // Maximal 100 Ausweich-Positionen ausprobieren (alle deterministisch)
     while (tries < 100 && !ok) {
-      const angle = Math.random() * Math.PI * 2;
+      const angle = rng() * Math.PI * 2;
       let dist;
       if (istImHerz) {
         // Herz-Zone: zufällig innerhalb des Herz-Radius
         // Quadratwurzel für gleichmäßigere Verteilung
-        dist = Math.sqrt(Math.random()) * (herzRadius - r - 2);
+        dist = Math.sqrt(rng()) * (herzRadius - r - 2);
         if (dist < 0) dist = 0;
       } else {
         // Außen-Ring: zwischen aussenRingMin und innerMaxRadius
@@ -13686,10 +13901,10 @@ function renderMenschenLandschaft(containerPrefix) {
         const maxD = innerMaxRadius - r - 4;
         if (maxD <= minD) {
           // Notfall: Ring zu klein, einfach zufällig
-          dist = Math.random() * (innerMaxRadius - r - 4);
+          dist = rng() * (innerMaxRadius - r - 4);
         } else {
           // Im Ring verteilen, quadratisch für gleichmäßigere Verteilung
-          const t = Math.random();
+          const t = rng();
           dist = minD + Math.sqrt(t) * (maxD - minD);
         }
       }
