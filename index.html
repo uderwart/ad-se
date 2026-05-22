@@ -14056,6 +14056,20 @@ function renderMenschenLandschaft(containerPrefix) {
 
   svg.innerHTML = svgInner;
 
+  // === TEMPORÄRER DEBUG ===
+  // Zeigt: wieviele Kreise in placed[] sind, davon wieviele im Herz, wieviele außen
+  const debugMsg = `[${prefix}] placed=${placed.length}, herz=${placed.filter(p => p.imHerz).length}, aussen=${placed.filter(p => !p.imHerz).length}, outerR=${outerRadius}, innerMax=${innerMaxRadius.toFixed(1)}, aussenRingMin=${aussenRingMin.toFixed(1)}`;
+  console.log(debugMsg);
+  // Auch sichtbar im SVG oben links zeigen
+  const dbgText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  dbgText.setAttribute('x', '4');
+  dbgText.setAttribute('y', '12');
+  dbgText.setAttribute('font-size', '8');
+  dbgText.setAttribute('fill', '#ff0000');
+  dbgText.textContent = debugMsg;
+  svg.appendChild(dbgText);
+  // === ENDE DEBUG ===
+
   // Click-Delegation: Tap auf Kreis → Mensch-Detailseite
   // Long-Press (~600ms) → Herz-Toggle-Dialog
   svg.querySelectorAll('.landschaft-kreis').forEach(el => {
