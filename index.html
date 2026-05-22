@@ -13819,13 +13819,14 @@ function renderMenschenLandschaft(containerPrefix) {
   }));
   const maxAkt = Math.max(...items.map(i => i.aktivitaet), 1);
 
-  // Größen-Mapping mit zwei Max-Grenzen und zwei Min-Grenzen:
-  // - Herz-Personen: 12–16 (auch in ruhigen Zeiten nie klein, Aktivität spielt zarte Rolle)
-  // - Außen-Personen: 8–22 (volle Aktivitäts-Spanne)
-  const minRAussen = 8;
-  const minRHerz = 12;
-  const maxRHerz = 16;
-  const maxRAussen = 22;
+  // Größen-Mapping mit klarer Trennung der Klassen:
+  // - Herz-Personen: 14–20 (immer größer als jeder Außen-Mensch)
+  // - Außen-Personen: 6–12 (volle Aktivitäts-Spanne, aber kleiner als jeder Herz-Mensch)
+  // So bleibt die Herz-Zugehörigkeit immer visuell ablesbar, unabhängig von Aktivität.
+  const minRAussen = 6;
+  const minRHerz = 14;
+  const maxRHerz = 20;
+  const maxRAussen = 12;
   // Logarithmisches Mapping, damit kleine Unterschiede bei wenig aktiven nicht überwertet werden
   const sizeFor = (akt, istImHerz) => {
     const minR = istImHerz ? minRHerz : minRAussen;
@@ -14045,8 +14046,6 @@ function renderMenschenLandschaft(containerPrefix) {
       : '';
 
     svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#${verlauf})" filter="url(#${schattenFilter})"${strokeAttr} style="cursor:pointer;"/>`;
-    // === TEMPORÄRER DEBUG: Radius + imHerz als Text auf jedem Kreis ===
-    svgInner += `<text x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" font-size="6" fill="#ff0000" style="pointer-events:none;font-weight:bold;">${p.r.toFixed(0)}${m.imHerz ? '♥' : ''}</text>`;
 
     // Name als kleines Label darunter — wenn der Kreis groß genug
     if (p.r >= 12) {
