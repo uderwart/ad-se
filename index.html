@@ -4866,6 +4866,7 @@ textarea, input {
       <!-- Stufe 0: Eine kurze Geschichte zum Tagesbeginn -->
       <div id="morning-story" style="display:none;">
         <div class="morning-step">Zum Anfang</div>
+        <img id="morning-story-image" alt="" style="display:none;width:100%;max-height:280px;object-fit:cover;border-radius:10px;margin-bottom:14px;">
         <div class="morning-story-text" id="morning-story-text"></div>
         <div class="morning-story-source" id="morning-story-source"></div>
         <textarea id="morning-story-reflection" rows="2" placeholder="Was bleibt dir davon? (optional)" class="morning-story-reflection"></textarea>
@@ -6010,6 +6011,60 @@ textarea, input {
           onkeydown="if(event.key==='Enter'){addFundCategory();}">
         <button class="btn small" onclick="addFundCategory()">+</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Eigene Geschichten (Morgengruß) -->
+  <div class="card collapsible" id="eigene-geschichten-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('eigene-geschichten')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Eigene Geschichten</h2>
+        <p class="muted-note" id="eigene-geschichten-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="eigene-geschichten-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:14px;line-height:1.55;">
+        Eigene Texte, die im Morgengruß erscheinen können — gleichberechtigt mit den Mark-Aurel-Zitaten. Quelle und Bild sind optional.
+      </p>
+      <div id="eigene-geschichten-list" style="margin-bottom:14px;display:flex;flex-direction:column;gap:10px;"></div>
+      <button class="btn full" onclick="openEigeneGeschichteEditor()">+ Eigene Geschichte anlegen</button>
+    </div>
+  </div>
+
+  <!-- Editor-Overlay für eigene Geschichten -->
+  <div class="entry-overlay" id="eigene-geschichte-editor">
+    <div class="entry-overlay-content" style="max-width:600px;">
+      <button class="fullscreen-close" onclick="closeEigeneGeschichteEditor()" aria-label="Schließen">✕</button>
+      <h2 id="eigene-geschichte-editor-title" style="margin-bottom:14px;">Eigene Geschichte</h2>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Text</div>
+        <textarea id="eigene-geschichte-text" rows="5" placeholder="Was möchtest du dir morgens sagen?"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:1rem;background:var(--bg);color:var(--ink);outline:none;resize:vertical;line-height:1.5;"></textarea>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Quelle (optional)</div>
+        <input type="text" id="eigene-geschichte-source" placeholder="z.B. Eigene Gedanken, Buchtitel, Person"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="muted-note" style="font-size:0.78rem;margin-bottom:6px;">Bild (optional)</div>
+        <div id="eigene-geschichte-image-preview-wrap" style="display:none;margin-bottom:8px;">
+          <img id="eigene-geschichte-image-preview" alt="" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;">
+          <button type="button" class="btn small" onclick="removeEigeneGeschichteImage()" style="margin-top:6px;color:#a14b38;border-color:#a14b38;">Bild entfernen</button>
+        </div>
+        <input type="file" id="eigene-geschichte-image-input" accept="image/*" onchange="onEigeneGeschichteImageSelected(event)"
+          style="width:100%;padding:8px;border:1.5px dashed var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.85rem;background:var(--bg);color:var(--muted);outline:none;">
+        <div id="eigene-geschichte-image-status" class="muted-note" style="font-size:0.75rem;margin-top:4px;"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn full" onclick="saveEigeneGeschichte()">Speichern</button>
+      </div>
+      <button class="btn secondary full" id="eigene-geschichte-delete-btn" onclick="deleteEigeneGeschichte()" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diese Geschichte löschen</button>
     </div>
   </div>
 
@@ -7438,6 +7493,7 @@ function loadState() {
     morningGifts: null,
     morningGiftsSeen: [],
     morningStorySeen: [],
+    eigeneGeschichten: [],     // { id, text, source, image (base64 oder null), createdAt }
     storyReflectionLog: [],
     todayItems: {},
     todaySuggestions: ['Meditation','Gitarre üben','Rad zur Arbeit','Spaziergang','Krafttraining','Lesen','Früh ins Bett','Bewusst essen','Mit Sabine sprechen','Atempause'],
@@ -7463,7 +7519,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -7482,6 +7538,7 @@ function loadState() {
     }
     if (!Array.isArray(saved.menschenBefindenWords)) saved.menschenBefindenWords = [];
     if (!Array.isArray(saved.suggestionBlacklist)) saved.suggestionBlacklist = [];
+    if (!Array.isArray(saved.eigeneGeschichten)) saved.eigeneGeschichten = [];
     if (!Array.isArray(saved.funde)) saved.funde = [];
     if (!Array.isArray(saved.fundeCategories) || saved.fundeCategories.length === 0) {
       saved.fundeCategories = ['Buch', 'Musik', 'Bild', 'Spruch', 'Gespräch', 'Sonstiges'];
@@ -12084,17 +12141,25 @@ let morningAnswers = [''];
 
 // Bag-Shuffle für Morgen-Geschichten: jede Geschichte einmal pro Runde
 // Pro Tag wird nur eine Story gezogen — bei mehrfachem Öffnen am gleichen Tag dieselbe.
+// Eigene Geschichten (state.eigeneGeschichten) werden gleichberechtigt mit MORNING_STORIES gemischt.
+function getAllMorningStories() {
+  const eigene = Array.isArray(state.eigeneGeschichten) ? state.eigeneGeschichten : [];
+  // Eigene haben das gleiche Schema wie MORNING_STORIES, plus optionales 'image'
+  return MORNING_STORIES.concat(eigene);
+}
+
 function pickNextMorningStory() {
   if (!Array.isArray(state.morningStorySeen)) state.morningStorySeen = [];
   const today = dayKey();
+  const allStories = getAllMorningStories();
 
   // Falls heute schon eine Story gezogen wurde, dieselbe wiederverwenden
   if (state.todayStoryId && state.todayStoryDate === today) {
-    const cached = MORNING_STORIES.find(s => s.id === state.todayStoryId);
+    const cached = allStories.find(s => s.id === state.todayStoryId);
     if (cached) return cached;
   }
 
-  const allIds = MORNING_STORIES.map(s => s.id);
+  const allIds = allStories.map(s => s.id);
   let unseen = allIds.filter(id => !state.morningStorySeen.includes(id));
   if (unseen.length === 0) {
     state.morningStorySeen = [];
@@ -12105,7 +12170,7 @@ function pickNextMorningStory() {
   state.todayStoryId = pickedId;
   state.todayStoryDate = today;
   saveState();
-  return MORNING_STORIES.find(s => s.id === pickedId);
+  return allStories.find(s => s.id === pickedId);
 }
 
 function openMorning() {
@@ -12131,7 +12196,25 @@ function showMorningStory() {
     return;
   }
   document.getElementById('morning-story-text').textContent = story.text;
-  document.getElementById('morning-story-source').textContent = '— ' + story.source;
+  const srcEl = document.getElementById('morning-story-source');
+  if (story.source && story.source.trim()) {
+    srcEl.textContent = '— ' + story.source;
+    srcEl.style.display = '';
+  } else {
+    srcEl.textContent = '';
+    srcEl.style.display = 'none';
+  }
+  // Bild ein-/ausschalten
+  const imgEl = document.getElementById('morning-story-image');
+  if (imgEl) {
+    if (story.image && typeof story.image === 'string' && story.image.startsWith('data:')) {
+      imgEl.src = story.image;
+      imgEl.style.display = '';
+    } else {
+      imgEl.src = '';
+      imgEl.style.display = 'none';
+    }
+  }
   // Reflection-Feld zurücksetzen, Story als aktive merken
   const refl = document.getElementById('morning-story-reflection');
   if (refl) refl.value = '';
@@ -14341,6 +14424,14 @@ function toggleSettingsCard(key) {
 
 function updateSettingsSummaries() {
   ensureQuotesInitialized();
+
+  // Eigene Geschichten Summary + Liste rendern
+  const eigeneSum = document.getElementById('eigene-geschichten-summary');
+  if (eigeneSum) {
+    const n = (state.eigeneGeschichten || []).length;
+    eigeneSum.textContent = n === 0 ? 'Noch keine' : (n === 1 ? '1 Geschichte' : `${n} Geschichten`);
+  }
+  if (typeof renderEigeneGeschichten === 'function') renderEigeneGeschichten();
 
   // Gesammelte Gedanken: "X in Rotation · Y ruhend · N von M gesehen"
   const quotesSum = document.getElementById('quotes-summary');
@@ -17079,6 +17170,207 @@ function saveGoalInputOverlay() {
   }
 }
 
+// ===== EIGENE GESCHICHTEN (Morgengruß) =====
+let eigeneGeschichteEditingId = null;       // null = neu, sonst id der existierenden
+let eigeneGeschichteCurrentImage = null;    // base64 oder null
+
+function renderEigeneGeschichten() {
+  const liste = document.getElementById('eigene-geschichten-list');
+  if (!liste) return;
+  const eigene = Array.isArray(state.eigeneGeschichten) ? state.eigeneGeschichten : [];
+  if (!eigene.length) {
+    liste.innerHTML = `<p class="muted-note" style="font-style:italic;text-align:center;padding:10px 0;">Noch keine eigenen Geschichten.</p>`;
+    return;
+  }
+  liste.innerHTML = eigene.map(g => {
+    const preview = (g.text || '').slice(0, 100) + ((g.text || '').length > 100 ? '…' : '');
+    const hasImg = g.image && typeof g.image === 'string' && g.image.startsWith('data:');
+    return `
+      <div class="card" style="padding:12px 14px;cursor:pointer;margin-bottom:0;" onclick="openEigeneGeschichteEditor('${escapeHtml(g.id)}')">
+        ${hasImg ? `<img src="${escapeHtml(g.image)}" alt="" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:8px;">` : ''}
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;line-height:1.4;color:var(--ink);">${escapeHtml(preview)}</div>
+        ${g.source ? `<div class="muted-note" style="font-size:0.75rem;margin-top:4px;">— ${escapeHtml(g.source)}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function openEigeneGeschichteEditor(id) {
+  eigeneGeschichteEditingId = id || null;
+  const overlay = document.getElementById('eigene-geschichte-editor');
+  const titleEl = document.getElementById('eigene-geschichte-editor-title');
+  const textEl = document.getElementById('eigene-geschichte-text');
+  const sourceEl = document.getElementById('eigene-geschichte-source');
+  const previewWrap = document.getElementById('eigene-geschichte-image-preview-wrap');
+  const previewImg = document.getElementById('eigene-geschichte-image-preview');
+  const fileInput = document.getElementById('eigene-geschichte-image-input');
+  const status = document.getElementById('eigene-geschichte-image-status');
+  const deleteBtn = document.getElementById('eigene-geschichte-delete-btn');
+
+  if (id) {
+    const g = (state.eigeneGeschichten || []).find(x => x.id === id);
+    if (g) {
+      titleEl.textContent = 'Geschichte bearbeiten';
+      textEl.value = g.text || '';
+      sourceEl.value = g.source || '';
+      eigeneGeschichteCurrentImage = g.image || null;
+      if (g.image) {
+        previewImg.src = g.image;
+        previewWrap.style.display = '';
+      } else {
+        previewWrap.style.display = 'none';
+      }
+      deleteBtn.style.display = '';
+    }
+  } else {
+    titleEl.textContent = 'Neue Geschichte';
+    textEl.value = '';
+    sourceEl.value = '';
+    eigeneGeschichteCurrentImage = null;
+    previewWrap.style.display = 'none';
+    deleteBtn.style.display = 'none';
+  }
+  fileInput.value = '';
+  status.textContent = '';
+  overlay.classList.add('visible');
+  setTimeout(() => textEl.focus(), 100);
+}
+
+function closeEigeneGeschichteEditor() {
+  const overlay = document.getElementById('eigene-geschichte-editor');
+  if (overlay) overlay.classList.remove('visible');
+  eigeneGeschichteEditingId = null;
+  eigeneGeschichteCurrentImage = null;
+}
+
+function onEigeneGeschichteImageSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  const status = document.getElementById('eigene-geschichte-image-status');
+  const previewWrap = document.getElementById('eigene-geschichte-image-preview-wrap');
+  const previewImg = document.getElementById('eigene-geschichte-image-preview');
+  if (!file) return;
+  status.textContent = 'Bild wird verarbeitet…';
+  compressImageForStorage(file, (dataUrl) => {
+    if (!dataUrl) {
+      status.textContent = 'Konnte Bild nicht verarbeiten.';
+      return;
+    }
+    eigeneGeschichteCurrentImage = dataUrl;
+    previewImg.src = dataUrl;
+    previewWrap.style.display = '';
+    const sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
+    status.textContent = `Bereit (${sizeKB} KB).`;
+  });
+}
+
+function removeEigeneGeschichteImage() {
+  eigeneGeschichteCurrentImage = null;
+  document.getElementById('eigene-geschichte-image-preview-wrap').style.display = 'none';
+  document.getElementById('eigene-geschichte-image-input').value = '';
+  document.getElementById('eigene-geschichte-image-status').textContent = '';
+}
+
+function saveEigeneGeschichte() {
+  const text = (document.getElementById('eigene-geschichte-text').value || '').trim();
+  const source = (document.getElementById('eigene-geschichte-source').value || '').trim();
+  if (!text) {
+    showToast('Text darf nicht leer sein.');
+    return;
+  }
+  if (!Array.isArray(state.eigeneGeschichten)) state.eigeneGeschichten = [];
+
+  if (eigeneGeschichteEditingId) {
+    const g = state.eigeneGeschichten.find(x => x.id === eigeneGeschichteEditingId);
+    if (g) {
+      g.text = text;
+      g.source = source || null;
+      g.image = eigeneGeschichteCurrentImage || null;
+    }
+  } else {
+    state.eigeneGeschichten.unshift({
+      id: 'eg-' + uid(),
+      text: text,
+      source: source || null,
+      image: eigeneGeschichteCurrentImage || null,
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  try {
+    saveState();
+  } catch (err) {
+    showToast('Speichern fehlgeschlagen — Speicher voll. Versuche es ohne Bild.');
+    console.error('Speicher voll:', err);
+    return;
+  }
+  renderEigeneGeschichten();
+  updateSettingsSummaries();
+  closeEigeneGeschichteEditor();
+  showToast('Gespeichert.');
+}
+
+function deleteEigeneGeschichte() {
+  if (!eigeneGeschichteEditingId) return;
+  askConfirm('Diese Geschichte wirklich löschen?', () => {
+    state.eigeneGeschichten = (state.eigeneGeschichten || []).filter(g => g.id !== eigeneGeschichteEditingId);
+    // Falls die heute gezogene Story diese war: zurücksetzen
+    if (state.todayStoryId === eigeneGeschichteEditingId) {
+      state.todayStoryId = null;
+      state.todayStoryDate = null;
+    }
+    saveState();
+    renderEigeneGeschichten();
+    updateSettingsSummaries();
+    closeEigeneGeschichteEditor();
+    showToast('Gelöscht.');
+  });
+}
+
+
+// - skaliert auf max 800px Längsseite
+// - JPEG mit Qualität 0.82
+// - Callback bekommt Base64-String oder null bei Fehler
+function compressImageForStorage(file, callback) {
+  if (!file) { callback(null); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_DIM = 800;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > h && w > MAX_DIM) { h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+      else if (h >= w && h > MAX_DIM) { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      // Weißer Hintergrund für PNGs mit Transparenz
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      try {
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        // Sicherheits-Check: nicht größer als ~500 KB
+        const sizeKB = Math.round(dataUrl.length * 0.75 / 1024);  // Base64 → echte Größe
+        if (sizeKB > 600) {
+          // Nochmal stärker komprimieren
+          const smaller = canvas.toDataURL('image/jpeg', 0.65);
+          callback(smaller);
+        } else {
+          callback(dataUrl);
+        }
+      } catch (err) {
+        console.error('Bild-Komprimierung fehlgeschlagen:', err);
+        callback(null);
+      }
+    };
+    img.onerror = () => callback(null);
+    img.src = e.target.result;
+  };
+  reader.onerror = () => callback(null);
+  reader.readAsDataURL(file);
+}
+
 function uid() {
   return 'm-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
@@ -19186,6 +19478,7 @@ function replaceStateFromImport(imported, meta) {
     morningGifts: null,
     morningGiftsSeen: [],
     morningStorySeen: [],
+    eigeneGeschichten: [],
     storyReflectionLog: [],
     todayItems: {},
     todaySuggestions: [],
@@ -19204,7 +19497,7 @@ function replaceStateFromImport(imported, meta) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
