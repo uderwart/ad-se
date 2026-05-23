@@ -5604,6 +5604,7 @@ textarea, input {
       <button class="chip" id="vf-evening" onclick="setVerlaufFilter('evening')">Abendstunde</button>
       <button class="chip" id="vf-gedanken" onclick="setVerlaufFilter('gedanken')">Gedanken</button>
       <button class="chip" id="vf-moment" onclick="setVerlaufFilter('moment')">Moment</button>
+      <button class="chip" id="vf-begegnung" onclick="setVerlaufFilter('begegnung')">Begegnungen</button>
       <button class="chip" id="vf-story" onclick="setVerlaufFilter('story')">Geschichten</button>
       <button class="chip" id="vf-today" onclick="setVerlaufFilter('today')">Vorhaben</button>
     </div>
@@ -9534,6 +9535,16 @@ function getAllEntries() {
       out.push({ type: 'today', ts: it.doneTs || it.ts, data: it, dayKey: dk });
     });
   });
+  // Begegnungen aus allen Menschen (verschachtelt in mensch.begegnungen)
+  (state.menschen || []).forEach(m => {
+    (m.begegnungen || []).forEach(b => {
+      out.push({
+        type: 'begegnung',
+        ts: b.ts,
+        data: { ...b, menschId: m.id, menschName: m.name }
+      });
+    });
+  });
   out.sort((a, b) => new Date(b.ts) - new Date(a.ts));
   return out;
 }
@@ -9574,7 +9585,8 @@ function summarizeDay(entries) {
     moment:    { one: 'Moment',    many: 'Momente' },
     gedanken:  { one: 'Gedanke',   many: 'Gedanken' },
     story:     { one: 'Geschichte', many: 'Geschichten' },
-    today:     { one: 'Vorhaben',  many: 'Vorhaben' }
+    today:     { one: 'Vorhaben',  many: 'Vorhaben' },
+    begegnung: { one: 'Begegnung', many: 'Begegnungen' }
   };
   return Object.keys(counts).map(k => {
     const n = counts[k];
@@ -9782,9 +9794,12 @@ function makeVerlaufEntry(e) {
     gratitude: 'var(--gold)',
     today: 'var(--accent)',
     evening: '#6b6bb5',
-    moment: '#a89060'
+    moment: '#a89060',
+    begegnung: 'var(--accent-deep)'
   };
   div.style.borderLeftColor = colors[e.type] || 'var(--border)';
+  // Begegnungen: nicht klickbar (reines Tagebuch)
+  if (e.type === 'begegnung') div.style.cursor = 'default';
 
   let body = '';
   const dat = e.data;
@@ -9823,6 +9838,13 @@ function makeVerlaufEntry(e) {
   } else if (e.type === 'today') {
     const done = dat.done ? '✓' : '○';
     body = `<strong>Vorhaben ${done}</strong> ${escapeHtml(dat.text)}`;
+  } else if (e.type === 'begegnung') {
+    const art = dat.art ? ` · ${escapeHtml(dat.art)}` : '';
+    body = `<strong>Begegnung:</strong> ${escapeHtml(dat.menschName || 'jemand')}${art}`;
+    if (dat.ort) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.78rem;">${escapeHtml(dat.ort)}</div>`;
+    if (dat.notiz) body += `<div style="margin-top:3px;color:var(--muted);font-size:0.82rem;font-style:italic;">„${escapeHtml(dat.notiz)}"</div>`;
+    if (dat.stimmung) body += `<div style="margin-top:3px;color:var(--accent-deep);font-size:0.78rem;"><em>${escapeHtml(dat.stimmung)}</em></div>`;
+    if (dat.befinden) body += `<div style="margin-top:2px;color:var(--muted);font-size:0.78rem;">Ihr/ihm ging es: <em>${escapeHtml(dat.befinden)}</em></div>`;
   } else if (e.type === 'evening') {
     body = `<strong>Abendstunde</strong>`;
     const steps = ['Was war heute', 'Dankbar für', 'Mitnehmen / Loslassen'];
@@ -9876,6 +9898,8 @@ function makeVerlaufEntry(e) {
   `;
   div.onclick = (ev) => {
     ev.stopPropagation();
+    // Begegnungen sind reines Tagebuch — kein Tap-Dialog, nichts editierbar/löschbar
+    if (e.type === 'begegnung') return;
     openVerlaufAction(e);
   };
 
