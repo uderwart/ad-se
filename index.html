@@ -14616,13 +14616,12 @@ function renderGoalsList() {
   } else {
     if (empty) empty.style.display = 'none';
     container.innerHTML = goals.map(g => {
-      const wishPreview = (g.wish || '').trim();
-      const shortWish = wishPreview.length > 140 ? wishPreview.slice(0, 140) + '…' : wishPreview;
+      const wishFull = (g.wish || '').trim();
       const startDate = g.createdAt ? new Date(g.createdAt) : null;
       const meta = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
       return `<div class="goal-card" onclick="openGoalDetail('${g.id}')">
         <div class="goal-card-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
-        ${shortWish ? `<div class="goal-card-wish">${escapeHtml(shortWish)}</div>` : ''}
+        ${wishFull ? `<div class="goal-card-wish">${escapeHtml(wishFull)}</div>` : ''}
         ${meta ? `<div class="goal-card-meta">${escapeHtml(meta)}</div>` : ''}
       </div>`;
     }).join('');
@@ -14745,22 +14744,32 @@ function renderGoalDetail() {
   const startDate = g.createdAt ? new Date(g.createdAt) : null;
   const startInfo = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
 
-  let html = `<div class="goal-detail-header">
+  let html = `<div class="goal-detail-header" style="cursor:pointer;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Bearbeiten">
     <div class="goal-detail-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
     ${startInfo ? `<div class="goal-card-meta">${escapeHtml(startInfo)}</div>` : ''}
   </div>`;
 
   if (g.wish) {
-    html += `<div class="goal-detail-section">
+    html += `<div class="goal-detail-section" style="cursor:pointer;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Bearbeiten">
       <div class="goal-detail-label">Wunsch</div>
       <div class="goal-detail-text">${escapeHtml(g.wish)}</div>
+    </div>`;
+  } else {
+    html += `<div class="goal-detail-section" style="cursor:pointer;opacity:0.6;font-style:italic;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Hinzufügen">
+      <div class="goal-detail-label">Wunsch</div>
+      <div class="goal-detail-text">Noch nicht formuliert — tippen zum Hinzufügen</div>
     </div>`;
   }
 
   if (g.outcome) {
-    html += `<div class="goal-detail-section">
+    html += `<div class="goal-detail-section" style="cursor:pointer;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Bearbeiten">
       <div class="goal-detail-label">Wenn es gelingt</div>
       <div class="goal-detail-text" style="font-style:italic;">${escapeHtml(g.outcome)}</div>
+    </div>`;
+  } else {
+    html += `<div class="goal-detail-section" style="cursor:pointer;opacity:0.6;font-style:italic;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Hinzufügen">
+      <div class="goal-detail-label">Wenn es gelingt</div>
+      <div class="goal-detail-text">Noch nicht formuliert — tippen zum Hinzufügen</div>
     </div>`;
   }
 
