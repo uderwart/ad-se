@@ -4580,6 +4580,20 @@ textarea, input {
 
   <!-- ====== MENSCHEN-LANDSCHAFT auf Home ====== -->
   <div id="home-landschaft-wrap" style="width:100%;aspect-ratio:1/1;max-width:520px;margin:14px auto;position:relative;">
+    <!-- Suche: Lupe oben rechts, klappt zu einem Eingabefeld auf -->
+    <div id="home-menschen-search-bar" style="position:absolute;top:6px;right:6px;z-index:5;display:flex;align-items:center;justify-content:flex-end;gap:0;">
+      <input id="home-menschen-search-input" type="text" placeholder="Name suchen…"
+        oninput="onMenschenSearchInput()"
+        style="display:none;width:0;padding:6px 10px;border:1.5px solid var(--border);border-radius:18px;font-family:'Inter',sans-serif;font-size:0.85rem;background:var(--bg);color:var(--ink);outline:none;transition:width 0.22s ease;">
+      <button id="home-menschen-search-toggle" onclick="toggleMenschenSearch()"
+        aria-label="Suche"
+        style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);color:var(--ink);cursor:pointer;padding:0;margin-left:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </div>
     <svg id="home-landschaft-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
       <!-- wird von JS gefüllt -->
     </svg>
@@ -6291,6 +6305,31 @@ textarea, input {
     </div>
   </div>
 
+  <!-- Wochenfragen — einklappbar, analog zu Reflexionsfragen -->
+  <div class="card collapsible" id="weekly-questions-collapsible">
+    <div class="collapsible-header" onclick="toggleSettingsCard('weekly-questions')">
+      <div style="flex:1;">
+        <h2 style="margin-bottom:2px;">Wochenfragen</h2>
+        <p class="muted-note" id="weekly-questions-summary" style="margin:0;font-size:0.85rem;"></p>
+      </div>
+      <span class="collapsible-arrow">▸</span>
+    </div>
+    <div class="collapsible-body" id="weekly-questions-body" style="display:none;">
+      <p class="muted-note" style="margin-bottom:12px;line-height:1.55;">
+        Die Fragen aus „Eine Stunde zu zweit". Drei Kapitel — Rückblick, Gefühle &amp; Bedürfnisse, Blick nach vorn. Innerhalb der Kapitel könnt ihr Fragen ergänzen oder entfernen. Die Kapitel selbst bleiben.
+      </p>
+      <div id="weekly-questions-lock-hint" style="display:none;background:var(--accent-soft);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:0.85rem;line-height:1.5;color:var(--ink);">
+        Es läuft eine Sitzung. Beendet oder verwerft sie zuerst, dann könnt ihr die Fragen wieder bearbeiten.
+      </div>
+      <div id="weekly-questions-list"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <button class="btn secondary" id="weekly-questions-reset-btn" onclick="resetWeeklyQuestions()" style="width:100%;">
+          Defaults wiederherstellen
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Morgengaben — einklappbar -->
   <div class="card collapsible" id="gifts-collapsible">
     <div class="collapsible-header" onclick="toggleSettingsCard('gifts')">
@@ -7490,6 +7529,7 @@ function loadState() {
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
+    weeklyQuestions: null,  // null = Default-Liste; sonst Nutzer-Liste
     morningGifts: null,
     morningGiftsSeen: [],
     morningStorySeen: [],
@@ -10572,8 +10612,10 @@ function sessionDisplayNames(session) {
   return { userName, partnerName };
 }
 
-// Fragen-Struktur: 3 Kapitel mit Fragen, teils mit Datenanzeige
-const WEEKLY_QUESTIONS = [
+// Fragen-Struktur: 3 Kapitel mit Fragen, teils mit Datenanzeige.
+// Diese Liste ist der Default — Nutzer können Fragen innerhalb der Kapitel
+// editieren. Kapitelnamen und -reihenfolge sind fix (Dramaturgie).
+const DEFAULT_WEEKLY_QUESTIONS = [
   // Kapitel 1 — Rückblick
   { chapter: 1, chapterLabel: 'Rückblick', title: 'Was ist euch diese Woche besonders geblieben?',
     sub: 'Ein Moment, eine Begegnung, ein Gedanke. Ihr könnt nacheinander sprechen.',
@@ -10607,6 +10649,39 @@ const WEEKLY_QUESTIONS = [
     sub: 'Der Satz, mit dem ihr hinausgeht. Ein Gedanke pro Person, oder zusammen.',
     dataKey: null },
 ];
+
+// Feste Kapitelstruktur — wird auch beim Rendern der Settings-Karte verwendet.
+const WEEKLY_CHAPTERS = [
+  { chapter: 1, chapterLabel: 'Rückblick' },
+  { chapter: 2, chapterLabel: 'Gefühle & Bedürfnisse' },
+  { chapter: 3, chapterLabel: 'Blick nach vorn' },
+];
+
+// Liefert die aktiv genutzte Frageliste:
+// - state.weeklyQuestions wenn vom Nutzer angefasst,
+// - sonst eine flache Kopie der Defaults.
+function getWeeklyQuestions() {
+  if (!Array.isArray(state.weeklyQuestions)) {
+    return DEFAULT_WEEKLY_QUESTIONS.map(q => ({ ...q }));
+  }
+  return state.weeklyQuestions;
+}
+
+// Liefert die Frageliste einer konkreten Session.
+// Bevorzugt den Snapshot, sonst die aktuelle aktive Liste (Fallback für
+// Altdaten und sehr alte laufende Sessions vor Einführung des Snapshots).
+function getSessionQuestions(session) {
+  if (session && Array.isArray(session.questions) && session.questions.length) {
+    return session.questions;
+  }
+  return getWeeklyQuestions();
+}
+
+// Prüft, ob die Wochenfragen gerade nicht editierbar sind, weil eine
+// Sitzung läuft (egal ob aktiv oder pausiert).
+function isWeeklyQuestionsLocked() {
+  return !!state.weeklySession;
+}
 
 function weekStart() {
   // Eine Woche = letzte 7 Tage ab jetzt
@@ -10702,12 +10777,13 @@ function renderWeeklyResume() {
   if (!s) return;
   const d = new Date(s.pausedAt || s.startedAt);
   const daysAgo = Math.floor((Date.now() - d.getTime()) / (1000*60*60*24));
-  const q = WEEKLY_QUESTIONS[s.currentQ] || WEEKLY_QUESTIONS[0];
+  const questions = getSessionQuestions(s);
+  const q = questions[s.currentQ] || questions[0];
   const answered = (s.answers || []).filter(answerHasContent).length;
   const info = document.getElementById('weekly-resume-info');
   info.innerHTML = `
     Ihr seid bei <strong>Kapitel ${q.chapter}: ${escapeHtml(q.chapterLabel)}</strong>,
-    Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}.<br>
+    Frage ${s.currentQ + 1} von ${questions.length}.<br>
     ${answered} Notiz${answered === 1 ? '' : 'en'} schon hinterlegt.<br>
     <span style="color:var(--muted);font-size:0.82rem;">
       Pausiert vor ${daysAgo === 0 ? 'weniger als einem Tag' : daysAgo + ' Tag' + (daysAgo === 1 ? '' : 'en')}.
@@ -10716,13 +10792,15 @@ function renderWeeklyResume() {
 }
 
 function startWeekly() {
+  const sessionQuestions = getWeeklyQuestions().map(q => ({ ...q }));
   state.weeklySession = {
     startedAt: new Date().toISOString(),
     currentQ: 0,
-    answers: new Array(WEEKLY_QUESTIONS.length).fill(null).map(() => ({ self: '', partner: '' })),
+    answers: new Array(sessionQuestions.length).fill(null).map(() => ({ self: '', partner: '' })),
     paused: false,
     userName: state.profile?.name || '',
-    partnerName: state.partner?.name || ''
+    partnerName: state.partner?.name || '',
+    questions: sessionQuestions
   };
   saveState();
   renderWeekly();
@@ -10800,7 +10878,7 @@ function weeklyBack() {
 function weeklyNext() {
   if (!state.weeklySession) return;
   state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
-  if (state.weeklySession.currentQ < WEEKLY_QUESTIONS.length - 1) {
+  if (state.weeklySession.currentQ < getSessionQuestions(state.weeklySession).length - 1) {
     state.weeklySession.currentQ++;
     saveState();
     renderWeekly();
@@ -10843,6 +10921,9 @@ function closeWeeklyFinish() {
 function archiveSession(session, completed) {
   const answered = (session.answers || []).filter(answerHasContent).length;
   if (!answered) return; // Leere Sitzungen nicht archivieren
+  // Snapshot der Fragen sichern. Bei sehr alten Sessions ohne Snapshot fällt
+  // getSessionQuestions auf die aktuelle Liste zurück.
+  const questionsSnapshot = getSessionQuestions(session).map(q => ({ ...q }));
   state.weeklyArchive.unshift({
     startedAt: session.startedAt,
     endedAt: new Date().toISOString(),
@@ -10850,7 +10931,8 @@ function archiveSession(session, completed) {
     completed,
     stoppedAt: session.currentQ + 1,
     userName: session.userName || state.profile?.name || '',
-    partnerName: session.partnerName || state.partner?.name || ''
+    partnerName: session.partnerName || state.partner?.name || '',
+    questions: questionsSnapshot
   });
   if (state.weeklyArchive.length > 100) state.weeklyArchive.pop();
   saveState();
@@ -10859,15 +10941,16 @@ function archiveSession(session, completed) {
 function renderWeeklyQuestion() {
   const s = state.weeklySession;
   if (!s) return;
-  const q = WEEKLY_QUESTIONS[s.currentQ];
+  const questions = getSessionQuestions(s);
+  const q = questions[s.currentQ];
 
   // Fortschritt
   document.getElementById('weekly-chapter-label').textContent =
     `Kapitel ${q.chapter} · ${q.chapterLabel}`;
-  const pct = ((s.currentQ + 1) / WEEKLY_QUESTIONS.length) * 100;
+  const pct = ((s.currentQ + 1) / questions.length) * 100;
   document.getElementById('weekly-progress-fill').style.width = pct + '%';
   document.getElementById('weekly-progress-q').textContent =
-    `Frage ${s.currentQ + 1} von ${WEEKLY_QUESTIONS.length}`;
+    `Frage ${s.currentQ + 1} von ${questions.length}`;
 
   // Frage
   document.getElementById('weekly-q-title').textContent = q.title;
@@ -10909,7 +10992,7 @@ function renderWeeklyQuestion() {
 
   // Weiter-Button: bei letzter Frage "Abschließen"
   const nextBtn = document.getElementById('weekly-next-btn');
-  nextBtn.textContent = s.currentQ === WEEKLY_QUESTIONS.length - 1 ? 'Abschließen' : 'Weiter';
+  nextBtn.textContent = s.currentQ === questions.length - 1 ? 'Abschließen' : 'Weiter';
 }
 
 function getWeeklyDataFor(key) {
@@ -11062,10 +11145,11 @@ function openArchiveSession(i) {
   // Inhalt rendern
   const content = document.getElementById('archive-detail-content');
   const { userName, partnerName } = sessionDisplayNames(s);
+  const questions = getSessionQuestions(s);
   let html = '';
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
-    const q = WEEKLY_QUESTIONS[idx];
+    const q = questions[idx];
     if (!q) return;
     if (q.chapter !== currentChapter) {
       currentChapter = q.chapter;
@@ -11102,13 +11186,14 @@ function formatSessionAsText(s) {
   const d = new Date(s.startedAt);
   const dateStr = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const { userName, partnerName } = sessionDisplayNames(s);
+  const questions = getSessionQuestions(s);
   // Header: wenn Partner-Name bekannt, "mit X" anhängen — wie früher
   const partnerHeader = (s.partnerName || state.partner?.name) ? ` mit ${s.partnerName || state.partner.name}` : '';
   let out = `Eine Stunde zu zweit${partnerHeader}\n${dateStr}\n`;
   out += '—'.repeat(40) + '\n\n';
   let currentChapter = null;
   (s.answers || []).forEach((a, idx) => {
-    const q = WEEKLY_QUESTIONS[idx];
+    const q = questions[idx];
     if (!q) return;
     const ans = normalizeAnswer(a);
     const hasSelf = ans.self && ans.self.trim();
@@ -11512,6 +11597,7 @@ function renderMomentSettings() {
     if (btn) btn.classList.toggle('active', String(s.duration) === d);
   });
   renderMomentQuestionsList();
+  renderWeeklyQuestionsList();
   renderSuggestionsList();
   renderAllQuotesList();
   renderMorningGiftsList();
@@ -11728,6 +11814,173 @@ function removeMomentQuestion(idx) {
   state.momentQuestions.splice(idx, 1);
   saveState();
   renderMomentQuestionsList();
+}
+
+/* ===== WOCHENFRAGEN (verwalten) ===== */
+
+// Sicherstellen, dass state.weeklyQuestions als Array existiert
+// (vor Mutation), kopiert vom Default falls noch null.
+function ensureWeeklyQuestionsArray() {
+  if (!Array.isArray(state.weeklyQuestions)) {
+    state.weeklyQuestions = DEFAULT_WEEKLY_QUESTIONS.map(q => ({ ...q }));
+  }
+}
+
+function renderWeeklyQuestionsList() {
+  const list = document.getElementById('weekly-questions-list');
+  const lockHint = document.getElementById('weekly-questions-lock-hint');
+  const resetBtn = document.getElementById('weekly-questions-reset-btn');
+  updateSettingsSummaries();
+  if (!list) return;
+
+  const locked = isWeeklyQuestionsLocked();
+  if (lockHint) lockHint.style.display = locked ? '' : 'none';
+  if (resetBtn) resetBtn.disabled = locked;
+
+  const questions = getWeeklyQuestions();
+
+  // Pro Kapitel rendern — Kapitelreihenfolge ist fix (WEEKLY_CHAPTERS)
+  let html = '';
+  WEEKLY_CHAPTERS.forEach(chap => {
+    html += `<div style="margin-bottom:16px;">
+      <div style="font-family:'Inter',sans-serif;font-size:0.74rem;font-weight:600;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Kapitel ${chap.chapter} · ${escapeHtml(chap.chapterLabel)}</div>`;
+
+    // Items dieses Kapitels — Indizes beziehen sich auf die Gesamt-Liste
+    const chapterItems = [];
+    questions.forEach((q, i) => {
+      if (q.chapter === chap.chapter) chapterItems.push({ q, i });
+    });
+
+    if (chapterItems.length === 0) {
+      html += `<div style="color:var(--muted);font-size:0.85rem;font-style:italic;padding:6px 0 10px;">Keine Frage in diesem Kapitel.</div>`;
+    } else {
+      chapterItems.forEach(({ q, i }) => {
+        const removeBtn = locked
+          ? ''
+          : `<button class="mq-remove" data-idx="${i}" title="Frage entfernen">✕</button>`;
+        html += `<div class="mq-item" data-idx="${i}">
+          <div class="mq-text">${escapeHtml(q.title)}</div>
+          ${removeBtn}
+        </div>`;
+      });
+    }
+
+    // Add-Zeile pro Kapitel
+    const disabledAttr = locked ? 'disabled' : '';
+    html += `<div style="display:flex;gap:8px;margin-top:8px;">
+      <input type="text" data-chapter="${chap.chapter}" class="weekly-q-add-input" ${disabledAttr}
+        placeholder="Neue Frage zu „${escapeHtml(chap.chapterLabel)}"…"
+        style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.88rem;background:var(--bg);color:var(--ink);outline:none;${locked ? 'opacity:0.5;cursor:not-allowed;' : ''}">
+      <button class="btn small weekly-q-add-btn" data-chapter="${chap.chapter}" ${disabledAttr}
+        style="${locked ? 'opacity:0.5;cursor:not-allowed;' : ''}">+</button>
+    </div>`;
+
+    html += `</div>`;
+  });
+
+  list.innerHTML = html;
+
+  // Event-Handler binden — nur wenn nicht gesperrt
+  if (!locked) {
+    list.querySelectorAll('.mq-remove').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const idx = parseInt(btn.getAttribute('data-idx'));
+        removeWeeklyQuestion(idx);
+      });
+    });
+    list.querySelectorAll('.weekly-q-add-btn').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const chap = parseInt(btn.getAttribute('data-chapter'));
+        addWeeklyQuestion(chap);
+      });
+    });
+    list.querySelectorAll('.weekly-q-add-input').forEach(input => {
+      input.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') {
+          const chap = parseInt(input.getAttribute('data-chapter'));
+          addWeeklyQuestion(chap);
+        }
+      });
+    });
+  }
+}
+
+function addWeeklyQuestion(chapter) {
+  if (isWeeklyQuestionsLocked()) {
+    showToast('Während einer Sitzung nicht änderbar.');
+    return;
+  }
+  const input = document.querySelector(`.weekly-q-add-input[data-chapter="${chapter}"]`);
+  if (!input) return;
+  const text = (input.value || '').trim();
+  if (!text) return;
+
+  ensureWeeklyQuestionsArray();
+
+  // Duplikat innerhalb desselben Kapitels verhindern
+  const exists = state.weeklyQuestions.some(q => q.chapter === chapter && q.title === text);
+  if (exists) {
+    showToast('Diese Frage gibt es schon.');
+    input.value = '';
+    return;
+  }
+
+  // Kapitel-Label aus WEEKLY_CHAPTERS holen
+  const chapMeta = WEEKLY_CHAPTERS.find(c => c.chapter === chapter);
+  const chapterLabel = chapMeta ? chapMeta.chapterLabel : '';
+
+  // Position: ans Ende des Kapitels — also vor dem ersten Item des
+  // nächsten Kapitels, oder ans Listenende.
+  let insertAt = state.weeklyQuestions.length;
+  for (let i = 0; i < state.weeklyQuestions.length; i++) {
+    if (state.weeklyQuestions[i].chapter > chapter) {
+      insertAt = i;
+      break;
+    }
+  }
+
+  state.weeklyQuestions.splice(insertAt, 0, {
+    chapter,
+    chapterLabel,
+    title: text,
+    sub: '',
+    dataKey: null
+  });
+  saveState();
+  input.value = '';
+  renderWeeklyQuestionsList();
+  showToast('Hinzugefügt.');
+}
+
+function removeWeeklyQuestion(idx) {
+  if (isWeeklyQuestionsLocked()) {
+    showToast('Während einer Sitzung nicht änderbar.');
+    return;
+  }
+  ensureWeeklyQuestionsArray();
+  if (idx < 0 || idx >= state.weeklyQuestions.length) return;
+  state.weeklyQuestions.splice(idx, 1);
+  saveState();
+  renderWeeklyQuestionsList();
+}
+
+function resetWeeklyQuestions() {
+  if (isWeeklyQuestionsLocked()) {
+    showToast('Während einer Sitzung nicht änderbar.');
+    return;
+  }
+  askConfirm(
+    'Wirklich auf die Standardfragen zurücksetzen? Eure Änderungen gehen verloren.',
+    () => {
+      state.weeklyQuestions = null;  // null = wieder Defaults verwenden
+      saveState();
+      renderWeeklyQuestionsList();
+      showToast('Zurückgesetzt.');
+    },
+    { title: 'Zurücksetzen?', yesText: 'Ja, zurücksetzen' }
+  );
 }
 
 /* ===== MORGENGABEN (verwalten) ===== */
@@ -12369,21 +12622,6 @@ function showMorningGoalDisplay(goal) {
   document.getElementById('morning-goal-title').textContent = goal.title || 'Unbenannter Weg';
   const wishWrap = document.getElementById('morning-goal-wish-wrap');
   const outcomeWrap = document.getElementById('morning-goal-outcome-wrap');
-
-  // === TEMPORÄRER DEBUG ===
-  // Zeigt sichtbar an, was im Weg-Objekt drin ist
-  const debugInfo = `[Debug] Felder: ${Object.keys(goal).join(', ')} | wish="${goal.wish}" (${typeof goal.wish}, len ${goal.wish ? goal.wish.length : 0}) | outcome="${goal.outcome}" (${typeof goal.outcome})`;
-  console.log(debugInfo);
-  // In wishWrap auch sichtbar anzeigen
-  const dbgEl = document.createElement('div');
-  dbgEl.style.cssText = 'font-size:0.65rem;color:#a14b38;background:rgba(161,75,56,0.08);padding:6px 8px;border-radius:4px;margin-bottom:8px;word-break:break-all;line-height:1.4;';
-  dbgEl.textContent = debugInfo;
-  // Alte Debug-Zeile entfernen falls vorhanden
-  const oldDbg = display.querySelector('.morning-debug-info');
-  if (oldDbg) oldDbg.remove();
-  dbgEl.classList.add('morning-debug-info');
-  display.insertBefore(dbgEl, display.firstChild);
-  // === ENDE DEBUG ===
 
   if (goal.wish && goal.wish.trim()) {
     wishWrap.style.display = '';
@@ -13888,6 +14126,38 @@ function hideVorhabenCard() {
 }
 
 // containerPrefix: 'menschen-landschaft' (Sektion) oder 'home-landschaft' (Home)
+// Suchbegriff für die Menschen-Sphäre auf Home.
+// Bewusst nicht in state — soll mit jedem Tab-Wechsel zurückkehren auf leer.
+let menschenSearchQuery = '';
+
+function toggleMenschenSearch() {
+  const input = document.getElementById('home-menschen-search-input');
+  if (!input) return;
+  const isOpen = input.style.display !== 'none' && input.style.width !== '0px' && input.style.width !== '0';
+  if (isOpen) {
+    // Schließen + Suche leeren
+    input.value = '';
+    menschenSearchQuery = '';
+    input.style.width = '0';
+    setTimeout(() => { input.style.display = 'none'; }, 220);
+    renderMenschenLandschaft('home-landschaft');
+  } else {
+    input.style.display = '';
+    // kleiner Tick, damit Transition greift
+    requestAnimationFrame(() => {
+      input.style.width = '180px';
+      input.focus();
+    });
+  }
+}
+
+function onMenschenSearchInput() {
+  const input = document.getElementById('home-menschen-search-input');
+  if (!input) return;
+  menschenSearchQuery = input.value || '';
+  renderMenschenLandschaft('home-landschaft');
+}
+
 function renderMenschenLandschaft(containerPrefix) {
   const prefix = containerPrefix || 'menschen-landschaft';
   const svg = document.getElementById(prefix + '-svg');
@@ -14149,12 +14419,37 @@ function renderMenschenLandschaft(containerPrefix) {
       ? ` stroke="rgba(120,110,100,0.7)" stroke-width="1.2"`
       : '';
 
-    svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#${defPrefix}${verlauf})" filter="url(#${defPrefix}${schattenFilter})"${strokeAttr} style="cursor:pointer;"/>`;
+    // Suche: Treffer leuchtet voll, Rest wird blass.
+    // Suche nur in der Home-Sphäre aktiv (dort gibt es das Lupen-Symbol).
+    const searchActive = satellitenAnzeigen && !!(menschenSearchQuery && menschenSearchQuery.trim());
+    let opacity = 1;
+    let extraStroke = '';
+    if (searchActive) {
+      const q = menschenSearchQuery.trim().toLowerCase();
+      const name = (m.name || '').toLowerCase();
+      const isMatch = name.includes(q);
+      opacity = isMatch ? 1 : 0.15;
+      if (isMatch) {
+        // Leuchtender Ring um die Treffer-Kugel
+        extraStroke = ` stroke="var(--accent-deep)" stroke-width="2"`;
+      }
+    }
 
-    // Name als kleines Label darunter — wenn der Kreis groß genug
-    if (p.r >= 12) {
-      const fontSize = Math.max(8, Math.min(11, p.r * 0.55));
-      svgInner += `<text x="${p.x.toFixed(1)}" y="${(p.y + p.r + fontSize + 1).toFixed(1)}" text-anchor="middle" font-family="EB Garamond, serif" font-size="${fontSize.toFixed(1)}" fill="var(--ink)" opacity="0.7" style="pointer-events:none;user-select:none;">${escapeHtml(m.name || '')}</text>`;
+    // Bei Suche: nicht-Treffer auch klick-inaktiv, damit der Tap nur Treffer öffnet
+    const pointerStyle = (searchActive && opacity < 1) ? 'pointer-events:none;' : 'cursor:pointer;';
+    const finalStrokeAttr = extraStroke || strokeAttr;
+
+    svgInner += `<circle class="landschaft-kreis" data-mensch-id="${escapeHtml(m.id)}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.r.toFixed(1)}" fill="url(#${defPrefix}${verlauf})" filter="url(#${defPrefix}${schattenFilter})"${finalStrokeAttr} opacity="${opacity}" style="${pointerStyle}"/>`;
+
+    // Name als Label:
+    // - normal: nur bei Kreisen >= 12px Radius (Herz-Personen)
+    // - bei aktiver Suche: für Treffer IMMER, auch wenn klein
+    const isSearchMatch = searchActive && (m.name || '').toLowerCase().includes(menschenSearchQuery.trim().toLowerCase());
+    const showLabel = isSearchMatch || (!searchActive && p.r >= 12);
+    if (showLabel) {
+      const fontSize = isSearchMatch ? 11 : Math.max(8, Math.min(11, p.r * 0.55));
+      const labelOpacity = isSearchMatch ? 1 : 0.7;
+      svgInner += `<text x="${p.x.toFixed(1)}" y="${(p.y + p.r + fontSize + 1).toFixed(1)}" text-anchor="middle" font-family="EB Garamond, serif" font-size="${fontSize.toFixed(1)}" fill="var(--ink)" opacity="${labelOpacity}" style="pointer-events:none;user-select:none;">${escapeHtml(m.name || '')}</text>`;
     }
   });
 
@@ -14468,6 +14763,14 @@ function updateSettingsSummaries() {
   if (questionsSum) {
     const questions = getMomentQuestions();
     questionsSum.textContent = questions.length === 1 ? '1 Frage' : `${questions.length} Fragen`;
+  }
+
+  // Wochenfragen: "9 Fragen in 3 Kapiteln"
+  const weeklyQSum = document.getElementById('weekly-questions-summary');
+  if (weeklyQSum) {
+    const wq = getWeeklyQuestions();
+    const label = wq.length === 1 ? '1 Frage' : `${wq.length} Fragen`;
+    weeklyQSum.textContent = `${label} in 3 Kapiteln`;
   }
 
   // Vorschläge: "10 Vorschläge"
@@ -19484,6 +19787,7 @@ function replaceStateFromImport(imported, meta) {
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
+    weeklyQuestions: null,
     morningGifts: null,
     morningGiftsSeen: [],
     morningStorySeen: [],
