@@ -4756,6 +4756,10 @@ textarea, input {
     <div class="weekly-title" id="weekly-home-title">Wochenreflexion</div>
     <div class="weekly-sub" id="weekly-home-sub">Wenn ihr Zeit findet — ein Rückblick.</div>
     <button class="weekly-btn" id="weekly-home-btn" onclick="openWeekly()">Beginnen</button>
+    <button id="weekly-home-buch-link" onclick="openWeeklyArchive()"
+      style="display:none;background:none;border:none;margin-top:10px;padding:6px 4px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;color:var(--accent-deep);cursor:pointer;text-decoration:underline;text-underline-offset:3px;opacity:0.85;">
+      Unser Buch lesen
+    </button>
   </div>
 
   <!-- Verlaufs-Heatmap als symbolisches Sein — keine Beschriftung, kein Tooltip, nur Raster -->
@@ -5741,6 +5745,7 @@ textarea, input {
       <button class="btn secondary" onclick="exportSessionAsText()">Als Text teilen</button>
       <button class="btn secondary" onclick="exportSessionAsJson()">Als Datei</button>
     </div>
+    <button class="btn secondary full" id="archive-detail-resume-btn" style="margin-top:8px;" onclick="resumeArchivedSession()">Wieder aufnehmen</button>
     <button class="btn secondary full" style="margin-top:8px;color:#b04848;border-color:#e0c0c0;" onclick="confirmDeleteSession()">Sitzung löschen</button>
   </div>
 </div>
@@ -8101,12 +8106,13 @@ function renderWeeklyHomeCard() {
   const title = document.getElementById('weekly-home-title');
   const sub = document.getElementById('weekly-home-sub');
   const btn = document.getElementById('weekly-home-btn');
+  const buchLink = document.getElementById('weekly-home-buch-link');
   if (!card) return;
 
   const session = state.weeklySession;
   if (session && session.paused) {
     title.textContent = 'Ihr seid mittendrin';
-    const answered = session.answers.filter(a => a && a.trim()).length;
+    const answered = (session.answers || []).filter(answerHasContent).length;
     sub.textContent = `${answered} Notiz${answered === 1 ? '' : 'en'} bereits hinterlegt.`;
     btn.textContent = 'Weitermachen';
   } else if (session && !session.paused) {
@@ -8121,6 +8127,17 @@ function renderWeeklyHomeCard() {
       ? 'Wenn ihr heute Zeit findet — ein Rückblick zu zweit.'
       : 'Ein Rückblick auf die vergangenen Tage.';
     btn.textContent = 'Beginnen';
+  }
+
+  // Sekundär-Link „Unser Buch lesen" — nur wenn es archivierte Sitzungen gibt
+  if (buchLink) {
+    const n = Array.isArray(state.weeklyArchive) ? state.weeklyArchive.length : 0;
+    if (n > 0) {
+      buchLink.textContent = `Unser Buch lesen · ${n} ${n === 1 ? 'Sitzung' : 'Sitzungen'}`;
+      buchLink.style.display = '';
+    } else {
+      buchLink.style.display = 'none';
+    }
   }
 }
 
@@ -10701,6 +10718,19 @@ function openWeekly() {
   showSection('weekly');
 }
 
+// Öffnet die Sektion „Eine Stunde zu zweit" und scrollt direkt zur Buch-Karte.
+// Wird vom Sekundär-Link „Unser Buch lesen" auf der Home-Karte aufgerufen.
+function openWeeklyArchive() {
+  showSection('weekly');
+  // Frame-Delay, damit die Sektion sichtbar ist, bevor wir scrollen
+  setTimeout(() => {
+    const card = document.getElementById('weekly-archive-card');
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 80);
+}
+
 function renderWeekly() {
   // Entscheide welche Ansicht: start / resume / active / finish
   const start = document.getElementById('weekly-start');
@@ -10851,7 +10881,7 @@ function pauseWeekly() {
 function endWeeklyEarly() {
   if (!state.weeklySession) return;
   askConfirm(
-    'Sitzung hier beenden? Was ihr bisher notiert habt, wird archiviert.',
+    'Die Sitzung wird gespeichert und beendet. Ihr könnt sie später im Buch lesen, aber nicht direkt fortsetzen — nur über „Wieder aufnehmen" im Buch.\n\nWenn ihr nur kurz unterbrechen wollt, ist Pausieren besser.',
     () => {
       state.weeklySession.answers[state.weeklySession.currentQ] = readWeeklyCurrentAnswer();
       archiveSession(state.weeklySession, false);
@@ -11174,12 +11204,70 @@ function openArchiveSession(i) {
   });
   content.innerHTML = html || '<p class="muted-note">Keine Notizen.</p>';
 
+  // „Wieder aufnehmen" nur anbieten, wenn keine andere Sitzung läuft
+  // und die archivierte Sitzung nicht bereits vollständig durchgesprochen wurde.
+  const resumeBtn = document.getElementById('archive-detail-resume-btn');
+  if (resumeBtn) {
+    const blocked = !!state.weeklySession;
+    const isComplete = !!s.completed;
+    if (blocked || isComplete) {
+      resumeBtn.style.display = 'none';
+    } else {
+      resumeBtn.style.display = '';
+    }
+  }
+
   document.getElementById('archive-detail-overlay').classList.add('visible');
 }
 
 function closeArchiveDetail() {
   document.getElementById('archive-detail-overlay').classList.remove('visible');
   archiveDetailIndex = null;
+}
+
+// Holt eine archivierte Sitzung zurück in den aktiven Zustand (pausiert),
+// damit man sie nach versehentlichem „Beenden" doch noch fortsetzen kann.
+// Voraussetzung: keine andere Sitzung läuft, Sitzung war nicht vollständig.
+function resumeArchivedSession() {
+  if (archiveDetailIndex === null) return;
+  const s = state.weeklyArchive[archiveDetailIndex];
+  if (!s) return;
+
+  if (state.weeklySession) {
+    showToast('Eine Sitzung läuft bereits. Erst beenden oder pausieren.');
+    return;
+  }
+
+  askConfirm(
+    'Diese Sitzung wieder zur aktiven Sitzung machen? Sie verschwindet aus dem Buch und liegt wieder pausiert auf der Startseite.',
+    () => {
+      // Sitzung aus dem Archiv holen
+      const restored = state.weeklyArchive.splice(archiveDetailIndex, 1)[0];
+
+      // Erste unbeantwortete Frage als Cursor setzen — natürlichste
+      // Weiterführung. Wenn alle beantwortet sind: letzte Frage.
+      const answers = (restored.answers || []).map(a => normalizeAnswer(a));
+      let firstUnanswered = answers.findIndex(a => !(a.self && a.self.trim()) && !(a.partner && a.partner.trim()));
+      if (firstUnanswered === -1) firstUnanswered = Math.max(0, answers.length - 1);
+
+      state.weeklySession = {
+        startedAt: restored.startedAt,
+        currentQ: firstUnanswered,
+        answers: answers,
+        paused: true,
+        pausedAt: new Date().toISOString(),
+        userName: restored.userName || state.profile?.name || '',
+        partnerName: restored.partnerName || state.partner?.name || '',
+        questions: Array.isArray(restored.questions) ? restored.questions.map(q => ({ ...q })) : undefined
+      };
+      saveState();
+      closeArchiveDetail();
+      showToast('Wieder aufgenommen.');
+      renderWeekly();
+      renderWeeklyHomeCard();
+    },
+    { title: 'Wieder aufnehmen?', yesText: 'Ja, fortsetzen' }
+  );
 }
 
 function formatSessionAsText(s) {
