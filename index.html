@@ -7535,6 +7535,7 @@ function loadState() {
     momentQuestions: null,
     momentQuestionsSeen: [],
     weeklyQuestions: null,  // null = Default-Liste; sonst Nutzer-Liste
+    weeklyLinkedGoalId: null,  // id des Wegs, mit dem das Buch verbunden ist
     morningGifts: null,
     morningGiftsSeen: [],
     morningStorySeen: [],
@@ -15140,6 +15141,11 @@ function renderGoalDetail() {
     ${startInfo ? `<div class="goal-card-meta">${escapeHtml(startInfo)}</div>` : ''}
   </div>`;
 
+  // Brücken-Karte: nur wenn dieser Weg mit der Wochenreflexion verbunden ist
+  if (state.weeklyLinkedGoalId === g.id) {
+    html += renderWeeklyBridgeCard();
+  }
+
   if (g.wish) {
     html += `<div class="goal-detail-section" style="cursor:pointer;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Bearbeiten">
       <div class="goal-detail-label">Wunsch</div>
@@ -15276,6 +15282,28 @@ function renderGoalDetail() {
   html += `<button class="btn secondary" style="margin-top:10px;padding:8px 14px;font-size:0.85rem;" onclick="addTracePrompt('${g.id}')">+ Spur eintragen</button>
   </div>`;
 
+  // Verbinden-Toggle: leiser Text-Knopf über der Aktionsleiste.
+  // Nur einer kann gleichzeitig verbunden sein.
+  const isLinked = state.weeklyLinkedGoalId === g.id;
+  const otherLinked = !isLinked && !!state.weeklyLinkedGoalId;
+  if (isLinked) {
+    html += `<div style="text-align:center;margin-top:18px;">
+      <button class="goal-detail-action-btn" onclick="unlinkWeeklyFromGoal()" style="font-size:0.82rem;opacity:0.75;">
+        Verbindung zur Wochenreflexion lösen
+      </button>
+    </div>`;
+  } else {
+    const subText = otherLinked
+      ? '<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;opacity:0.75;">Aktuell ist ein anderer Weg verbunden — wird ersetzt.</div>'
+      : '';
+    html += `<div style="text-align:center;margin-top:18px;">
+      <button class="goal-detail-action-btn" onclick="linkWeeklyToGoal('${g.id}')" style="font-size:0.82rem;opacity:0.75;">
+        Mit der Wochenreflexion verbinden
+      </button>
+      ${subText}
+    </div>`;
+  }
+
   html += `<div class="goal-detail-actions">
     <button class="goal-detail-action-btn" onclick="openGoalEditor('${g.id}')">Bearbeiten</button>
     <button class="goal-detail-action-btn danger" onclick="deleteGoal('${g.id}')">Weg beenden</button>
@@ -15284,11 +15312,95 @@ function renderGoalDetail() {
   container.innerHTML = html;
 }
 
+// Rendert die Brücken-Karte „Eine Stunde zu zweit" oben im Weg-Detail.
+// Wird nur aufgerufen wenn dieser Weg der mit dem Buch verbundene ist.
+function renderWeeklyBridgeCard() {
+  const archive = Array.isArray(state.weeklyArchive) ? state.weeklyArchive : [];
+  const n = archive.length;
+  const last = n > 0 ? archive[0] : null;  // weeklyArchive ist unshift-sortiert → [0] = neueste
+
+  let metaLine = '';
+  if (n === 0) {
+    metaLine = 'Noch keine Sitzungen — eine Stunde zu zweit wartet.';
+  } else {
+    const lastDate = new Date(last.startedAt);
+    const dateStr = lastDate.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+    metaLine = `${n} ${n === 1 ? 'Sitzung' : 'Sitzungen'} · zuletzt am ${dateStr}`;
+  }
+
+  // Mini-Vorschau der letzten Sitzung: erste nicht-leere Notiz
+  let previewLine = '';
+  if (last) {
+    const questions = getSessionQuestions(last);
+    let previewText = null;
+    let previewQ = null;
+    for (let i = 0; i < (last.answers || []).length; i++) {
+      const a = normalizeAnswer(last.answers[i]);
+      const text = (a.self && a.self.trim()) || (a.partner && a.partner.trim());
+      if (text) {
+        previewText = text;
+        previewQ = questions[i];
+        break;
+      }
+    }
+    if (previewText && previewQ) {
+      // kurz halten
+      const short = previewText.length > 90 ? previewText.slice(0, 88).trim() + '…' : previewText;
+      previewLine = `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+        <div style="font-family:'Inter',sans-serif;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Aus der letzten Sitzung</div>
+        <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;line-height:1.5;color:var(--ink);opacity:0.88;">„${escapeHtml(short)}"</div>
+      </div>`;
+    }
+  }
+
+  // Tap-Ziel: bei Sitzungen → letzte Sitzung öffnen; sonst → openWeekly (kein Buch da)
+  const tapAction = n > 0 ? `openArchiveSessionFromBridge(0)` : `openWeekly()`;
+
+  return `<div onclick="${tapAction}" style="cursor:pointer;background:var(--accent-soft);border-radius:14px;padding:14px 16px;margin:6px 0 18px;border:1px solid var(--border);transition:opacity 0.15s;">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;">
+      <div style="flex:1;">
+        <div style="font-family:'Inter',sans-serif;font-size:0.72rem;color:var(--accent-deep);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:4px;">Eine Stunde zu zweit</div>
+        <div style="font-family:'EB Garamond',serif;font-size:0.92rem;color:var(--ink);opacity:0.88;line-height:1.45;">${escapeHtml(metaLine)}</div>
+      </div>
+      <div style="color:var(--accent-deep);font-size:1rem;opacity:0.7;">→</div>
+    </div>
+    ${previewLine}
+  </div>`;
+}
+
+// Tap auf die Brücken-Karte mit Sitzungen: öffne die letzte Sitzung im Archiv-Detail.
+// Springt erst in die Weekly-Sektion (damit Schließen sauber zurückführt), dann öffnet das Overlay.
+function openArchiveSessionFromBridge(idx) {
+  showSection('weekly');
+  setTimeout(() => openArchiveSession(idx), 80);
+}
+
+function linkWeeklyToGoal(id) {
+  if (!id) return;
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  state.weeklyLinkedGoalId = id;
+  saveState();
+  renderGoalDetail();
+  showToast('Verbunden.');
+}
+
+function unlinkWeeklyFromGoal() {
+  state.weeklyLinkedGoalId = null;
+  saveState();
+  renderGoalDetail();
+  showToast('Verbindung gelöst.');
+}
+
 function deleteGoal(id) {
   const g = (state.goals || []).find(x => x.id === id);
   if (!g) return;
   askConfirm(`„${g.title}" wirklich beenden?\n\nDieser Weg wird gelöscht — alles, was du dazu eingetragen hast, geht verloren.`, () => {
     state.goals = state.goals.filter(x => x.id !== id);
+    // Verbindung zur Wochenreflexion mit löschen, falls dieser Weg verbunden war
+    if (state.weeklyLinkedGoalId === id) {
+      state.weeklyLinkedGoalId = null;
+    }
     saveState();
     showSection('goals');
     showToast('Weg beendet.');
@@ -19876,6 +19988,7 @@ function replaceStateFromImport(imported, meta) {
     momentQuestions: null,
     momentQuestionsSeen: [],
     weeklyQuestions: null,
+    weeklyLinkedGoalId: null,
     morningGifts: null,
     morningGiftsSeen: [],
     morningStorySeen: [],
