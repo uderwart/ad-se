@@ -2700,6 +2700,43 @@ h3 {
   color: var(--muted);
   letter-spacing: 0.04em;
 }
+.goal-card-badge {
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 2px 8px;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.goals-group-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 8px;
+}
+.goals-archive-toggle {
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 14px 0 6px;
+  width: 100%;
+  text-align: left;
+}
+.goals-archive-toggle:hover { color: var(--accent-deep); }
 
 /* Detail-Ansicht eines Weges */
 .goal-detail-header {
@@ -7035,6 +7072,9 @@ textarea, input {
         <button class="art-chip" data-art="gemeinsam erlebt" onclick="selectBegegnungArt('gemeinsam erlebt')">gemeinsam erlebt</button>
         <button class="art-chip" data-art="gedacht an" onclick="selectBegegnungArt('gedacht an')">gedacht an</button>
       </div>
+      <input type="text" id="begegnung-art-input" placeholder="oder eigene Art — z.B. zusammen gekocht, kurz gewinkt"
+        style="width:100%;margin-top:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
+        oninput="onBegegnungArtInput(this.value)">
 
       <!-- Ort (optional) -->
       <div style="margin-top:14px;">
@@ -9115,7 +9155,7 @@ function populateActivityGoalDropdown() {
   const wrap = document.getElementById('activity-goal-link-wrap');
   const select = document.getElementById('activity-goal-link');
   if (!wrap || !select) return;
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const goals = activeGoals();
   if (!goals.length) {
     wrap.style.display = 'none';
     return;
@@ -10494,7 +10534,7 @@ function openEditActivity(e) {
 
   const goalWrap = document.getElementById('edit-activity-goal-wrap');
   const goalSelect = document.getElementById('edit-activity-goal');
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const goals = activeGoals();
   if (goals.length > 0) {
     goalWrap.style.display = '';
     goalSelect.innerHTML = '<option value="">— Kein Weg —</option>' +
@@ -10576,7 +10616,7 @@ function openEditToday(e) {
   document.getElementById('edit-today-text').value = it.text || '';
   const goalWrap = document.getElementById('edit-today-goal-wrap');
   const goalSelect = document.getElementById('edit-today-goal');
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const goals = activeGoals();
   if (goals.length > 0) {
     goalWrap.style.display = '';
     goalSelect.innerHTML = '<option value="">— Kein Weg —</option>' +
@@ -12984,7 +13024,7 @@ function showMorningQuestion() {
 let morningSelectedGoalId = null;
 
 function setupMorningGoalStep() {
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const goals = activeGoals();
   const picker = document.getElementById('morning-goal-picker');
   const display = document.getElementById('morning-goal-display');
   const empty = document.getElementById('morning-goal-empty');
@@ -15321,6 +15361,14 @@ function toggleGedankenEnabled() {
 /* ===== WEGE / GROSSE ZIELE ===== */
 const MAX_GOALS = 3;
 
+// Lebenszyklus eines Wegs: 'active' (Standard, auch für Alt-Einträge ohne Feld), 'paused', 'archived'
+function goalStatus(g) { return g && g.status ? g.status : 'active'; }
+function activeGoals() {
+  return (Array.isArray(state.goals) ? state.goals : []).filter(g => goalStatus(g) === 'active');
+}
+let goalsArchiveOpen = false;
+function toggleGoalsArchive() { goalsArchiveOpen = !goalsArchiveOpen; renderGoalsList(); }
+
 function goalUid() {
   return 'goal-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
 }
@@ -15331,28 +15379,45 @@ function renderGoalsList() {
   const addBtn = document.getElementById('goals-add-btn');
   if (!container) return;
 
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const all = Array.isArray(state.goals) ? state.goals : [];
+  const active = all.filter(g => goalStatus(g) === 'active');
+  const paused = all.filter(g => goalStatus(g) === 'paused');
+  const archived = all.filter(g => goalStatus(g) === 'archived');
 
-  if (!goals.length) {
+  const card = (g, mode) => {
+    const wishFull = (g.wish || '').trim();
+    const startDate = g.createdAt ? new Date(g.createdAt) : null;
+    const meta = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
+    const dim = mode ? 'opacity:0.62;' : '';
+    const badge = mode === 'paused' ? `<span class="goal-card-badge">pausiert</span>`
+                : mode === 'archived' ? `<span class="goal-card-badge">archiviert</span>` : '';
+    return `<div class="goal-card" style="${dim}" onclick="openGoalDetail('${g.id}')">
+      <div class="goal-card-title">${escapeHtml(g.title || '(Ohne Titel)')}${badge}</div>
+      ${wishFull ? `<div class="goal-card-wish">${escapeHtml(wishFull)}</div>` : ''}
+      ${meta ? `<div class="goal-card-meta">${escapeHtml(meta)}</div>` : ''}
+    </div>`;
+  };
+
+  if (!all.length) {
     container.innerHTML = '';
     if (empty) empty.style.display = '';
   } else {
     if (empty) empty.style.display = 'none';
-    container.innerHTML = goals.map(g => {
-      const wishFull = (g.wish || '').trim();
-      const startDate = g.createdAt ? new Date(g.createdAt) : null;
-      const meta = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
-      return `<div class="goal-card" onclick="openGoalDetail('${g.id}')">
-        <div class="goal-card-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
-        ${wishFull ? `<div class="goal-card-wish">${escapeHtml(wishFull)}</div>` : ''}
-        ${meta ? `<div class="goal-card-meta">${escapeHtml(meta)}</div>` : ''}
-      </div>`;
-    }).join('');
+    let html = active.map(g => card(g, null)).join('');
+    if (paused.length) {
+      html += `<div class="goals-group-label">Pausiert</div>`;
+      html += paused.map(g => card(g, 'paused')).join('');
+    }
+    if (archived.length) {
+      html += `<button class="goals-archive-toggle" onclick="toggleGoalsArchive()">Archiv (${archived.length}) ${goalsArchiveOpen ? '▾' : '▸'}</button>`;
+      if (goalsArchiveOpen) html += archived.map(g => card(g, 'archived')).join('');
+    }
+    container.innerHTML = html;
   }
 
-  // Add-Button nur sichtbar, wenn weniger als MAX_GOALS
+  // Add-Button nur sichtbar, wenn weniger als MAX_GOALS aktive Wege
   if (addBtn) {
-    addBtn.style.display = (goals.length < MAX_GOALS) ? '' : 'none';
+    addBtn.style.display = (active.length < MAX_GOALS) ? '' : 'none';
   }
 }
 
@@ -15419,8 +15484,8 @@ function saveGoalEditor() {
       g.updatedAt = new Date().toISOString();
     }
   } else {
-    if (state.goals.length >= MAX_GOALS) {
-      showToast(`Maximal ${MAX_GOALS} Wege gleichzeitig.`);
+    if (activeGoals().length >= MAX_GOALS) {
+      showToast(`Maximal ${MAX_GOALS} aktive Wege. Pausiere oder archiviere zuerst einen.`);
       return;
     }
     state.goals.push({
@@ -15429,6 +15494,7 @@ function saveGoalEditor() {
       wish: wish,
       outcome: outcome,
       keywords: keywords,
+      status: 'active',
       obstacles: [],
       ifThenPlans: [],
       traces: [],
@@ -15466,10 +15532,18 @@ function renderGoalDetail() {
 
   const startDate = g.createdAt ? new Date(g.createdAt) : null;
   const startInfo = startDate ? `Begonnen ${formatGoalDate(startDate)}` : '';
+  const st = goalStatus(g);
+  let statusInfo = '';
+  if (st === 'paused') {
+    statusInfo = g.pausedAt ? `Pausiert seit ${formatGoalDate(new Date(g.pausedAt))}` : 'Pausiert';
+  } else if (st === 'archived') {
+    statusInfo = g.archivedAt ? `Archiviert am ${formatGoalDate(new Date(g.archivedAt))}` : 'Archiviert';
+  }
 
   let html = `<div class="goal-detail-header" style="cursor:pointer;" onclick="openGoalEditor('${g.id}')" title="Tippen zum Bearbeiten">
     <div class="goal-detail-title">${escapeHtml(g.title || '(Ohne Titel)')}</div>
     ${startInfo ? `<div class="goal-card-meta">${escapeHtml(startInfo)}</div>` : ''}
+    ${statusInfo ? `<div class="goal-card-meta" style="margin-top:4px;font-style:italic;">${escapeHtml(statusInfo)}</div>` : ''}
   </div>`;
 
   // Brücken-Karte: nur wenn dieser Weg mit der Wochenreflexion verbunden ist
@@ -15614,31 +15688,48 @@ function renderGoalDetail() {
   </div>`;
 
   // Verbinden-Toggle: leiser Text-Knopf über der Aktionsleiste.
-  // Nur einer kann gleichzeitig verbunden sein.
+  // Nur einer kann gleichzeitig verbunden sein. Nur bei aktiven Wegen anbieten.
   const isLinked = state.weeklyLinkedGoalId === g.id;
   const otherLinked = !isLinked && !!state.weeklyLinkedGoalId;
-  if (isLinked) {
-    html += `<div style="text-align:center;margin-top:18px;">
-      <button class="goal-detail-action-btn" onclick="unlinkWeeklyFromGoal()" style="font-size:0.82rem;opacity:0.75;">
-        Verbindung zur Wochenreflexion lösen
-      </button>
-    </div>`;
-  } else {
-    const subText = otherLinked
-      ? '<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;opacity:0.75;">Aktuell ist ein anderer Weg verbunden — wird ersetzt.</div>'
-      : '';
-    html += `<div style="text-align:center;margin-top:18px;">
-      <button class="goal-detail-action-btn" onclick="linkWeeklyToGoal('${g.id}')" style="font-size:0.82rem;opacity:0.75;">
-        Mit der Wochenreflexion verbinden
-      </button>
-      ${subText}
-    </div>`;
+  if (st === 'active') {
+    if (isLinked) {
+      html += `<div style="text-align:center;margin-top:18px;">
+        <button class="goal-detail-action-btn" onclick="unlinkWeeklyFromGoal()" style="font-size:0.82rem;opacity:0.75;">
+          Verbindung zur Wochenreflexion lösen
+        </button>
+      </div>`;
+    } else {
+      const subText = otherLinked
+        ? '<div style="font-size:0.72rem;color:var(--muted);margin-top:4px;opacity:0.75;">Aktuell ist ein anderer Weg verbunden — wird ersetzt.</div>'
+        : '';
+      html += `<div style="text-align:center;margin-top:18px;">
+        <button class="goal-detail-action-btn" onclick="linkWeeklyToGoal('${g.id}')" style="font-size:0.82rem;opacity:0.75;">
+          Mit der Wochenreflexion verbinden
+        </button>
+        ${subText}
+      </div>`;
+    }
   }
 
-  html += `<div class="goal-detail-actions">
-    <button class="goal-detail-action-btn" onclick="openGoalEditor('${g.id}')">Bearbeiten</button>
-    <button class="goal-detail-action-btn danger" onclick="deleteGoal('${g.id}')">Weg beenden</button>
-  </div>`;
+  // Aktionsleiste — je nach Status
+  if (st === 'archived') {
+    html += `<div class="goal-detail-actions">
+      <button class="goal-detail-action-btn" onclick="reactivateGoal('${g.id}')">Reaktivieren</button>
+      <button class="goal-detail-action-btn danger" onclick="deleteGoal('${g.id}')">Endgültig löschen</button>
+    </div>`;
+  } else if (st === 'paused') {
+    html += `<div class="goal-detail-actions">
+      <button class="goal-detail-action-btn" onclick="openGoalEditor('${g.id}')">Bearbeiten</button>
+      <button class="goal-detail-action-btn" onclick="resumeGoal('${g.id}')">Fortsetzen</button>
+      <button class="goal-detail-action-btn" onclick="archiveGoal('${g.id}')">Archivieren</button>
+    </div>`;
+  } else {
+    html += `<div class="goal-detail-actions">
+      <button class="goal-detail-action-btn" onclick="openGoalEditor('${g.id}')">Bearbeiten</button>
+      <button class="goal-detail-action-btn" onclick="pauseGoal('${g.id}')">Pausieren</button>
+      <button class="goal-detail-action-btn" onclick="archiveGoal('${g.id}')">Archivieren</button>
+    </div>`;
+  }
 
   container.innerHTML = html;
 }
@@ -15723,19 +15814,78 @@ function unlinkWeeklyFromGoal() {
   showToast('Verbindung gelöst.');
 }
 
+function pauseGoal(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  g.status = 'paused';
+  g.pausedAt = new Date().toISOString();
+  g.updatedAt = new Date().toISOString();
+  if (state.weeklyLinkedGoalId === id) state.weeklyLinkedGoalId = null;
+  saveState();
+  showSection('goals');
+  renderGoalsList();
+  showToast('Weg pausiert.');
+}
+
+function resumeGoal(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  if (activeGoals().length >= MAX_GOALS) {
+    showToast(`Maximal ${MAX_GOALS} aktive Wege. Pausiere oder archiviere zuerst einen.`);
+    return;
+  }
+  g.status = 'active';
+  delete g.pausedAt;
+  g.updatedAt = new Date().toISOString();
+  saveState();
+  renderGoalDetail();
+  showToast('Weg fortgesetzt.');
+}
+
+function archiveGoal(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  askConfirm(`„${g.title}" archivieren?\n\nDer Weg verschwindet aus der Übersicht, bleibt aber mit allem erhalten. Du kannst ihn jederzeit reaktivieren.`, () => {
+    g.status = 'archived';
+    g.archivedAt = new Date().toISOString();
+    delete g.pausedAt;
+    g.updatedAt = new Date().toISOString();
+    if (state.weeklyLinkedGoalId === id) state.weeklyLinkedGoalId = null;
+    saveState();
+    showSection('goals');
+    renderGoalsList();
+    showToast('Weg archiviert.');
+  }, { title: 'Weg archivieren?', yesText: 'Ja, archivieren' });
+}
+
+function reactivateGoal(id) {
+  const g = (state.goals || []).find(x => x.id === id);
+  if (!g) return;
+  if (activeGoals().length >= MAX_GOALS) {
+    showToast(`Maximal ${MAX_GOALS} aktive Wege. Pausiere oder archiviere zuerst einen.`);
+    return;
+  }
+  g.status = 'active';
+  delete g.archivedAt;
+  delete g.pausedAt;
+  g.updatedAt = new Date().toISOString();
+  saveState();
+  renderGoalDetail();
+  showToast('Weg reaktiviert.');
+}
+
 function deleteGoal(id) {
   const g = (state.goals || []).find(x => x.id === id);
   if (!g) return;
-  askConfirm(`„${g.title}" wirklich beenden?\n\nDieser Weg wird gelöscht — alles, was du dazu eingetragen hast, geht verloren.`, () => {
+  askConfirm(`„${g.title}" endgültig löschen?\n\nDer Weg wird gelöscht — alles, was du dazu eingetragen hast, geht verloren. Das lässt sich nicht rückgängig machen.`, () => {
     state.goals = state.goals.filter(x => x.id !== id);
-    // Verbindung zur Wochenreflexion mit löschen, falls dieser Weg verbunden war
     if (state.weeklyLinkedGoalId === id) {
       state.weeklyLinkedGoalId = null;
     }
     saveState();
     showSection('goals');
-    showToast('Weg beendet.');
-  }, { title: 'Weg beenden?', yesText: 'Ja, beenden' });
+    showToast('Weg gelöscht.');
+  }, { title: 'Endgültig löschen?', yesText: 'Ja, löschen' });
 }
 
 // ----- Hindernisse -----
@@ -16388,7 +16538,7 @@ function restoreHourglass() {
 function findGoalForText(text) {
   if (!text || typeof text !== 'string') return null;
   const lower = text.toLowerCase();
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const goals = activeGoals();
 
   for (const g of goals) {
     if (!Array.isArray(g.keywords) || !g.keywords.length) continue;
@@ -18929,6 +19079,7 @@ let begegnungImageDraft = null;     // aktuell gewählte mediaId
 let begegnungImagePrevious = null;  // mediaId beim Öffnen — für refs-Diff
 let begegnungCaptionPrevious = null; // Caption beim Öffnen
 let begegnungMitPersonen = [];       // IDs der zusätzlich ausgewählten Menschen (nur bei neuen Begegnungen)
+let begegnungBestehendeMitPersonen = []; // IDs der bereits zugeordneten Mit-Personen beim Bearbeiten (read-only)
 let mitPersonenPickerSelection = []; // temporäre Auswahl im Picker
 
 function triggerBegegnungImageSelect() {
@@ -19048,8 +19199,9 @@ function openBegegnungEditor(existingId) {
   if (captionEl) captionEl.value = '';
   if (ortEl) ortEl.value = '';
   if (befindenEl) befindenEl.value = '';
-  // Mit-Personen-Sektion nur bei neuen Begegnungen
-  if (mitSection) mitSection.style.display = existingId ? 'none' : '';
+  // Mit-Personen-Sektion immer sichtbar (im Bearbeiten-Modus mit read-only bestehenden + Hinzufügen-Option)
+  if (mitSection) mitSection.style.display = '';
+  begegnungBestehendeMitPersonen = [];
   renderMitPersonenChips();
   renderBegegnungDayPartChips();
   renderBegegnungOrtSuggestions('');
@@ -19059,6 +19211,8 @@ function openBegegnungEditor(existingId) {
 
   // Chips zurücksetzen (Art + Stimmung)
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => c.classList.remove('selected'));
+  const artInputReset = document.getElementById('begegnung-art-input');
+  if (artInputReset) artInputReset.value = '';
   document.querySelectorAll('#begegnung-stimmung-chips .art-chip').forEach(c => c.classList.remove('selected'));
 
   if (existingId) {
@@ -19069,6 +19223,11 @@ function openBegegnungEditor(existingId) {
       ? m.begegnungen.find(x => x.id === existingId)
       : null;
     if (b) {
+      // Bereits zugeordnete Mit-Personen aus treffenId ableiten (read-only Anzeige)
+      if (b.treffenId) {
+        const andere = findTreffenBeteiligte(b.treffenId, menschDetailCurrentId);
+        begegnungBestehendeMitPersonen = andere.map(p => p.id);
+      }
       notizEl.value = b.notiz || '';
       const d = new Date(b.ts);
       dateEl.value = isoDateOnly(d);
@@ -19110,6 +19269,8 @@ function openBegegnungEditor(existingId) {
         begegnungEditorSelectedArt = b.art;
         const chip = document.querySelector(`#begegnung-art-chips .art-chip[data-art="${b.art}"]`);
         if (chip) chip.classList.add('selected');
+        const artInput = document.getElementById('begegnung-art-input');
+        if (artInput) artInput.value = b.art;
       }
       if (b.stimmung) {
         begegnungEditorSelectedStimmung = b.stimmung;
@@ -19159,6 +19320,8 @@ function openBegegnungEditor(existingId) {
     deleteWrap.style.display = 'none';
   }
 
+  renderMitPersonenChips();
+
   renderBegegnungImageDraft();
 
   document.getElementById('begegnung-editor-overlay').classList.add('visible');
@@ -19188,6 +19351,7 @@ async function closeBegegnungEditor() {
   begegnungImagePrevious = null;
   begegnungCaptionPrevious = null;
   begegnungMitPersonen = [];
+  begegnungBestehendeMitPersonen = [];
 }
 
 function toggleBegegnungDate() {
@@ -19207,6 +19371,22 @@ function selectBegegnungArt(art) {
   } else {
     begegnungEditorSelectedArt = art;
   }
+  document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => {
+    if (c.dataset.art === begegnungEditorSelectedArt) {
+      c.classList.add('selected');
+    } else {
+      c.classList.remove('selected');
+    }
+  });
+  // Eingabefeld mitführen, damit Chip und Feld dieselbe Art zeigen
+  const input = document.getElementById('begegnung-art-input');
+  if (input) input.value = begegnungEditorSelectedArt || '';
+}
+
+// Freitext-Art: Feld ist die Quelle, passende Chips leuchten mit
+function onBegegnungArtInput(val) {
+  const trimmed = (val || '').trim();
+  begegnungEditorSelectedArt = trimmed || null;
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => {
     if (c.dataset.art === begegnungEditorSelectedArt) {
       c.classList.add('selected');
@@ -19337,7 +19517,7 @@ function populateBegegnungLinkSelect() {
   let opts = '<option value="">— kein Bezug —</option>';
 
   // Wege
-  const goals = Array.isArray(state.goals) ? state.goals : [];
+  const goals = activeGoals();
   if (goals.length) {
     opts += '<optgroup label="Wege">';
     goals.forEach(g => {
@@ -19411,14 +19591,30 @@ function renderMitPersonenChips() {
   const container = document.getElementById('begegnung-mit-chips');
   const addBtn = document.getElementById('begegnung-mit-add-btn');
   if (!container) return;
-  if (!begegnungMitPersonen.length) {
+
+  const liste = state.menschen || [];
+  const bestehend = begegnungBestehendeMitPersonen || [];
+  const neu = begegnungMitPersonen || [];
+
+  if (!bestehend.length && !neu.length) {
     container.innerHTML = '';
     if (addBtn) addBtn.textContent = '+ Person hinzufügen';
     return;
   }
+
   if (addBtn) addBtn.textContent = '+ weitere Person';
-  const liste = state.menschen || [];
-  container.innerHTML = begegnungMitPersonen.map(id => {
+
+  // Bestehende Mit-Personen: kleines „·" als read-only-Markierung, kein ✕
+  const bestehendHtml = bestehend.map(id => {
+    const p = liste.find(x => x.id === id);
+    if (!p) return '';
+    return `<span class="mit-person-chip" style="opacity:0.78;cursor:default;" title="Bereits bei dieser Begegnung dabei">
+      ${escapeHtml(p.name)}
+    </span>`;
+  }).join('');
+
+  // Neu hinzugefügte: mit ✕ zum Entfernen
+  const neuHtml = neu.map(id => {
     const p = liste.find(x => x.id === id);
     if (!p) return '';
     return `<span class="mit-person-chip">
@@ -19426,6 +19622,8 @@ function renderMitPersonenChips() {
       <button type="button" class="mit-person-chip-remove" onclick="removeMitPerson('${id}')" aria-label="Entfernen">✕</button>
     </span>`;
   }).join('');
+
+  container.innerHTML = bestehendHtml + neuHtml;
 }
 
 function removeMitPerson(id) {
@@ -19434,8 +19632,11 @@ function removeMitPerson(id) {
 }
 
 function openMitPersonenPicker() {
-  // Alle Menschen außer dem aktuellen
-  const liste = (state.menschen || []).filter(m => m.id !== menschDetailCurrentId);
+  // Alle Menschen außer dem aktuellen und außer den bereits zugeordneten Mit-Personen
+  const bestehend = begegnungBestehendeMitPersonen || [];
+  const liste = (state.menschen || [])
+    .filter(m => m.id !== menschDetailCurrentId)
+    .filter(m => !bestehend.includes(m.id));
   if (!liste.length) {
     showToast('Keine weiteren Menschen in deiner Liste.');
     return;
@@ -19454,10 +19655,16 @@ function closeMitPersonenPicker() {
 function renderMitPersonenPickerList() {
   const list = document.getElementById('mit-personen-picker-list');
   if (!list) return;
+  const bestehend = begegnungBestehendeMitPersonen || [];
   const liste = (state.menschen || [])
     .filter(m => m.id !== menschDetailCurrentId)
+    .filter(m => !bestehend.includes(m.id))  // bereits zugeordnete ausblenden
     .slice()
     .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  if (!liste.length) {
+    list.innerHTML = `<p class="muted-note" style="text-align:center;padding:18px 0;font-style:italic;">Keine weiteren Menschen verfügbar.</p>`;
+    return;
+  }
   list.innerHTML = liste.map(m => {
     const sel = mitPersonenPickerSelection.includes(m.id) ? 'selected' : '';
     const checkMark = mitPersonenPickerSelection.includes(m.id) ? '✓' : '';
@@ -19719,6 +19926,40 @@ async function saveBegegnungEditor() {
           // Nutzer will nur diese Kopie ändern → treffenId aus DIESER Kopie entfernen
           // Die anderen behalten ihre treffenId untereinander
           b.treffenId = null;
+        }
+      }
+
+      // Neu hinzugefügte Mit-Personen: Kopien anlegen
+      if (begegnungMitPersonen.length > 0) {
+        // Falls die Begegnung noch keine treffenId hat (oder wir sie eben entfernt haben),
+        // jetzt eine neue erzeugen und an die aktuelle Begegnung hängen.
+        if (!b.treffenId) {
+          b.treffenId = 'tref-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+        }
+        const sharedTreffenId = b.treffenId;
+        for (const otherId of begegnungMitPersonen) {
+          const other = (state.menschen || []).find(x => x.id === otherId);
+          if (!other) continue;
+          if (!Array.isArray(other.begegnungen)) other.begegnungen = [];
+          // Sicherheit: nicht doppelt anlegen
+          const schonDa = other.begegnungen.some(x => x.treffenId === sharedTreffenId);
+          if (schonDa) continue;
+          const copyId = 'beg-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+          other.begegnungen.push({
+            id: copyId,
+            ts: ts,
+            art: art || null,
+            stimmung: stimmung || null,
+            ort: ort || null,
+            seinBefinden: null,    // person-spezifisch — bleibt leer
+            link: link,
+            notiz: notiz,
+            dayPart: dayPart,
+            mediaId: mediaId,
+            mediaCaption: caption || null,
+            treffenId: sharedTreffenId
+          });
+          allRecipients.push({ menschId: otherId, begegnungId: copyId });
         }
       }
     }
