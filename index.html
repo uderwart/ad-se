@@ -6053,7 +6053,13 @@ textarea, input {
     <div style="margin-bottom:14px;">
       <button type="button" id="fund-feeling-toggle" onclick="toggleFundFeelingPicker()"
         style="background:none;border:none;padding:0;font-size:0.78rem;color:var(--muted);cursor:pointer;display:block;margin-bottom:6px;text-align:left;">Gefühl dazu? <span style="opacity:0.6;">(optional)</span></button>
-      <div id="fund-feeling-chips" style="display:none;flex-wrap:wrap;gap:6px;"></div>
+      <div id="fund-feeling-body" style="display:none;">
+        <div id="fund-feeling-selected" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+        <input type="text" id="fund-feeling-input" placeholder="Gefühl eintippen und Enter…" onkeydown="onFundFeelingInputKey(event)"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;box-sizing:border-box;">
+        <div id="fund-feeling-suggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+        <div id="fund-feeling-quadrant" style="display:none;"></div>
+      </div>
     </div>
 
     <div style="margin-bottom:14px;">
@@ -7933,6 +7939,7 @@ function loadState() {
     momentQuestions: null,
     momentQuestionsSeen: [],
     qualitySeen: [],
+    personalFeelings: [],
     weeklyQuestions: null,  // null = Default-Liste; sonst Nutzer-Liste
     weeklyLinkedGoalId: null,  // id des Wegs, mit dem das Buch verbunden ist
     morningGifts: null,
@@ -7966,7 +7973,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','qualitySeen','schreibseiten','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','qualitySeen','schreibseiten','personalFeelings','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -17122,7 +17129,10 @@ function askConfirmFund(f) {
 
 let fundEditorDayPart = null;  // 'morgens' | 'abends' | ... oder null = exakte Uhrzeit
 
-// ----- Gefühl an einen Moment hängen (optional) -----
+// ----- Gefühl an einen Moment hängen — eigener, wachsender Wortschatz (Konzept v01) -----
+let fundFeelingPending = null;        // Wort, das gerade optional eingeordnet werden kann
+let fundFeelingSuggestionList = [];   // aktuelle Vorschlagsliste (Index-Referenz fuer onclick)
+
 function fundFeelingVocab() {
   const m = (typeof FEELING_MATRIX !== 'undefined' && FEELING_MATRIX.kern) ? FEELING_MATRIX.kern : {};
   const out = [];
@@ -17130,27 +17140,92 @@ function fundFeelingVocab() {
   return out;
 }
 
+// Quadrant eines Worts: erst gelernte eigene Woerter, dann die Matrix; undefined = unbekannt
+function feelingQuadrantOf(label) {
+  const lc = (label || '').toLowerCase();
+  const pf = (state.personalFeelings || []).find(x => (x.label || '').toLowerCase() === lc);
+  if (pf) return pf.quadrant;
+  const mv = fundFeelingVocab().find(x => x.label.toLowerCase() === lc);
+  if (mv) return mv.quadrant;
+  return undefined;
+}
+
+// Wort in den eigenen Wortschatz aufnehmen/aktualisieren
+function learnFeeling(label, quadrant) {
+  if (!Array.isArray(state.personalFeelings)) state.personalFeelings = [];
+  const lc = (label || '').toLowerCase();
+  const ex = state.personalFeelings.find(x => (x.label || '').toLowerCase() === lc);
+  if (ex) {
+    if (quadrant !== null && quadrant !== undefined) ex.quadrant = quadrant;
+  } else {
+    state.personalFeelings.push({ label: label, quadrant: (quadrant === undefined ? null : quadrant) });
+  }
+}
+
 function toggleFundFeelingPicker() {
   fundFeelingPickerOpen = !fundFeelingPickerOpen;
   renderFundFeelingChips();
 }
 
-function toggleFundFeeling(label, quadrant) {
-  const i = fundEditorFeelings.findIndex(x => x.label === label);
-  if (i >= 0) fundEditorFeelings.splice(i, 1);
-  else fundEditorFeelings.push({ label: label, quadrant: quadrant });
+function addFundFeeling(rawLabel) {
+  const label = (rawLabel || '').trim();
+  if (!label) return;
+  if (fundEditorFeelings.some(x => x.label.toLowerCase() === label.toLowerCase())) {
+    fundFeelingPending = null;
+    const inEl = document.getElementById('fund-feeling-input');
+    if (inEl) inEl.value = '';
+    renderFundFeelingChips();
+    return;
+  }
+  let q = feelingQuadrantOf(label);
+  const wasKnown = (q !== undefined);
+  if (q === undefined) q = null;
+  learnFeeling(label, wasKnown ? q : null);
+  fundEditorFeelings.push({ label: label, quadrant: q });
+  fundFeelingPending = (q === null) ? label : null;
+  const inEl = document.getElementById('fund-feeling-input');
+  if (inEl) inEl.value = '';
+  renderFundFeelingChips();
+}
+
+function addFundFeelingByIndex(i) {
+  const p = fundFeelingSuggestionList[i];
+  if (p) addFundFeeling(p.label);
+}
+
+function removeFundFeelingAt(i) {
+  const removed = fundEditorFeelings[i];
+  fundEditorFeelings.splice(i, 1);
+  if (removed && fundFeelingPending && removed.label.toLowerCase() === fundFeelingPending.toLowerCase()) {
+    fundFeelingPending = null;
+  }
+  renderFundFeelingChips();
+}
+
+function onFundFeelingInputKey(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    addFundFeeling(event.target.value);
+  }
+}
+
+function assignFundFeelingQuadrant(quadrant) {
+  const label = fundFeelingPending;
+  if (!label) return;
+  const f = fundEditorFeelings.find(x => x.label.toLowerCase() === label.toLowerCase());
+  if (f) f.quadrant = quadrant;
+  learnFeeling(label, quadrant);
+  fundFeelingPending = null;
+  renderFundFeelingChips();
+}
+
+function skipFundFeelingQuadrant() {
+  fundFeelingPending = null;
   renderFundFeelingChips();
 }
 
 function renderFundFeelingChips() {
-  const wrap = document.getElementById('fund-feeling-chips');
   const toggle = document.getElementById('fund-feeling-toggle');
-  if (!wrap) return;
-  wrap.style.display = fundFeelingPickerOpen ? 'flex' : 'none';
-  wrap.innerHTML = fundFeelingVocab().map(f => {
-    const sel = fundEditorFeelings.some(x => x.label === f.label) ? ' active' : '';
-    return `<button type="button" class="fund-cat-chip${sel}" onclick="toggleFundFeeling('${f.label}','${f.quadrant}')">${escapeHtml(f.label)}</button>`;
-  }).join('');
   if (toggle) {
     const names = fundEditorFeelings.map(x => escapeHtml(x.label)).join(', ');
     if (!fundFeelingPickerOpen && fundEditorFeelings.length) {
@@ -17159,6 +17234,44 @@ function renderFundFeelingChips() {
       toggle.innerHTML = `Gefühl dazu? <span style="opacity:0.6;">(optional — tippen zum Schließen)</span>`;
     } else {
       toggle.innerHTML = `Gefühl dazu? <span style="opacity:0.6;">(optional)</span>`;
+    }
+  }
+  const body = document.getElementById('fund-feeling-body');
+  if (!body) return;
+  body.style.display = fundFeelingPickerOpen ? 'block' : 'none';
+
+  const sel = document.getElementById('fund-feeling-selected');
+  if (sel) {
+    sel.innerHTML = fundEditorFeelings.map((f, i) =>
+      `<span class="fund-card-feeling" style="display:inline-flex;align-items:center;gap:6px;">${escapeHtml(f.label)}<button type="button" onclick="removeFundFeelingAt(${i})" style="background:none;border:none;color:inherit;cursor:pointer;font-size:1rem;line-height:1;opacity:0.55;padding:0;">×</button></span>`
+    ).join('');
+  }
+
+  const sugWrap = document.getElementById('fund-feeling-suggestions');
+  fundFeelingSuggestionList = (state.personalFeelings || [])
+    .filter(p => !fundEditorFeelings.some(s => s.label.toLowerCase() === (p.label || '').toLowerCase()))
+    .slice(0, 12);
+  if (sugWrap) {
+    sugWrap.innerHTML = fundFeelingSuggestionList.map((p, i) =>
+      `<button type="button" class="fund-cat-chip" onclick="addFundFeelingByIndex(${i})">${escapeHtml(p.label)}</button>`
+    ).join('');
+  }
+
+  const qWrap = document.getElementById('fund-feeling-quadrant');
+  if (qWrap) {
+    if (fundFeelingPending) {
+      qWrap.style.display = 'block';
+      qWrap.innerHTML = `<div style="font-size:0.78rem;color:var(--muted);margin:10px 0 6px;">„${escapeHtml(fundFeelingPending)}" einordnen? <span style="opacity:0.6;">(optional)</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <button type="button" class="fund-cat-chip" onclick="assignFundFeelingQuadrant('aa')">angenehm · aktiviert</button>
+          <button type="button" class="fund-cat-chip" onclick="assignFundFeelingQuadrant('ar')">angenehm · ruhig</button>
+          <button type="button" class="fund-cat-chip" onclick="assignFundFeelingQuadrant('ua')">unangenehm · aktiviert</button>
+          <button type="button" class="fund-cat-chip" onclick="assignFundFeelingQuadrant('ur')">unangenehm · ruhig</button>
+          <button type="button" class="fund-cat-chip" onclick="skipFundFeelingQuadrant()" style="opacity:0.7;">später</button>
+        </div>`;
+    } else {
+      qWrap.style.display = 'none';
+      qWrap.innerHTML = '';
     }
   }
 }
@@ -17208,6 +17321,9 @@ function openFundEditor(existingId) {
   }
 
   fundFeelingPickerOpen = fundEditorFeelings.length > 0;
+  fundFeelingPending = null;
+  const ffInput = document.getElementById('fund-feeling-input');
+  if (ffInput) ffInput.value = '';
   renderFundCategoryChips();
   renderFundFeelingChips();
   renderFundDayPartChips();
@@ -21541,6 +21657,7 @@ function replaceStateFromImport(imported, meta) {
     momentQuestions: null,
     momentQuestionsSeen: [],
     qualitySeen: [],
+    personalFeelings: [],
     weeklyQuestions: null,
     weeklyLinkedGoalId: null,
     morningGifts: null,
@@ -21567,7 +21684,7 @@ function replaceStateFromImport(imported, meta) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','qualitySeen','schreibseiten','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','qualitySeen','schreibseiten','personalFeelings','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
