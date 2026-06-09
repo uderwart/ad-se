@@ -8375,81 +8375,128 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('visible'), 2500);
 }
 
-/* ===== KARTE SENDEN (Funde + Tageseinträge mit Bild) =====
-   Lokal: kein Server. Öffnet das native Teilen-Blatt des Geräts mit
-   Text + Foto als Datei. Fällt zurück auf die Zwischenablage, wenn der
-   Browser das Teilen (von Dateien) nicht unterstützt. */
-async function shareCardData(title, lines, mediaId) {
-  const parts = [];
-  if (title) parts.push(title);
-  (lines || []).forEach(l => { if (l) parts.push(l); });
-  const text = parts.join('\n');
-
-  let file = null;
-  if (mediaId) {
-    try {
-      const rec = await getImage(mediaId);
-      if (rec && rec.blob) {
-        const ext = (rec.type || '').indexOf('png') !== -1 ? 'png' : 'jpg';
-        file = new File([rec.blob], 'ad-se.' + ext, { type: rec.type || 'image/jpeg' });
-      }
-    } catch (e) {}
-  }
-
-  try {
-    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], text });
-      return;
-    }
-    if (navigator.share) {
-      await navigator.share({ title: title || 'Ad se', text });
-      return;
-    }
-  } catch (e) {
-    if (e && e.name === 'AbortError') return;  // Nutzer hat abgebrochen
-  }
-
-  try {
-    await navigator.clipboard.writeText(text);
-    showToast('In die Zwischenablage kopiert (ohne Foto)');
-  } catch (e) {
-    showToast('Senden wird hier nicht unterstützt');
-  }
-}
-
-function shareFund(fundId) {
-  const f = (state.funde || []).find(x => x.id === fundId);
-  if (!f) return;
-  const lines = [];
-  if (f.source) lines.push(f.source);
-  const sub = [];
-  if (f.place) sub.push(f.place);
-  if (f.ts) {
-    const d = new Date(f.ts);
-    if (!isNaN(d)) sub.push(d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }));
-  }
-  if (sub.length) lines.push(sub.join(' · '));
-  shareCardData(f.text || 'Fund', lines, f.mediaId || null);
-}
-
-function shareTripEntry(entryId) {
+/* ===== TAGESEINTRAG ALS BILD SENDEN =====
+   Lokal: kein Server. Rendert den ganzen Eintrag als ein Bild (Foto + Text
+   + „Ad se") und speichert es; wo unterstützt, öffnet sich das Teilen-Blatt.
+   Funde nutzen die bestehende Funktion shareFundAsImage(). */
+async function shareTripEntryAsImage(entryId) {
   const e = getTripEntry(entryId);
   if (!e) return;
-  const trip = getTripById(e.tripId);
-  const blocks = Array.isArray(e.blocks) ? e.blocks : [];
-  const lines = [];
-  blocks.forEach(b => {
-    if (b.type === 'text' && b.content && b.content.trim()) lines.push(b.content.trim());
-  });
-  const firstImg = blocks.find(b => b.type === 'image' && b.mediaId);
-  const sub = [];
-  if (e.date) {
-    const d = new Date(e.date + 'T00:00:00');
-    if (!isNaN(d)) sub.push(d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }));
+  showToast('Bild wird erstellt …');
+  try {
+    if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (er) {} }
+
+    const cs = getComputedStyle(document.documentElement);
+    const col = (n, fb) => { const v = cs.getPropertyValue(n).trim(); return v || fb; };
+    const C = {
+      bg:     col('--bg', '#f4ece0'),
+      ink:    col('--ink', '#3d3527'),
+      muted:  col('--muted', '#8a7f6c'),
+      accent: col('--accent-deep', '#9a6b4f'),
+      border: col('--border', '#d8cab5')
+    };
+
+    const trip = getTripById(e.tripId);
+    const serif = "'EB Garamond', Georgia, serif";
+    const sans  = "'Inter', system-ui, sans-serif";
+    const W = 1080, pad = 72, contentW = W - pad * 2, dpr = 2;
+    const measure = document.createElement('canvas').getContext('2d');
+
+    const title = (trip && trip.name) ? trip.name : 'Tageseintrag';
+    let dateStr = '';
+    if (e.date) {
+      const d = new Date(e.date + 'T00:00:00');
+      if (!isNaN(d)) {
+        dateStr = d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const no = (typeof tripDayNumber === 'function' && trip) ? tripDayNumber(trip, e.date) : null;
+        if (no) dateStr += ` · Tag ${no}`;
+      }
+    }
+
+    // Blöcke in Reihenfolge aufbereiten (Text + Bilder)
+    const blocks = Array.isArray(e.blocks) ? e.blocks : [];
+    const items = [];
+    measure.font = `italic 40px ${serif}`;
+    for (const b of blocks) {
+      if (b.type === 'text' && b.content && b.content.trim()) {
+        items.push({ kind: 'text', lines: wrapCanvasText(measure, b.content.trim(), contentW) });
+      } else if (b.type === 'image' && b.mediaId) {
+        try {
+          const url = await getImageObjectUrl(b.mediaId);
+          if (url) {
+            const im = await loadImageEl(url);
+            const iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+            let w = contentW, hh = Math.round(ih * (contentW / iw)), x = pad;
+            const maxH = 720;
+            if (hh > maxH) { hh = maxH; w = Math.round(iw * (maxH / ih)); x = Math.round((W - w) / 2); }
+            items.push({ kind: 'image', img: im, w, h: hh, x });
+          }
+        } catch (er) {}
+      }
+    }
+
+    const LH_TEXT = 54, GAP = 36;
+    let h = pad;
+    h += 52;
+    if (dateStr) h += 12 + 32;
+    h += 24;
+    items.forEach((it, i) => {
+      if (i > 0) h += GAP;
+      h += (it.kind === 'text') ? it.lines.length * LH_TEXT : it.h;
+    });
+    h += 60 + pad;
+    const H = Math.round(h);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    let y = pad;
+    ctx.fillStyle = C.ink; ctx.font = `italic 44px ${serif}`;
+    ctx.fillText(title, pad, y); y += 52;
+    if (dateStr) {
+      ctx.fillStyle = C.accent; ctx.font = `24px ${sans}`;
+      y += 12; ctx.fillText(dateStr, pad, y); y += 32;
+    }
+    y += 24;
+    items.forEach((it, i) => {
+      if (i > 0) y += GAP;
+      if (it.kind === 'text') {
+        ctx.fillStyle = C.ink; ctx.font = `italic 40px ${serif}`;
+        for (const line of it.lines) { ctx.fillText(line, pad, y); y += LH_TEXT; }
+      } else {
+        roundRectPath(ctx, it.x, y, it.w, it.h, 24);
+        ctx.save(); ctx.clip(); ctx.drawImage(it.img, it.x, y, it.w, it.h); ctx.restore();
+        ctx.lineWidth = 1.5; ctx.strokeStyle = C.border;
+        roundRectPath(ctx, it.x, y, it.w, it.h, 24); ctx.stroke();
+        y += it.h;
+      }
+    });
+
+    ctx.fillStyle = C.accent; ctx.font = `italic 30px ${serif}`;
+    ctx.fillText('Ad se', pad, H - pad - 30);
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+    if (!blob) { showToast('Bild konnte nicht erstellt werden.'); return; }
+    const file = new File([blob], 'ad-se-moment.png', { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+      try { await navigator.share({ files: [file], title: 'Ein Moment' }); return; }
+      catch (er) { if (er && er.name === 'AbortError') return; }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'ad-se-moment.png';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    showToast('Bild gespeichert — du kannst es jetzt senden.');
+  } catch (err) {
+    console.error('Bild-Fehler:', err);
+    showToast('Konnte das Bild nicht erstellen.');
   }
-  if (sub.length) lines.push(sub.join(' · '));
-  const title = (trip && trip.name) ? trip.name : 'Tageseintrag';
-  shareCardData(title, lines, firstImg ? firstImg.mediaId : null);
 }
 
 /* ===== HOME RENDER ===== */
@@ -17290,7 +17337,7 @@ function renderFundCard(f, isRandom) {
   if (dateStr) meta.push(`<span class="fund-card-date">${escapeHtml(dateStr)}</span>`);
   if (f.place) meta.push(`<span class="fund-card-place">${escapeHtml(f.place)}</span>`);
   let html = `<div class="fund-card${isRandom ? ' random-card' : ''}" data-fund-id="${escapeHtml(f.id)}">
-    ${f.mediaId ? `<button class="card-share-btn" onclick="event.stopPropagation();shareFund('${f.id}')" aria-label="Senden" title="Senden">↗</button>` : ''}
+    ${f.mediaId ? `<button class="card-share-btn" onclick="event.stopPropagation();shareFundAsImage('${f.id}')" aria-label="Als Bild senden" title="Als Bild senden">↗</button>` : ''}
     <div class="fund-card-text">${escapeHtml(f.text || '')}</div>`;
   if (f.source) {
     html += `<div class="fund-card-source" style="font-family:'EB Garamond',serif;font-size:0.95rem;margin-bottom:8px;">${escapeHtml(f.source)}</div>`;
@@ -18390,7 +18437,7 @@ function renderTripEntryCard(entry) {
   }
 
   const hasImg = blocks.some(b => b.type === 'image' && b.mediaId);
-  const shareBtn = hasImg ? `<button class="card-share-btn" onclick="event.stopPropagation();shareTripEntry('${entry.id}')" aria-label="Senden" title="Senden">↗</button>` : '';
+  const shareBtn = hasImg ? `<button class="card-share-btn" onclick="event.stopPropagation();shareTripEntryAsImage('${entry.id}')" aria-label="Als Bild senden" title="Als Bild senden">↗</button>` : '';
   return `<div class="trip-entry-card" onclick="openTripEntryEditor('${entry.id}')">${shareBtn}${body}</div>`;
 }
 
