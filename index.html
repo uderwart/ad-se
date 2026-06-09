@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ad se">
@@ -1475,6 +1475,17 @@ h3 {
   opacity: 0.7;
   margin-bottom: 40px;
   text-align: center;
+}
+.moment-quality {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: #3d3527;
+  opacity: 0.62;
+  text-align: center;
+  margin-top: 34px;
+  max-width: 300px;
+  line-height: 1.5;
 }
 
 /* Atem-Animation */
@@ -3144,6 +3155,21 @@ h3 {
   padding: 1px 8px;
   border-radius: 8px;
   letter-spacing: 0.04em;
+}
+.fund-card-feelings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 8px 0 2px;
+}
+.fund-card-feeling {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: #6f5742;
+  background: rgba(168, 99, 76, 0.08);
+  border-radius: 8px;
+  padding: 2px 9px;
 }
 .fund-card-date {
   opacity: 0.7;
@@ -5057,6 +5083,7 @@ textarea, input {
       <div class="breath-progress">
         <div class="breath-progress-fill" id="breath-progress-fill"></div>
       </div>
+      <div class="moment-quality" id="moment-quality"></div>
     </div>
 
     <!-- Phase 2: Frage -->
@@ -6024,6 +6051,12 @@ textarea, input {
     </div>
 
     <div style="margin-bottom:14px;">
+      <button type="button" id="fund-feeling-toggle" onclick="toggleFundFeelingPicker()"
+        style="background:none;border:none;padding:0;font-size:0.78rem;color:var(--muted);cursor:pointer;display:block;margin-bottom:6px;text-align:left;">Gefühl dazu? <span style="opacity:0.6;">(optional)</span></button>
+      <div id="fund-feeling-chips" style="display:none;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+
+    <div style="margin-bottom:14px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Kategorie</div>
       <div id="fund-category-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
     </div>
@@ -6047,6 +6080,28 @@ textarea, input {
     <button class="btn full" onclick="saveFund()">Speichern</button>
     <button class="btn secondary full" id="fund-delete-btn" onclick="deleteFund(editingFundId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diesen Moment löschen</button>
   </div>
+</div>
+
+<!-- ====== SCHREIBEN — rahmenloser Schreib-Ort (Konzept v01) ====== -->
+<div id="section-schreiben" class="section">
+  <button class="back-link" onclick="showSection('home')">← Heute</button>
+  <div class="greeting-block">
+    <h1>Schreiben</h1>
+    <div class="greeting-sub">Einfach schreiben. Ohne Frage, ohne Einordnen.</div>
+  </div>
+
+  <textarea id="schreib-text" rows="6" placeholder="…" onfocus="schreibFocus()"
+    style="width:100%;padding:16px;border:1.5px solid var(--border);border-radius:12px;font-family:'EB Garamond',serif;font-style:italic;font-size:1.12rem;line-height:1.6;resize:none;background:var(--bg);color:var(--ink);outline:none;box-sizing:border-box;scroll-margin-top:12px;"></textarea>
+
+  <div id="schreib-daypart-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;"></div>
+
+  <input type="date" id="schreib-date"
+    style="width:100%;margin-top:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;box-sizing:border-box;">
+
+  <button class="btn full" onclick="saveSchreibseite()" style="margin-top:14px;">Speichern</button>
+  <button class="btn secondary full" id="schreib-delete-btn" onclick="deleteSchreibseite(schreibEditingId)" style="display:none;margin-top:8px;color:#a14b38;border-color:#a14b38;">Diese Seite löschen</button>
+
+  <div id="schreib-list" style="margin-top:28px;"></div>
 </div>
 
 <!-- ====== REISE-DETAIL — Spec v02, Mai 2026 ====== -->
@@ -7072,9 +7127,6 @@ textarea, input {
         <button class="art-chip" data-art="gemeinsam erlebt" onclick="selectBegegnungArt('gemeinsam erlebt')">gemeinsam erlebt</button>
         <button class="art-chip" data-art="gedacht an" onclick="selectBegegnungArt('gedacht an')">gedacht an</button>
       </div>
-      <input type="text" id="begegnung-art-input" placeholder="oder eigene Art — z.B. zusammen gekocht, kurz gewinkt"
-        style="width:100%;margin-top:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.9rem;background:var(--bg);color:var(--ink);outline:none;"
-        oninput="onBegegnungArtInput(this.value)">
 
       <!-- Ort (optional) -->
       <div style="margin-top:14px;">
@@ -7880,6 +7932,7 @@ function loadState() {
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
+    qualitySeen: [],
     weeklyQuestions: null,  // null = Default-Liste; sonst Nutzer-Liste
     weeklyLinkedGoalId: null,  // id des Wegs, mit dem das Buch verbunden ist
     morningGifts: null,
@@ -7903,6 +7956,7 @@ function loadState() {
     ritualOverrides: { morning: null, evening: null },  // Override-Tag (dayKey) — aktiv bis Nutzung oder Tageswechsel
     weeklySession: null,
     goals: [],
+    schreibseiten: [],          // Freies Schreiben — rahmenlose, datierte Seiten (Konzept v01)
     orchester: { parts: [] },
     weeklyArchive: [],
     seenQuotes: [],  // IDs der bereits in laufender Runde gezeigten Zitate (Bag-Shuffle)
@@ -7912,7 +7966,7 @@ function loadState() {
   if (!raw) return defaults;
   try {
     const saved = { ...defaults, ...JSON.parse(raw) };
-    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
+    ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','qualitySeen','schreibseiten','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
       if (!Array.isArray(saved[k])) saved[k] = defaults[k];
     });
     if (typeof saved.todayItems !== 'object' || saved.todayItems === null) saved.todayItems = {};
@@ -8129,6 +8183,7 @@ function showSection(id) {
   if (id === 'gedanken-log') renderGedankenLog();
   if (id === 'rueckblick-list') renderRueckblickList();
   if (id === 'goals') renderGoalsList();
+  if (id === 'schreiben') renderSchreiben();
   if (id === 'goal-detail') renderGoalDetail();
   if (id === 'trip-detail') renderTripDetail();
   if (id === 'funde') {
@@ -11884,6 +11939,37 @@ function pickNextMomentQuestion() {
   return chosen;
 }
 
+// Die acht Selbst-Qualitäten (IFS 8 C's) — einladend in der Atemphase (Konzept v01)
+const QUALITIES_OF_SELF = [
+  { name: 'Gelassenheit',  line: 'Diesen Atem lang darf Gelassenheit da sein.' },
+  { name: 'Neugier',       line: 'Vielleicht regt sich Neugier — ganz ohne Urteil.' },
+  { name: 'Klarheit',      line: 'Mach Platz für Klarheit.' },
+  { name: 'Mitgefühl',     line: 'Vielleicht ist schon etwas Mitgefühl in dir.' },
+  { name: 'Zuversicht',    line: 'Atme — und spüre, ob Zuversicht da ist.' },
+  { name: 'Kreativität',   line: 'Lass Raum für Kreativität.' },
+  { name: 'Mut',           line: 'Vielleicht wartet ein wenig Mut in dir.' },
+  { name: 'Verbundenheit', line: 'Mach Platz — für Verbundenheit.' }
+];
+
+// Bag-Shuffle wie bei den Reflexionsfragen: über die Zeit einmal durch alle acht
+function pickNextQualityOfSelf() {
+  if (!Array.isArray(state.qualitySeen)) state.qualitySeen = [];
+  let unseen = QUALITIES_OF_SELF.filter(q => !state.qualitySeen.includes(q.name));
+  const lastShown = state.qualitySeen[state.qualitySeen.length - 1] || '';
+  if (unseen.length === 0) {
+    state.qualitySeen = [];
+    unseen = QUALITIES_OF_SELF.filter(q => q.name !== lastShown);
+    if (unseen.length === 0) unseen = QUALITIES_OF_SELF.slice();
+  }
+  const chosen = unseen[Math.floor(Math.random() * unseen.length)];
+  state.qualitySeen.push(chosen.name);
+  if (state.qualitySeen.length > QUALITIES_OF_SELF.length) {
+    state.qualitySeen = state.qualitySeen.slice(-QUALITIES_OF_SELF.length);
+  }
+  saveState();
+  return chosen;
+}
+
 let momentTimers = [];
 let momentRunning = false;
 
@@ -11902,6 +11988,11 @@ function openMoment() {
   }
   const hint = document.getElementById('breath-hint');
   if (hint) hint.textContent = 'Bereit';
+  const qualityEl = document.getElementById('moment-quality');
+  if (qualityEl) {
+    const q = pickNextQualityOfSelf();
+    qualityEl.textContent = q ? q.line : '';
+  }
   showSection('moment');
   // Kurze Pause, damit der Nutzer kurz den kleinen Kreis wahrnimmt,
   // bevor das erste Einatmen losgeht
@@ -14525,6 +14616,7 @@ const LANDSCHAFT_SATELLITEN = [
   { id: 'vorhaben',   symbol: '◆', label: 'Vorhaben',    onTap: 'jumpToVorhaben()' },
   { id: 'aktivitaet', symbol: '◭', label: 'Aktivität',   onTap: "openQuickEntry('activity')" },
   { id: 'dankbarkeit',symbol: '☆', label: 'Dankbarkeit', onTap: "openQuickEntry('gratitude')" },
+  { id: 'schreiben',  symbol: '✎', label: 'Schreiben',   onTap: 'openSchreiben()' },
   { id: 'sanduhr',    symbol: '⧖', label: 'Sanduhr',     onTap: 'openHourglassPicker()' }
 ];
 
@@ -16588,10 +16680,142 @@ function dayPartFromHour(hour) {
   if (hour >= 18 && hour < 22) return 'abends';
   return 'nachts';
 }
+
+// ===== Freies Schreiben — rahmenloser Schreib-Ort (Konzept v01) =====
+let schreibEditingId = null;
+let schreibDayPart = null;
+
+function schreibUid() {
+  return 's-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+}
+
+function schreibDateValue(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function openSchreiben() {
+  showSection('schreiben');
+}
+
+// Beim Fokus das Feld nach oben scrollen, damit die Tastatur es nicht verdeckt
+function schreibFocus() {
+  const el = document.getElementById('schreib-text');
+  if (!el) return;
+  setTimeout(() => {
+    try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
+  }, 250);
+}
+
+function resetSchreibComposer() {
+  schreibEditingId = null;
+  schreibDayPart = dayPartFromHour(new Date().getHours());
+  const textEl = document.getElementById('schreib-text');
+  if (textEl) textEl.value = '';
+  const dateEl = document.getElementById('schreib-date');
+  if (dateEl) dateEl.value = schreibDateValue(new Date());
+  const delBtn = document.getElementById('schreib-delete-btn');
+  if (delBtn) delBtn.style.display = 'none';
+  renderSchreibDayPartChips();
+}
+
+function renderSchreibDayPartChips() {
+  const wrap = document.getElementById('schreib-daypart-chips');
+  if (!wrap) return;
+  wrap.innerHTML = FUND_DAYPARTS.map(dp => {
+    const active = dp.key === schreibDayPart ? ' active' : '';
+    return `<button class="fund-cat-chip${active}" onclick="selectSchreibDayPart('${dp.key}')">${escapeHtml(dp.label)}</button>`;
+  }).join('');
+}
+
+function selectSchreibDayPart(key) {
+  // Toggle: nochmal tippen = keine Tageszeit
+  schreibDayPart = (schreibDayPart === key) ? null : key;
+  renderSchreibDayPartChips();
+}
+
+function renderSchreiben() {
+  resetSchreibComposer();
+  renderSchreibList();
+}
+
+function saveSchreibseite() {
+  if (!Array.isArray(state.schreibseiten)) state.schreibseiten = [];
+  const text = (document.getElementById('schreib-text')?.value || '').trim();
+  if (!text) { showToast('Schreib einen Satz — sonst gibt es nichts zu sichern.'); return; }
+  const dateStr = document.getElementById('schreib-date')?.value || schreibDateValue(new Date());
+  const [y, mo, d] = dateStr.split('-').map(Number);
+  // Uhrzeit am Zeitstempel erhalten (zum Sortieren), Datum aus dem Feld übernehmen
+  const base = schreibEditingId
+    ? new Date((state.schreibseiten.find(s => s.id === schreibEditingId) || {}).ts || Date.now())
+    : new Date();
+  const ts = new Date(y, (mo || 1) - 1, d || 1, base.getHours(), base.getMinutes(), base.getSeconds()).toISOString();
+
+  if (schreibEditingId) {
+    const s = state.schreibseiten.find(x => x.id === schreibEditingId);
+    if (s) { s.text = text; s.dayPart = schreibDayPart || null; s.ts = ts; }
+    showToast('Seite gesichert.');
+  } else {
+    state.schreibseiten.push({ id: schreibUid(), ts, dayPart: schreibDayPart || null, text });
+    showToast('Geschrieben.');
+  }
+  saveState();
+  resetSchreibComposer();
+  renderSchreibList();
+}
+
+function editSchreibseite(id) {
+  const s = (state.schreibseiten || []).find(x => x.id === id);
+  if (!s) return;
+  schreibEditingId = id;
+  schreibDayPart = s.dayPart || null;
+  const textEl = document.getElementById('schreib-text');
+  if (textEl) textEl.value = s.text || '';
+  const dateEl = document.getElementById('schreib-date');
+  if (dateEl) dateEl.value = schreibDateValue(new Date(s.ts));
+  const delBtn = document.getElementById('schreib-delete-btn');
+  if (delBtn) delBtn.style.display = '';
+  renderSchreibDayPartChips();
+  window.scrollTo(0, 0);
+  if (textEl) textEl.focus();
+}
+
+function deleteSchreibseite(id) {
+  if (!id) return;
+  askConfirm('Diese Seite wirklich löschen?', () => {
+    state.schreibseiten = (state.schreibseiten || []).filter(x => x.id !== id);
+    saveState();
+    resetSchreibComposer();
+    renderSchreibList();
+    showToast('Seite gelöscht.');
+  }, { title: 'Seite löschen?', yesText: 'Ja, löschen' });
+}
+
+function renderSchreibList() {
+  const wrap = document.getElementById('schreib-list');
+  if (!wrap) return;
+  const list = (Array.isArray(state.schreibseiten) ? state.schreibseiten : [])
+    .slice().sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  if (!list.length) {
+    wrap.innerHTML = `<p class="muted-note" style="text-align:center;margin-top:8px;font-size:0.85rem;line-height:1.5;">Noch nichts geschrieben. Die Seiten, die du hier füllst, ruhen still — ohne Kategorie, ohne dass du sie verwalten musst.</p>`;
+    return;
+  }
+  wrap.innerHTML = list.map(s => {
+    const d = new Date(s.ts);
+    const dateLabel = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+    const meta = s.dayPart ? `${escapeHtml(dateLabel)} · ${escapeHtml(s.dayPart)}` : escapeHtml(dateLabel);
+    return `<div class="gedanken-entry" style="cursor:pointer;" onclick="editSchreibseite('${s.id}')">
+      <div class="gedanken-entry-date">${meta}</div>
+      <div class="gedanken-entry-row" style="font-family:'EB Garamond',serif;font-size:1.05rem;line-height:1.6;white-space:pre-wrap;">${escapeHtml(s.text)}</div>
+    </div>`;
+  }).join('');
+}
+
 let fundeView = 'recent';  // 'recent' | 'category' | 'random'
 let fundeRandomShown = null;
 let editingFundId = null;
 let fundEditorCategory = null;
+let fundEditorFeelings = [];
+let fundFeelingPickerOpen = false;
 // Bild-Draft im Fund-Editor (Spec v02 Schritt 4)
 let fundImageDraft = null;          // mediaId oder null
 let fundImagePrevious = null;       // mediaId, die der Fund VORHER hatte (für Refs-Diff)
@@ -16858,6 +17082,9 @@ function renderFundCard(f, isRandom) {
   if (meta.length > 0) {
     html += `<div class="fund-card-meta">${meta.join('')}</div>`;
   }
+  if (Array.isArray(f.feelings) && f.feelings.length) {
+    html += `<div class="fund-card-feelings">${f.feelings.map(x => `<span class="fund-card-feeling">${escapeHtml(x.label)}</span>`).join('')}</div>`;
+  }
   if (f.note) {
     html += `<div class="fund-card-note">${escapeHtml(f.note)}</div>`;
   }
@@ -16895,6 +17122,47 @@ function askConfirmFund(f) {
 
 let fundEditorDayPart = null;  // 'morgens' | 'abends' | ... oder null = exakte Uhrzeit
 
+// ----- Gefühl an einen Moment hängen (optional) -----
+function fundFeelingVocab() {
+  const m = (typeof FEELING_MATRIX !== 'undefined' && FEELING_MATRIX.kern) ? FEELING_MATRIX.kern : {};
+  const out = [];
+  ['ua', 'aa', 'ur', 'ar'].forEach(q => (m[q] || []).forEach(f => out.push({ label: f.label, quadrant: q })));
+  return out;
+}
+
+function toggleFundFeelingPicker() {
+  fundFeelingPickerOpen = !fundFeelingPickerOpen;
+  renderFundFeelingChips();
+}
+
+function toggleFundFeeling(label, quadrant) {
+  const i = fundEditorFeelings.findIndex(x => x.label === label);
+  if (i >= 0) fundEditorFeelings.splice(i, 1);
+  else fundEditorFeelings.push({ label: label, quadrant: quadrant });
+  renderFundFeelingChips();
+}
+
+function renderFundFeelingChips() {
+  const wrap = document.getElementById('fund-feeling-chips');
+  const toggle = document.getElementById('fund-feeling-toggle');
+  if (!wrap) return;
+  wrap.style.display = fundFeelingPickerOpen ? 'flex' : 'none';
+  wrap.innerHTML = fundFeelingVocab().map(f => {
+    const sel = fundEditorFeelings.some(x => x.label === f.label) ? ' active' : '';
+    return `<button type="button" class="fund-cat-chip${sel}" onclick="toggleFundFeeling('${f.label}','${f.quadrant}')">${escapeHtml(f.label)}</button>`;
+  }).join('');
+  if (toggle) {
+    const names = fundEditorFeelings.map(x => escapeHtml(x.label)).join(', ');
+    if (!fundFeelingPickerOpen && fundEditorFeelings.length) {
+      toggle.innerHTML = `Gefühl: ${names} <span style="opacity:0.6;">(ändern)</span>`;
+    } else if (fundFeelingPickerOpen) {
+      toggle.innerHTML = `Gefühl dazu? <span style="opacity:0.6;">(optional — tippen zum Schließen)</span>`;
+    } else {
+      toggle.innerHTML = `Gefühl dazu? <span style="opacity:0.6;">(optional)</span>`;
+    }
+  }
+}
+
 function openFundEditor(existingId) {
   editingFundId = existingId || null;
   const titleEl = document.getElementById('fund-editor-title');
@@ -16914,6 +17182,7 @@ function openFundEditor(existingId) {
       place.value = f.place || '';
       note.value = f.note || '';
       fundEditorCategory = f.category || null;
+      fundEditorFeelings = Array.isArray(f.feelings) ? f.feelings.map(x => ({ label: x.label, quadrant: x.quadrant })) : [];
       // Datum / Uhrzeit
       const d = f.ts ? new Date(f.ts) : new Date();
       dateEl.value = d.toISOString().slice(0, 10);  // yyyy-mm-dd
@@ -16929,6 +17198,7 @@ function openFundEditor(existingId) {
     place.value = '';
     note.value = '';
     fundEditorCategory = null;
+    fundEditorFeelings = [];
     const now = new Date();
     dateEl.value = now.toISOString().slice(0, 10);
     timeEl.value = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
@@ -16937,7 +17207,9 @@ function openFundEditor(existingId) {
     fundImagePrevious = null;
   }
 
+  fundFeelingPickerOpen = fundEditorFeelings.length > 0;
   renderFundCategoryChips();
+  renderFundFeelingChips();
   renderFundDayPartChips();
   renderFundImageDraft();
   // Lösch-Knopf nur beim Bearbeiten
@@ -17171,6 +17443,7 @@ async function saveFund() {
       f.place = place || null;
       f.note = note || null;
       f.category = category;
+      f.feelings = fundEditorFeelings.length ? fundEditorFeelings.map(x => ({ label: x.label, quadrant: x.quadrant })) : null;
       f.ts = ts;
       f.dayPart = dayPart;
       f.mediaId = fundImageDraft || null;
@@ -17191,6 +17464,7 @@ async function saveFund() {
       place: place || null,
       note: note || null,
       category: category,
+      feelings: fundEditorFeelings.length ? fundEditorFeelings.map(x => ({ label: x.label, quadrant: x.quadrant })) : null,
       ts: ts,
       dayPart: dayPart,
       mediaId: fundImageDraft || null
@@ -19211,8 +19485,6 @@ function openBegegnungEditor(existingId) {
 
   // Chips zurücksetzen (Art + Stimmung)
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => c.classList.remove('selected'));
-  const artInputReset = document.getElementById('begegnung-art-input');
-  if (artInputReset) artInputReset.value = '';
   document.querySelectorAll('#begegnung-stimmung-chips .art-chip').forEach(c => c.classList.remove('selected'));
 
   if (existingId) {
@@ -19269,8 +19541,6 @@ function openBegegnungEditor(existingId) {
         begegnungEditorSelectedArt = b.art;
         const chip = document.querySelector(`#begegnung-art-chips .art-chip[data-art="${b.art}"]`);
         if (chip) chip.classList.add('selected');
-        const artInput = document.getElementById('begegnung-art-input');
-        if (artInput) artInput.value = b.art;
       }
       if (b.stimmung) {
         begegnungEditorSelectedStimmung = b.stimmung;
@@ -19371,22 +19641,6 @@ function selectBegegnungArt(art) {
   } else {
     begegnungEditorSelectedArt = art;
   }
-  document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => {
-    if (c.dataset.art === begegnungEditorSelectedArt) {
-      c.classList.add('selected');
-    } else {
-      c.classList.remove('selected');
-    }
-  });
-  // Eingabefeld mitführen, damit Chip und Feld dieselbe Art zeigen
-  const input = document.getElementById('begegnung-art-input');
-  if (input) input.value = begegnungEditorSelectedArt || '';
-}
-
-// Freitext-Art: Feld ist die Quelle, passende Chips leuchten mit
-function onBegegnungArtInput(val) {
-  const trimmed = (val || '').trim();
-  begegnungEditorSelectedArt = trimmed || null;
   document.querySelectorAll('#begegnung-art-chips .art-chip').forEach(c => {
     if (c.dataset.art === begegnungEditorSelectedArt) {
       c.classList.add('selected');
@@ -21286,6 +21540,7 @@ function replaceStateFromImport(imported, meta) {
     momentSettings: { breathType: 'box', duration: 60 },
     momentQuestions: null,
     momentQuestionsSeen: [],
+    qualitySeen: [],
     weeklyQuestions: null,
     weeklyLinkedGoalId: null,
     morningGifts: null,
@@ -21301,6 +21556,7 @@ function replaceStateFromImport(imported, meta) {
     ritualOverrides: { morning: null, evening: null },
     weeklySession: null,
     goals: [],
+    schreibseiten: [],
     orchester: { parts: [] },
     weeklyArchive: [],
     seenQuotes: [],
@@ -21311,7 +21567,7 @@ function replaceStateFromImport(imported, meta) {
   };
   state = { ...defaults, ...imported };
   // Arrays absichern
-  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
+  ['feelingLog','bodyLog','activityLog','waterLog','gratitudeLog','eveningLog','morningLog','momentLog','favoriteQuotes','todaySuggestions','weeklyArchive','seenQuotes','momentQuestionsSeen','qualitySeen','schreibseiten','morningGiftsSeen','morningStorySeen','storyReflectionLog','gedankenLog','menschen','rueckblicke','goals','trips','tripEntries','menschenBefindenWords','suggestionBlacklist','eigeneGeschichten'].forEach(k => {
     if (!Array.isArray(state[k])) state[k] = defaults[k];
   });
   if (typeof state.todayItems !== 'object' || state.todayItems === null) state.todayItems = {};
