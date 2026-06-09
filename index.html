@@ -3153,6 +3153,7 @@ h3 {
   background: linear-gradient(180deg, #faf3e8 0%, var(--bg) 60%);
 }
 .fund-card {
+  position: relative;
   background: linear-gradient(135deg, #ffffff 0%, #faf3e8 100%);
   border-radius: 12px;
   padding: 18px 20px;
@@ -3694,6 +3695,7 @@ h3 {
   border-bottom: 1px solid rgba(139, 111, 71, 0.2);
 }
 .trip-entry-card {
+  position: relative;
   background: #fefcf7;
   border-radius: 10px;
   padding: 14px 16px;
@@ -3701,6 +3703,31 @@ h3 {
   border-left: 2px solid #c8a88a;
   cursor: pointer;
   transition: background 0.12s;
+}
+/* Senden-Knopf auf Karten mit Bild */
+.card-share-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(58, 31, 26, 0.06);
+  color: #8a6f57;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+  z-index: 2;
+}
+.card-share-btn:hover, .card-share-btn:active {
+  background: rgba(58, 31, 26, 0.14);
+  color: #5a4636;
+  transform: scale(1.08);
 }
 .trip-entry-card:hover {
   background: #faf3e8;
@@ -8346,6 +8373,83 @@ function showToast(msg) {
   t.classList.add('visible');
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('visible'), 2500);
+}
+
+/* ===== KARTE SENDEN (Funde + Tageseinträge mit Bild) =====
+   Lokal: kein Server. Öffnet das native Teilen-Blatt des Geräts mit
+   Text + Foto als Datei. Fällt zurück auf die Zwischenablage, wenn der
+   Browser das Teilen (von Dateien) nicht unterstützt. */
+async function shareCardData(title, lines, mediaId) {
+  const parts = [];
+  if (title) parts.push(title);
+  (lines || []).forEach(l => { if (l) parts.push(l); });
+  const text = parts.join('\n');
+
+  let file = null;
+  if (mediaId) {
+    try {
+      const rec = await getImage(mediaId);
+      if (rec && rec.blob) {
+        const ext = (rec.type || '').indexOf('png') !== -1 ? 'png' : 'jpg';
+        file = new File([rec.blob], 'ad-se.' + ext, { type: rec.type || 'image/jpeg' });
+      }
+    } catch (e) {}
+  }
+
+  try {
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text });
+      return;
+    }
+    if (navigator.share) {
+      await navigator.share({ title: title || 'Ad se', text });
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;  // Nutzer hat abgebrochen
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('In die Zwischenablage kopiert (ohne Foto)');
+  } catch (e) {
+    showToast('Senden wird hier nicht unterstützt');
+  }
+}
+
+function shareFund(fundId) {
+  const f = (state.funde || []).find(x => x.id === fundId);
+  if (!f) return;
+  const lines = [];
+  if (f.source) lines.push(f.source);
+  const sub = [];
+  if (f.place) sub.push(f.place);
+  if (f.ts) {
+    const d = new Date(f.ts);
+    if (!isNaN(d)) sub.push(d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }));
+  }
+  if (sub.length) lines.push(sub.join(' · '));
+  shareCardData(f.text || 'Fund', lines, f.mediaId || null);
+}
+
+function shareTripEntry(entryId) {
+  const e = getTripEntry(entryId);
+  if (!e) return;
+  const trip = getTripById(e.tripId);
+  const blocks = Array.isArray(e.blocks) ? e.blocks : [];
+  const lines = [];
+  blocks.forEach(b => {
+    if (b.type === 'text' && b.content && b.content.trim()) lines.push(b.content.trim());
+  });
+  const firstImg = blocks.find(b => b.type === 'image' && b.mediaId);
+  const sub = [];
+  if (e.date) {
+    const d = new Date(e.date + 'T00:00:00');
+    if (!isNaN(d)) sub.push(d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }));
+  }
+  if (sub.length) lines.push(sub.join(' · '));
+  const title = (trip && trip.name) ? trip.name : 'Tageseintrag';
+  shareCardData(title, lines, firstImg ? firstImg.mediaId : null);
 }
 
 /* ===== HOME RENDER ===== */
@@ -17186,6 +17290,7 @@ function renderFundCard(f, isRandom) {
   if (dateStr) meta.push(`<span class="fund-card-date">${escapeHtml(dateStr)}</span>`);
   if (f.place) meta.push(`<span class="fund-card-place">${escapeHtml(f.place)}</span>`);
   let html = `<div class="fund-card${isRandom ? ' random-card' : ''}" data-fund-id="${escapeHtml(f.id)}">
+    ${f.mediaId ? `<button class="card-share-btn" onclick="event.stopPropagation();shareFund('${f.id}')" aria-label="Senden" title="Senden">↗</button>` : ''}
     <div class="fund-card-text">${escapeHtml(f.text || '')}</div>`;
   if (f.source) {
     html += `<div class="fund-card-source" style="font-family:'EB Garamond',serif;font-size:0.95rem;margin-bottom:8px;">${escapeHtml(f.source)}</div>`;
@@ -18284,7 +18389,9 @@ function renderTripEntryCard(entry) {
     });
   }
 
-  return `<div class="trip-entry-card" onclick="openTripEntryEditor('${entry.id}')">${body}</div>`;
+  const hasImg = blocks.some(b => b.type === 'image' && b.mediaId);
+  const shareBtn = hasImg ? `<button class="card-share-btn" onclick="event.stopPropagation();shareTripEntry('${entry.id}')" aria-label="Senden" title="Senden">↗</button>` : '';
+  return `<div class="trip-entry-card" onclick="openTripEntryEditor('${entry.id}')">${shareBtn}${body}</div>`;
 }
 
 /* Bilder in der Chronik nachträglich laden — wird nach renderTripDetail aufgerufen */
