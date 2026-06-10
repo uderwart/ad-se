@@ -10101,41 +10101,37 @@ function openBodyDetail(kind, key) {
   };
 
   if (kind === 'zone') {
-    // Pro Typ ein eigenes Diagramm — nur Standard-Empfindungen, freie Texte werden nicht eigens aufgeschlüsselt
-    // Sammle alle Typen, die in den Einträgen dieser Zone vorkommen
-    const standardTypes = new Set([...BODY_TYPES_LOCAL, ...BODY_TYPES_GENERAL]);
+    // Pro Beschwerde-Art ein eigenes Diagramm — Standard UND Freitext.
+    // Nur Arten mit mindestens 2 auswertbaren Einträgen bekommen einen Verlauf;
+    // einzelne Einträge stehen ohnehin in der Liste darunter.
     const typeFreqs = {};
     entries.forEach(e => {
       (e.types || []).forEach(t => {
         if (!t || !t.trim()) return;
-        // Nur Standard-Typen — freie Texte überspringen, sonst zu viele kleine Diagramme
-        if (!standardTypes.has(t)) return;
         typeFreqs[t] = (typeFreqs[t] || 0) + 1;
       });
     });
-    const typesSorted = Object.entries(typeFreqs).sort((a,b) => b[1] - a[1]).map(([t]) => t);
+    const typesSorted = Object.keys(typeFreqs).sort((a, b) => typeFreqs[b] - typeFreqs[a]);
 
-    if (typesSorted.length === 0) {
-      // Keine Standard-Typen — ein einziges Gesamt-Diagramm wie früher
-      const withIntensity = sortedAsc.filter(e => typeof e.intensity === 'number').map(e => ({ts: e.ts, intensity: e.intensity}));
-      if (withIntensity.length >= 1) html += renderBodyChart(withIntensity);
-    } else {
-      // Pro Typ ein kleines Diagramm
-      typesSorted.forEach(t => {
-        const typeEntries = sortedAsc
-          .filter(e => Array.isArray(e.types) && e.types.includes(t))
-          .map(e => ({ ts: e.ts, intensity: getIntensityForType(e, t) }))
-          .filter(e => typeof e.intensity === 'number');
-        if (typeEntries.length === 0) return;
-        const avg = (typeEntries.reduce((s,x) => s + x.intensity, 0) / typeEntries.length).toFixed(1);
-        html += `<div style="margin-bottom:6px;">
+    const singles = [];
+    typesSorted.forEach(t => {
+      const typeEntries = sortedAsc
+        .filter(e => Array.isArray(e.types) && e.types.includes(t))
+        .map(e => ({ ts: e.ts, intensity: getIntensityForType(e, t) }))
+        .filter(e => typeof e.intensity === 'number');
+      if (typeEntries.length < 2) { if (typeEntries.length === 1) singles.push(t); return; }
+      const avg = (typeEntries.reduce((s,x) => s + x.intensity, 0) / typeEntries.length).toFixed(1);
+      html += `<div style="margin-bottom:6px;">
           <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:1rem;color:var(--ink);margin-bottom:4px;display:flex;justify-content:space-between;">
             <span>${escapeHtml(t)}</span>
             <span style="font-style:normal;font-family:'Inter',sans-serif;font-size:0.78rem;color:var(--muted);">${typeEntries.length}× · ⌀ ${avg}/10</span>
           </div>
         </div>`;
-        html += renderBodyChart(typeEntries);
-      });
+      html += renderBodyChart(typeEntries);
+    });
+
+    if (singles.length) {
+      html += `<div style="font-size:0.78rem;color:var(--muted);font-style:italic;margin:2px 0 12px;">Einzelner Eintrag, noch kein Verlauf: ${escapeHtml(singles.join(', '))}</div>`;
     }
   } else {
     // Allgemein-Typ: nur ein Diagramm, mit Werten dieses Typs
