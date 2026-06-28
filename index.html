@@ -6168,10 +6168,11 @@ textarea, input {
     <div style="margin-bottom:12px;">
       <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Wann? <span style="opacity:0.6;">(Datum + Zeit oder Tageszeit)</span></div>
       <input type="date" id="fund-date"
-        onchange="updateFundTripHint()"
+        onchange="updateFundTripHint()" oninput="fundTimeUserEdited=true"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;margin-bottom:8px;">
       <div id="fund-daypart-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
       <input type="time" id="fund-time"
+        oninput="fundTimeUserEdited=true"
         style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
       <p class="muted-note" style="margin:6px 0 0;font-size:0.78rem;line-height:1.4;">
         Wähle eine Tageszeit oder gib eine genaue Uhrzeit ein.
@@ -7685,6 +7686,95 @@ async function cleanupOrphans() {
     await deleteImage(id);
   }
   return ids.length;
+}
+
+/* ===== EXIF: AUFNAHMEZEIT AUS FOTO LESEN =====
+   Liest ausschließlich die Aufnahmezeit (DateTimeOriginal) aus JPEG-EXIF,
+   offline, ohne Fremd-Bibliothek. Muss VOR compressImage laufen, da Canvas
+   die Metadaten entfernt. Kein GPS, keine Online-Abfrage. Liefert Date | null. */
+function readPhotoDateTime(file) {
+  return new Promise((resolve) => {
+    if (!file || !/jpe?g/i.test(file.type || '')) { resolve(null); return; }
+    const reader = new FileReader();
+    reader.onerror = () => resolve(null);
+    reader.onload = () => {
+      try { resolve(parseExifDateTime(reader.result)); }
+      catch (e) { resolve(null); }
+    };
+    reader.readAsArrayBuffer(file.slice(0, 256 * 1024));
+  });
+}
+
+function parseExifDateTime(buffer) {
+  const dv = new DataView(buffer);
+  if (dv.byteLength < 4 || dv.getUint16(0) !== 0xFFD8) return null;  // kein JPEG
+  let offset = 2;
+  const len = dv.byteLength;
+  while (offset + 4 < len) {
+    if (dv.getUint8(offset) !== 0xFF) { offset++; continue; }
+    const marker = dv.getUint8(offset + 1);
+    if (marker === 0xD9 || marker === 0xDA) break;  // EOI / Bilddaten
+    const size = dv.getUint16(offset + 2);
+    if (marker === 0xE1) {  // APP1
+      const start = offset + 4;
+      if (start + 6 <= len && dv.getUint32(start) === 0x45786966 && dv.getUint16(start + 4) === 0x0000) {
+        return parseTiffForDateTime(dv, start + 6);
+      }
+    }
+    offset += 2 + size;
+  }
+  return null;
+}
+
+function parseTiffForDateTime(dv, tiff) {
+  const bo = dv.getUint16(tiff);
+  let le;
+  if (bo === 0x4949) le = true; else if (bo === 0x4D4D) le = false; else return null;
+  const u16 = (o) => dv.getUint16(o, le);
+  const u32 = (o) => dv.getUint32(o, le);
+  if (u16(tiff + 2) !== 0x002A) return null;
+
+  const readAscii = (valOff, count) => {
+    let s = '';
+    for (let i = 0; i < count; i++) {
+      const c = dv.getUint8(valOff + i);
+      if (c === 0) break;
+      s += String.fromCharCode(c);
+    }
+    return s;
+  };
+  const scanIFD = (ifd, wanted) => {
+    const n = u16(ifd);
+    let exifPtr = null;
+    const found = {};
+    for (let i = 0; i < n; i++) {
+      const e = ifd + 2 + i * 12;
+      const tag = u16(e);
+      const type = u16(e + 2);
+      const count = u32(e + 4);
+      if (tag === 0x8769) exifPtr = tiff + u32(e + 8);
+      if (wanted.indexOf(tag) !== -1 && type === 2) {
+        const valOff = count <= 4 ? (e + 8) : (tiff + u32(e + 8));
+        found[tag] = readAscii(valOff, count);
+      }
+    }
+    return { exifPtr, found };
+  };
+
+  const ifd0 = tiff + u32(tiff + 4);
+  const a = scanIFD(ifd0, [0x0132]);              // DateTime (Fallback)
+  let str = null;
+  if (a.exifPtr) {
+    const b = scanIFD(a.exifPtr, [0x9003, 0x9004]); // DateTimeOriginal, DateTimeDigitized
+    str = b.found[0x9003] || b.found[0x9004] || null;
+  }
+  if (!str) str = a.found[0x0132] || null;
+  if (!str) return null;
+
+  const m = str.match(/^(\d{4}):(\d{2}):(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!m) return null;
+  const d = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0), 0);
+  return isNaN(d.getTime()) ? null : d;
 }
 
 /* ===== BILD-VERARBEITUNG (Komprimierung, EXIF-Strip) =====
@@ -17082,6 +17172,7 @@ let fundEditorFeelings = [];
 let fundFeelingPickerOpen = false;
 // Bild-Draft im Fund-Editor (Spec v02 Schritt 4)
 let fundImageDraft = null;          // mediaId oder null
+let fundTimeUserEdited = false;     // true, sobald der Nutzer Datum/Zeit selbst ändert
 let fundImagePrevious = null;       // mediaId, die der Fund VORHER hatte (für Refs-Diff)
 
 function uidFund() {
@@ -17578,6 +17669,7 @@ function openFundEditor(existingId) {
     fundImagePrevious = null;
   }
 
+  fundTimeUserEdited = false;
   fundFeelingPickerOpen = fundEditorFeelings.length > 0;
   fundFeelingPending = null;
   const ffInput = document.getElementById('fund-feeling-input');
@@ -17977,6 +18069,7 @@ async function handleFundImageFile(event) {
   event.target.value = '';
   if (!file) return;
   showToast('Bild wird verarbeitet …');
+  const photoDate = await readPhotoDateTime(file);   // Aufnahmezeit aus EXIF (oder null), vor der Kompression
   try {
     const { blob, width, height } = await compressImage(file);
     const ok = await hasEnoughStorageFor(blob.size);
@@ -17998,6 +18091,20 @@ async function handleFundImageFile(event) {
     const mediaId = await addImage(blob, { width, height, refs: [] });
     fundImageDraft = mediaId;
     renderFundImageDraft();
+
+    // Zeit aus dem Foto übernehmen — nur bei neuem Fund und nur, wenn Datum/Zeit
+    // nicht schon manuell geändert wurden. Nie überschreiben, wenn der Nutzer eingegriffen hat.
+    if (photoDate && !editingFundId && !fundTimeUserEdited) {
+      const dEl = document.getElementById('fund-date');
+      const tEl = document.getElementById('fund-time');
+      if (dEl && tEl) {
+        dEl.value = `${photoDate.getFullYear()}-${String(photoDate.getMonth()+1).padStart(2,'0')}-${String(photoDate.getDate()).padStart(2,'0')}`;
+        tEl.value = `${String(photoDate.getHours()).padStart(2,'0')}:${String(photoDate.getMinutes()).padStart(2,'0')}`;
+        if (typeof updateFundTripHint === 'function') updateFundTripHint();
+        showToast('Bild hinzugefügt · Zeit vom Foto übernommen.');
+        return;
+      }
+    }
     showToast('Bild hinzugefügt.');
   } catch (err) {
     console.error('Fund-Bild-Fehler:', err);
@@ -18663,6 +18770,7 @@ async function handleTeImageFile(event) {
   _teImageInsertIndex = null;
 
   showToast('Bild wird verarbeitet …');
+  const photoDate = await readPhotoDateTime(file);   // Aufnahmezeit aus EXIF, vor der Kompression
   try {
     const { blob, width, height } = await compressImage(file);
 
@@ -18678,16 +18786,21 @@ async function handleTeImageFile(event) {
     // In IndexedDB speichern (Refs werden später beim Save gesetzt — hier noch ohne Ref)
     const mediaId = await addImage(blob, { width, height, refs: [] });
 
+    // Uhrzeit des Bild-Blocks: aus dem Foto, sonst aktuelle Zeit
+    const photoTime = photoDate
+      ? `${String(photoDate.getHours()).padStart(2,'0')}:${String(photoDate.getMinutes()).padStart(2,'0')}`
+      : null;
+
     // Block einfügen
     teBlocksDraft.splice(insertIndex, 0, {
       id: blockUid(),
       type: 'image',
       mediaId: mediaId,
       caption: '',
-      time: currentHHMM()
+      time: photoTime || currentHHMM()
     });
     renderTeBlocks();
-    showToast('Bild eingefügt.');
+    showToast(photoTime ? 'Bild eingefügt · Zeit vom Foto übernommen.' : 'Bild eingefügt.');
   } catch (err) {
     console.error('Bild-Fehler:', err);
     showToast('Bild konnte nicht eingefügt werden.');
