@@ -7352,6 +7352,12 @@ textarea, input {
     </div>
     <p class="muted-note" style="margin:0 0 10px;font-size:0.85rem;">Bei jeder ausgewählten Person wird der gleiche Eintrag angelegt.</p>
     <div id="mit-personen-picker-list" class="mit-personen-picker-list"></div>
+    <div style="display:flex;gap:8px;margin:10px 0 14px;">
+      <input type="text" id="mit-personen-new-name" placeholder="Neuer Mensch …"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();createMitPersonInline();}"
+        style="flex:1;min-width:0;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:'EB Garamond',serif;font-size:0.95rem;background:var(--bg);color:var(--ink);outline:none;">
+      <button type="button" class="btn secondary" style="padding:10px 14px;white-space:nowrap;" onclick="createMitPersonInline()">Anlegen</button>
+    </div>
     <div style="display:flex;gap:8px;">
       <button class="btn secondary" style="flex:1;min-width:0;padding:11px 10px;" onclick="closeMitPersonenPicker()">Abbrechen</button>
       <button class="btn" style="flex:1;min-width:0;padding:11px 10px;" onclick="confirmMitPersonenPicker()">Übernehmen</button>
@@ -15205,6 +15211,44 @@ function renderMenschenLandschaft(containerPrefix) {
     placed.push({ x, y, r, item: it, imHerz: istImHerz });
   });
 
+  // Überlappungen auflösen: sanftes Auseinanderschieben (deterministisch, da
+  // die Startpositionen deterministisch sind und die Reihenfolge nach ID fix ist).
+  // Zonen bleiben erhalten: Herz-Personen im inneren Kreis, andere im Ring.
+  const clearPad = 3;
+  for (let iter = 0; iter < 80; iter++) {
+    let moved = false;
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        const a = placed[i], b = placed[j];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        let d = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        const need = a.r + b.r + clearPad;
+        if (d < need) {
+          const push = (need - d) / 2;
+          const ux = dx / d, uy = dy / d;
+          a.x -= ux * push; a.y -= uy * push;
+          b.x += ux * push; b.y += uy * push;
+          moved = true;
+        }
+      }
+    }
+    // Radialer Zonen-Clamp: hält jede Kugel in ihrem erlaubten Abstand zur Mitte
+    for (const p of placed) {
+      const ddx = p.x - cx, ddy = p.y - cy;
+      const dr = Math.sqrt(ddx * ddx + ddy * ddy) || 0.01;
+      let minR, maxR;
+      if (p.imHerz) { minR = 0; maxR = herzRadius - p.r - 2; }
+      else { minR = aussenRingMin + p.r + 2; maxR = innerMaxRadius - p.r - 4; }
+      if (maxR < minR) maxR = minR;
+      const clamped = Math.max(minR, Math.min(maxR, dr));
+      if (clamped !== dr) {
+        p.x = cx + (ddx / dr) * clamped;
+        p.y = cy + (ddy / dr) * clamped;
+      }
+    }
+    if (!moved) break;
+  }
+
   // SVG aufbauen
   let svgInner = '';
 
@@ -20641,17 +20685,11 @@ function removeMitPerson(id) {
 }
 
 function openMitPersonenPicker() {
-  // Alle Menschen außer dem aktuellen und außer den bereits zugeordneten Mit-Personen
-  const bestehend = begegnungBestehendeMitPersonen || [];
-  const liste = (state.menschen || [])
-    .filter(m => m.id !== menschDetailCurrentId)
-    .filter(m => !bestehend.includes(m.id));
-  if (!liste.length) {
-    showToast('Keine weiteren Menschen in deiner Liste.');
-    return;
-  }
-  // Aktuelle Auswahl als Startwert
+  // Der Picker öffnet immer — auch wenn (noch) keine weiteren Menschen da sind.
+  // Dann legt man direkt hier einen neuen Menschen an, ohne Umweg über die Verwaltung.
   mitPersonenPickerSelection = begegnungMitPersonen.slice();
+  const newInput = document.getElementById('mit-personen-new-name');
+  if (newInput) newInput.value = '';
   renderMitPersonenPickerList();
   document.getElementById('mit-personen-picker-overlay').classList.add('visible');
 }
@@ -20697,6 +20735,41 @@ function confirmMitPersonenPicker() {
   begegnungMitPersonen = mitPersonenPickerSelection.slice();
   closeMitPersonenPicker();
   renderMitPersonenChips();
+}
+
+function createMitPersonInline() {
+  const input = document.getElementById('mit-personen-new-name');
+  if (!input) return;
+  const name = (input.value || '').trim();
+  if (!name) { showToast('Ein Name fehlt.'); return; }
+  if (!Array.isArray(state.menschen)) state.menschen = [];
+
+  // Gibt es den Namen schon, nehmen wir die bestehende Person — kein Duplikat.
+  let person = state.menschen.find(m => (m.name || '').trim().toLowerCase() === name.toLowerCase());
+  if (!person) {
+    person = {
+      id: uid(),
+      name: name,
+      relation: '',
+      note: '',
+      geburtsdatum: null,
+      todesdatum: null,
+      imHerz: false,
+      giftedAt: null,
+      begegnungen: []
+    };
+    state.menschen.push(person);
+    saveState();
+    if (typeof renderMenschenList === 'function') renderMenschenList();
+    if (typeof renderMenschenLandschaft === 'function') renderMenschenLandschaft('home-landschaft');
+    if (typeof updateSettingsSummaries === 'function') updateSettingsSummaries();
+    showToast(`${name} angelegt.`);
+  }
+
+  if (!mitPersonenPickerSelection.includes(person.id)) mitPersonenPickerSelection.push(person.id);
+  input.value = '';
+  renderMitPersonenPickerList();
+  input.focus();
 }
 
 /* ----- Schnell-Begegnung mit neuer Person ----- */
