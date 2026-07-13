@@ -7025,6 +7025,18 @@ textarea, input {
       </p>
     </div>
 
+    <!-- An meiner Seite — genau eine Person, fest im Zentrum -->
+    <div style="margin-bottom:14px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="mensch-an-seite"
+          style="width:18px;height:18px;cursor:pointer;accent-color:var(--accent-deep);">
+        <span style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.95rem;color:var(--ink);">An meiner Seite</span>
+      </label>
+      <p class="muted-note" style="margin:4px 0 0 28px;font-size:0.75rem;line-height:1.4;">
+        Der Mensch, der mit dir geht. Sitzt fest im Mittelpunkt, als größte Kugel — nur eine Person zugleich.
+      </p>
+    </div>
+
     <!-- Todes-Bereich — verborgen, nur über bewussten Klick zugänglich -->
     <div id="mensch-tod-wrap" style="margin-bottom:14px;">
       <button type="button" id="mensch-tod-toggle" onclick="openMenschTodDialog()"
@@ -15167,7 +15179,14 @@ function renderMenschenLandschaft(containerPrefix) {
   const placed = []; // { x, y, r, item, imHerz }
   sorted.forEach((it) => {
     const istImHerz = !!it.mensch.imHerz;
-    const r = sizeFor(it.aktivitaet, istImHerz);
+    const istSeite = it.mensch.id && it.mensch.id === state.seiteId;
+    let r = sizeFor(it.aktivitaet, istImHerz);
+    if (istSeite) {
+      // „An meiner Seite": fest im Mittelpunkt und immer die größte Kugel.
+      r = maxRHerz + 2;
+      placed.push({ x: cx, y: cy, r, item: it, imHerz: true, fixed: true });
+      return;
+    }
     // Pseudo-Zufalls-Folge aus der Mensch-ID — gleicher Seed → gleiche Folge
     const seed = hashString(it.mensch.id || it.mensch.name || 'leer');
     const rng = mulberry32(seed);
@@ -15224,16 +15243,26 @@ function renderMenschenLandschaft(containerPrefix) {
         let d = Math.sqrt(dx * dx + dy * dy) || 0.01;
         const need = a.r + b.r + clearPad;
         if (d < need) {
-          const push = (need - d) / 2;
+          const overlap = need - d;
           const ux = dx / d, uy = dy / d;
-          a.x -= ux * push; a.y -= uy * push;
-          b.x += ux * push; b.y += uy * push;
-          moved = true;
+          if (a.fixed && b.fixed) {
+            // beide fest — nicht bewegen
+          } else if (a.fixed) {
+            b.x += ux * overlap; b.y += uy * overlap; moved = true;
+          } else if (b.fixed) {
+            a.x -= ux * overlap; a.y -= uy * overlap; moved = true;
+          } else {
+            const push = overlap / 2;
+            a.x -= ux * push; a.y -= uy * push;
+            b.x += ux * push; b.y += uy * push;
+            moved = true;
+          }
         }
       }
     }
     // Radialer Zonen-Clamp: hält jede Kugel in ihrem erlaubten Abstand zur Mitte
     for (const p of placed) {
+      if (p.fixed) continue;
       const ddx = p.x - cx, ddy = p.y - cy;
       const dr = Math.sqrt(ddx * ddx + ddy * ddy) || 0.01;
       let minR, maxR;
@@ -19633,6 +19662,7 @@ function openMenschEditor(existingId) {
   document.getElementById('mensch-note').value = existing?.note || '';
   document.getElementById('mensch-geburtsdatum').value = existing?.geburtsdatum || '';
   document.getElementById('mensch-im-herz').checked = !!(existing?.imHerz);
+  document.getElementById('mensch-an-seite').checked = !!(existing && existing.id && existing.id === state.seiteId);
 
   // Tod-Bereich: anzeigen, ob bereits markiert
   refreshMenschTodAnzeige(existing);
@@ -19676,6 +19706,7 @@ function saveMenschEditor() {
   const note = document.getElementById('mensch-note').value.trim();
   const geburtsdatum = document.getElementById('mensch-geburtsdatum').value || null;
   const imHerz = !!document.getElementById('mensch-im-herz').checked;
+  const anSeite = !!document.getElementById('mensch-an-seite').checked;
   if (!name) {
     showToast('Ein Name fehlt.');
     return;
@@ -19700,6 +19731,8 @@ function saveMenschEditor() {
       existing.geburtsdatum = geburtsdatum;
       existing.imHerz = imHerz;
       // todesdatum wird über die separate Tod-Funktion gepflegt, nicht hier
+      if (anSeite) state.seiteId = existing.id;
+      else if (state.seiteId === existing.id) state.seiteId = null;
     }
     } else {
     const newId = uid();
@@ -19715,6 +19748,7 @@ function saveMenschEditor() {
       begegnungen: []
     });
     window._menschTodProvisorisch = null;
+    if (anSeite) state.seiteId = newId;
     saveState();
     renderMenschenList();
     updateSettingsSummaries();
