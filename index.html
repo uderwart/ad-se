@@ -4813,6 +4813,195 @@ body.ritual-fullscreen .hourglass-wrap {
 textarea, input {
   font-family: 'Inter', sans-serif;
 }
+
+/* ===== DAS BUCH — Lese-Ort (Juli 2026) ===== */
+#section-buch { padding: 0; }
+
+/* Einband */
+#buch-cover {
+  position: fixed; inset: 0; z-index: 60;
+  background: radial-gradient(ellipse at 50% 30%, #5a3a32 0%, #3a2420 55%, #2a1815 100%);
+  display: flex; align-items: center; justify-content: center;
+  overflow-y: auto;
+}
+.buch-cover-inner { text-align: center; padding: 40px 28px; max-width: 420px; }
+.buch-cover-flower { width: 150px; height: 150px; margin: 0 auto 10px; opacity: 0.95; }
+.buch-cover-flower svg { width: 100%; height: 100%; }
+.buch-cover-title {
+  font-family: 'EB Garamond', serif; font-style: italic; font-weight: 500;
+  font-size: 2.4rem; color: #f5ead8; letter-spacing: 0.02em; margin-bottom: 10px;
+}
+.buch-cover-range {
+  font-family: 'EB Garamond', serif; font-style: italic;
+  font-size: 1.02rem; color: rgba(245, 234, 216, 0.65); margin-bottom: 36px; line-height: 1.5;
+}
+.buch-open-btn {
+  padding: 13px 38px; border-radius: 26px;
+  border: 1.5px solid rgba(245, 234, 216, 0.45); background: transparent;
+  color: #f5ead8; font-family: 'EB Garamond', serif; font-style: italic;
+  font-size: 1.15rem; cursor: pointer; transition: all 0.2s;
+}
+.buch-open-btn:hover, .buch-open-btn:active { background: rgba(245, 234, 216, 0.08); }
+.buch-cover-hint {
+  margin-top: 22px; font-family: 'EB Garamond', serif; font-style: italic;
+  font-size: 0.9rem; color: rgba(245, 234, 216, 0.45); min-height: 1.2em;
+}
+
+/* Schließen-Knopf */
+.buch-close {
+  position: fixed; top: 14px; right: 14px; z-index: 66;
+  background: none; border: none; cursor: pointer; padding: 8px 10px;
+  color: rgba(245, 234, 216, 0.55); font-size: 1.25rem; line-height: 1;
+  transition: color 0.15s;
+}
+.buch-close:hover { color: rgba(245, 234, 216, 0.95); }
+.buch-close.on-paper { color: rgba(74, 47, 42, 0.4); }
+.buch-close.on-paper:hover { color: rgba(74, 47, 42, 0.85); }
+
+/* Seiten */
+#buch-reader { position: fixed; inset: 0; z-index: 60; background: #f7f1e3; }
+#buch-page-wrap {
+  position: absolute; inset: 0; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 54px 0 92px;
+}
+#buch-page {
+  max-width: 620px; margin: 0 auto; padding: 10px 30px 30px;
+}
+
+/* Papieranmutung: sanfte Ränder */
+#buch-reader::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  box-shadow: inset 0 0 70px rgba(120, 90, 60, 0.13);
+}
+
+/* Seiten-Kopf: Datum */
+.buch-datum {
+  font-family: 'EB Garamond', serif; font-style: italic; font-weight: 500;
+  font-size: 1.45rem; color: #4a2f2a; text-align: center;
+  margin: 14px 0 6px; line-height: 1.35;
+}
+.buch-datum-rule {
+  width: 56px; height: 1px; margin: 0 auto 30px;
+  background: rgba(74, 47, 42, 0.3); border: none;
+}
+
+/* Eintrag im Fließtext */
+.buch-eintrag { margin-bottom: 6px; }
+.buch-label {
+  font-family: 'Inter', sans-serif; font-size: 0.66rem; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(74, 47, 42, 0.48); margin-bottom: 7px; text-align: center;
+}
+.buch-text {
+  font-family: 'EB Garamond', serif; font-size: 1.13rem; line-height: 1.75;
+  color: #35251f; text-align: left;
+}
+.buch-text p { margin-bottom: 10px; }
+.buch-text .buch-frage {
+  font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(74, 47, 42, 0.42); margin: 10px 0 2px;
+}
+.buch-text .buch-zitat { font-style: italic; }
+.buch-text .buch-nebensatz { font-size: 0.98rem; color: rgba(53, 37, 31, 0.68); font-style: italic; }
+
+/* Bilder wie im gedruckten Buch */
+.buch-bild { margin: 14px 0; text-align: center; }
+.buch-bild img {
+  max-width: 100%; border-radius: 4px; display: block; margin: 0 auto;
+  box-shadow: 0 2px 10px rgba(60, 40, 25, 0.18);
+}
+.buch-bild .buch-bildtext {
+  font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.92rem;
+  color: rgba(53, 37, 31, 0.6); margin-top: 7px;
+}
+
+/* Ornament zwischen Einträgen */
+.buch-ornament {
+  text-align: center; color: rgba(74, 47, 42, 0.3);
+  font-size: 1.05rem; margin: 20px 0; user-select: none;
+}
+
+/* Stille Zeile (z. B. Wasser des Tages) */
+.buch-still {
+  font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.95rem;
+  color: rgba(53, 37, 31, 0.5); text-align: center; margin-top: 26px;
+}
+
+/* Fußleiste */
+#buch-footer {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 64;
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, #f7f1e3 62%, rgba(247, 241, 227, 0));
+}
+.buch-nav-btn {
+  background: none; border: none; cursor: pointer; padding: 6px 16px;
+  font-family: 'EB Garamond', serif; font-size: 1.5rem; line-height: 1;
+  color: rgba(74, 47, 42, 0.55); transition: color 0.15s;
+}
+.buch-nav-btn:hover { color: rgba(74, 47, 42, 0.95); }
+.buch-nav-btn:disabled { opacity: 0.2; cursor: default; }
+#buch-pageno {
+  font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.95rem;
+  color: rgba(74, 47, 42, 0.6); cursor: pointer; padding: 4px 10px;
+  border-bottom: 1px solid rgba(74, 47, 42, 0.2); user-select: none;
+}
+
+/* Umblättern */
+@keyframes buchTurnNext {
+  from { opacity: 0; transform: translateX(26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes buchTurnPrev {
+  from { opacity: 0; transform: translateX(-26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+#buch-page.turn-next { animation: buchTurnNext 0.26s ease-out; }
+#buch-page.turn-prev { animation: buchTurnPrev 0.26s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  #buch-page.turn-next, #buch-page.turn-prev { animation: none; }
+}
+
+/* Register */
+#buch-register {
+  position: fixed; inset: 0; z-index: 70;
+  background: rgba(42, 24, 21, 0.55); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.buch-register-card {
+  background: #f7f1e3; border-radius: 14px; padding: 26px 24px;
+  max-width: 380px; width: 100%; max-height: 76vh; overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+}
+.buch-register-title {
+  font-family: 'EB Garamond', serif; font-style: italic; font-weight: 500;
+  font-size: 1.35rem; color: #4a2f2a; text-align: center; margin-bottom: 18px;
+}
+.buch-register-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 10px 6px; border-bottom: 1px solid rgba(74, 47, 42, 0.1);
+  font-family: 'EB Garamond', serif; font-size: 1.05rem; color: #35251f;
+  text-align: left;
+}
+.buch-register-row:hover { background: rgba(74, 47, 42, 0.05); }
+.buch-register-row .buch-register-count {
+  font-size: 0.85rem; font-style: italic; color: rgba(53, 37, 31, 0.5);
+}
+.buch-register-close {
+  display: block; margin: 18px auto 0; padding: 9px 26px; border-radius: 20px;
+  border: 1.5px solid rgba(74, 47, 42, 0.3); background: transparent;
+  color: #4a2f2a; font-family: 'Inter', sans-serif; font-size: 0.9rem; cursor: pointer;
+}
+
+/* Leeres Buch */
+.buch-leer {
+  font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.1rem;
+  color: rgba(53, 37, 31, 0.55); text-align: center; margin-top: 34vh; line-height: 1.7;
+}
+
 </style>
 </head>
 <body>
@@ -5957,6 +6146,13 @@ textarea, input {
     <div class="greeting-sub">Was du in den letzten Tagen wahrgenommen hast.</div>
   </div>
 
+  <!-- Das Buch — Lese-Ort -->
+  <div class="card" onclick="showSection('buch')"
+    style="cursor:pointer;background:radial-gradient(ellipse at 50% 0%, #5a3a32 0%, #3a2420 70%);text-align:center;padding:22px 20px;">
+    <div style="font-family:'EB Garamond',serif;font-style:italic;font-weight:500;font-size:1.35rem;color:#f5ead8;margin-bottom:4px;">Das Buch</div>
+    <div style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.92rem;color:rgba(245,234,216,0.6);">Alles, was du eingetragen hast — zum Blättern und Wiederlesen.</div>
+  </div>
+
   <!-- Heatmap -->
   <div class="card">
     <h2>Letzte 90 Tage</h2>
@@ -6110,6 +6306,51 @@ textarea, input {
 </div>
 
 <!-- ====== FUNDE — Schönes was berührt ====== -->
+<!-- ====== DAS BUCH — Lese-Ort ====== -->
+<div id="section-buch" class="section">
+
+  <!-- Einband -->
+  <div id="buch-cover">
+    <button class="buch-close" onclick="closeBuch()" title="Buch schließen">✕</button>
+    <div class="buch-cover-inner">
+      <div class="buch-cover-flower" id="buch-cover-flower" aria-hidden="true"></div>
+      <div class="buch-cover-title">Das Buch</div>
+      <div class="buch-cover-range" id="buch-cover-range">&nbsp;</div>
+      <button class="buch-open-btn" onclick="openBuchFromCover()">Aufschlagen</button>
+      <div class="buch-cover-hint" id="buch-cover-hint">&nbsp;</div>
+    </div>
+  </div>
+
+  <!-- Seiten -->
+  <div id="buch-reader" style="display:none;">
+    <button class="buch-close on-paper" onclick="closeBuch()" title="Buch schließen">✕</button>
+    <div id="buch-page-wrap">
+      <div id="buch-page"></div>
+    </div>
+    <div id="buch-footer">
+      <button class="buch-nav-btn" id="buch-prev-btn" onclick="buchPrev()" title="Zurückblättern">‹</button>
+      <div id="buch-pageno" onclick="openBuchRegister()" title="Register öffnen"></div>
+      <button class="buch-nav-btn" id="buch-next-btn" onclick="buchNext()" title="Umblättern">›</button>
+    </div>
+  </div>
+
+  <!-- Register -->
+  <div id="buch-register" style="display:none;" onclick="if(event.target===this)closeBuchRegister()">
+    <div class="buch-register-card">
+      <div class="buch-register-title">Register</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <input type="date" id="buch-goto-date"
+          style="flex:1;padding:9px 10px;border:1.5px solid rgba(74,47,42,0.3);border-radius:10px;background:transparent;color:#35251f;font-family:'Inter',sans-serif;font-size:0.9rem;outline:none;">
+        <button onclick="buchGotoDate()"
+          style="padding:9px 16px;border-radius:10px;border:1.5px solid rgba(74,47,42,0.3);background:transparent;color:#4a2f2a;font-family:'Inter',sans-serif;font-size:0.9rem;cursor:pointer;">Gehe hin</button>
+      </div>
+      <div id="buch-register-list"></div>
+      <button class="buch-register-close" onclick="closeBuchRegister()">Schließen</button>
+    </div>
+  </div>
+
+</div>
+
 <div id="section-funde" class="section">
   <button class="back-link" onclick="showSection('home')">← Heute</button>
   <div class="greeting-block">
@@ -8423,12 +8664,13 @@ function showSection(id) {
   const navBtn = document.getElementById('nav-' + id);
   if (navBtn) navBtn.classList.add('active');
   // Bottom-Nav in Vollbild-Ritualen ausblenden
-  const isRitual = (id === 'moment' || id === 'morning' || id === 'evening' || id === 'gedanken' || id === 'rueckblick' || id === 'hourglass');
+  const isRitual = (id === 'moment' || id === 'morning' || id === 'evening' || id === 'gedanken' || id === 'rueckblick' || id === 'hourglass' || id === 'buch');
   document.body.classList.toggle('ritual-fullscreen', isRitual);
   if (id === 'settings') renderSettings();
   if (id === 'home') renderHome();
   if (id === 'body') renderBody();
   if (id === 'verlauf') { renderHeatmap(); renderVerlaufList(); }
+  if (id === 'buch') renderBuch();
   if (id === 'weekly') renderWeekly();
   if (id === 'gedanken-log') renderGedankenLog();
   if (id === 'rueckblick-list') renderRueckblickList();
@@ -22477,6 +22719,438 @@ function closeVersionHistory() {
 }
 
 /* ===== INIT ===== */
+/* ===== DAS BUCH — Lese-Ort (Juli 2026) =====
+   Eine zweite Darstellung aller Einträge: chronologisch vom ersten Tag an,
+   ein Tag = eine Seite, nur zum Lesen. Kein Bearbeiten, kein Löschen.
+   Lesezeichen liegt außerhalb des States (localStorage), damit es die
+   Sicherung nicht aufbläht. */
+
+const BUCH_LESEZEICHEN_KEY = 'adse-buch-lesezeichen';
+
+let buchPages = [];        // [{ dk, date, entries }]
+let buchIndex = 0;         // aktuelle Seite
+let buchOpenState = false; // false = Einband, true = Seiten
+
+/* Alle Einträge sammeln — Verlauf plus Funde, Freies Schreiben,
+   Reise-Tageseinträge und Wochenreflexionen. */
+function getBuchEntries() {
+  const out = getAllEntries(); // feeling, body, activity, water, gratitude, evening, morning, gedanken, moment, story, today, begegnung
+
+  (state.funde || []).forEach(f => out.push({ type: 'fund', ts: f.ts, data: f }));
+  (state.schreibseiten || []).forEach(s => out.push({ type: 'schreiben', ts: s.ts, data: s }));
+
+  (state.tripEntries || []).forEach(te => {
+    // Der Tageseintrag gehört zu seinem Datum, nicht zum Erstellzeitpunkt.
+    let ts;
+    if (te.createdAt && dayKey(new Date(te.createdAt)) === te.date) {
+      ts = te.createdAt;
+    } else {
+      ts = te.date + 'T21:00:00';
+    }
+    out.push({ type: 'tripEntry', ts, data: te });
+  });
+
+  (state.weeklyArchive || []).forEach(w => {
+    if (w.startedAt) out.push({ type: 'weekly', ts: w.startedAt, data: w });
+  });
+
+  return out;
+}
+
+/* Seiten bauen: nach Tag gruppiert, chronologisch aufsteigend. */
+function buildBuchPages() {
+  const entries = getBuchEntries();
+  const groups = {};
+  entries.forEach(e => {
+    const d = new Date(e.ts);
+    if (isNaN(d)) return;
+    const dk = dayKey(d);
+    if (!groups[dk]) groups[dk] = { dk, date: d, entries: [] };
+    groups[dk].entries.push(e);
+  });
+  buchPages = Object.keys(groups).sort().map(dk => {
+    const g = groups[dk];
+    g.entries.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+    return g;
+  });
+}
+
+function renderBuch() {
+  buildBuchPages();
+  buchOpenState = false;
+  document.getElementById('buch-cover').style.display = '';
+  document.getElementById('buch-reader').style.display = 'none';
+  closeBuchRegister();
+  renderBuchCoverFlower();
+
+  const rangeEl = document.getElementById('buch-cover-range');
+  const hintEl = document.getElementById('buch-cover-hint');
+  if (!buchPages.length) {
+    rangeEl.textContent = 'Noch sind die Seiten leer.';
+    hintEl.innerHTML = '&nbsp;';
+    return;
+  }
+  const first = buchPages[0].date;
+  const last = buchPages[buchPages.length - 1].date;
+  const fmt = d => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+  rangeEl.textContent = `${fmt(first)} — ${fmt(last)}`;
+
+  // Lesezeichen-Hinweis
+  const marked = getBuchLesezeichen();
+  const idx = marked ? buchPages.findIndex(p => p.dk === marked) : -1;
+  if (idx > 0) {
+    hintEl.textContent = 'Lesezeichen: ' + buchPages[idx].date.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+  } else {
+    hintEl.innerHTML = '&nbsp;';
+  }
+}
+
+/* Margerite auf dem Einband — still, ohne Animation. */
+function renderBuchCoverFlower() {
+  const holder = document.getElementById('buch-cover-flower');
+  if (!holder || holder.dataset.done) return;
+  let petals = '';
+  for (let a = 0; a < 360; a += 15) {
+    petals += `<ellipse cx="160" cy="57" rx="7" ry="38" fill="url(#buchPetalGrad)" transform="rotate(${a} 160 160)"/>`;
+  }
+  holder.innerHTML = `
+    <svg viewBox="0 0 320 320" aria-hidden="true">
+      <defs>
+        <radialGradient id="buchHaloGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffe1a0" stop-opacity="0.5"/>
+          <stop offset="60%" stop-color="#f4c468" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#f4c468" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="buchCoreGrad" cx="50%" cy="42%" r="62%">
+          <stop offset="0%" stop-color="#ffe9b2"/>
+          <stop offset="52%" stop-color="#f3c264"/>
+          <stop offset="100%" stop-color="#d99632"/>
+        </radialGradient>
+        <linearGradient id="buchPetalGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#fbf7ee"/>
+          <stop offset="100%" stop-color="#e5d9c2"/>
+        </linearGradient>
+      </defs>
+      <circle cx="160" cy="160" r="150" fill="url(#buchHaloGrad)"/>
+      <g>${petals}</g>
+      <circle cx="160" cy="160" r="70" fill="url(#buchCoreGrad)"/>
+    </svg>`;
+  holder.dataset.done = '1';
+}
+
+function getBuchLesezeichen() {
+  try { return localStorage.getItem(BUCH_LESEZEICHEN_KEY); } catch (e) { return null; }
+}
+function setBuchLesezeichen(dk) {
+  try { localStorage.setItem(BUCH_LESEZEICHEN_KEY, dk); } catch (e) {}
+}
+
+function openBuchFromCover() {
+  buchOpenState = true;
+  document.getElementById('buch-cover').style.display = 'none';
+  document.getElementById('buch-reader').style.display = '';
+  if (!buchPages.length) {
+    buchIndex = 0;
+    renderBuchPage(null);
+    return;
+  }
+  const marked = getBuchLesezeichen();
+  const idx = marked ? buchPages.findIndex(p => p.dk === marked) : -1;
+  buchIndex = idx >= 0 ? idx : 0;
+  renderBuchPage(null);
+}
+
+function closeBuch() {
+  closeBuchRegister();
+  showSection('verlauf');
+}
+
+function buchNext() {
+  if (buchIndex < buchPages.length - 1) {
+    buchIndex++;
+    renderBuchPage('next');
+  }
+}
+function buchPrev() {
+  if (buchIndex > 0) {
+    buchIndex--;
+    renderBuchPage('prev');
+  }
+}
+
+/* ===== Seiten-Rendering ===== */
+
+function renderBuchPage(direction) {
+  const page = document.getElementById('buch-page');
+  const wrap = document.getElementById('buch-page-wrap');
+  if (!page) return;
+
+  page.classList.remove('turn-next', 'turn-prev');
+
+  if (!buchPages.length) {
+    page.innerHTML = `<div class="buch-leer">Dieses Buch wartet noch auf seine ersten Zeilen.<br>Alles, was du in Ad se einträgst, findet hierher.</div>`;
+    document.getElementById('buch-pageno').textContent = '';
+    document.getElementById('buch-prev-btn').disabled = true;
+    document.getElementById('buch-next-btn').disabled = true;
+    return;
+  }
+
+  const g = buchPages[buchIndex];
+  const dateText = g.date.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Wasser des Tages leise zusammenfassen statt als Einzelzeilen
+  const waterSum = g.entries.filter(e => e.type === 'water')
+    .reduce((s, e) => s + (Number(e.data.ml) || 0), 0);
+  const flow = g.entries.filter(e => e.type !== 'water');
+
+  let html = `<div class="buch-datum">${escapeHtml(dateText)}</div><hr class="buch-datum-rule">`;
+
+  flow.forEach((e, i) => {
+    if (i > 0) html += `<div class="buch-ornament">&#10086;</div>`;
+    html += buchEntryHtml(e);
+  });
+
+  if (!flow.length && waterSum <= 0) {
+    html += `<div class="buch-leer" style="margin-top:16vh;">Ein stiller Tag.</div>`;
+  }
+  if (waterSum > 0) {
+    html += `<div class="buch-still">Wasser über den Tag: ${waterSum} ml</div>`;
+  }
+
+  page.innerHTML = html;
+
+  // Umblätter-Bewegung (respektiert prefers-reduced-motion via CSS)
+  if (direction === 'next') { void page.offsetWidth; page.classList.add('turn-next'); }
+  if (direction === 'prev') { void page.offsetWidth; page.classList.add('turn-prev'); }
+
+  // Fußleiste
+  document.getElementById('buch-pageno').textContent = `Seite ${buchIndex + 1} von ${buchPages.length}`;
+  document.getElementById('buch-prev-btn').disabled = buchIndex === 0;
+  document.getElementById('buch-next-btn').disabled = buchIndex === buchPages.length - 1;
+
+  if (wrap) wrap.scrollTop = 0;
+  setBuchLesezeichen(g.dk);
+  hydrateBuchImages(page);
+}
+
+/* Bilder aus IndexedDB nachladen */
+async function hydrateBuchImages(container) {
+  const imgs = container.querySelectorAll('img[data-media-id]');
+  for (const img of imgs) {
+    try {
+      const url = await getImageObjectUrl(img.dataset.mediaId);
+      if (url) {
+        img.src = url;
+        img.style.cursor = 'pointer';
+        img.onclick = () => openLightbox(img.dataset.mediaId, img.dataset.caption || '');
+      } else if (img.parentElement) img.parentElement.style.display = 'none';
+    } catch (e) {
+      if (img.parentElement) img.parentElement.style.display = 'none';
+    }
+  }
+}
+
+/* Zeilenumbrüche im Buch erhalten */
+function buchText(t) {
+  return escapeHtml(t || '').replace(/\n/g, '<br>');
+}
+
+function buchZeit(ts) {
+  return new Date(ts).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
+/* Ein Eintrag als Buchabsatz */
+function buchEntryHtml(e) {
+  const dat = e.data;
+  const t = buchZeit(e.ts);
+  let label = '';
+  let body = '';
+
+  const frage = (q, a) => a && a.trim()
+    ? `<div class="buch-frage">${escapeHtml(q)}</div><p class="buch-zitat">&#8222;${buchText(a)}&#8220;</p>`
+    : '';
+
+  if (e.type === 'feeling') {
+    label = 'Gefühl';
+    const labels = (dat.feelings || []).map(f => escapeHtml(f.label)).join(', ');
+    body = `<p><em>${labels}</em></p>`;
+    if (dat.context) body += `<p class="buch-zitat">&#8222;${buchText(dat.context)}&#8220;</p>`;
+    if (dat.linkedActivity && dat.linkedActivity.text) body += `<p class="buch-nebensatz">aus dem Erleben: ${escapeHtml(dat.linkedActivity.text)}</p>`;
+    if (dat.needs && dat.needs.length) body += `<p class="buch-nebensatz">Bedürfnis: ${dat.needs.map(escapeHtml).join(', ')}</p>`;
+    if (Array.isArray(dat.parts) && dat.parts.length) {
+      const kindLabels = { erste_geige: '1. Geige', pauker: 'Pauker', notenwart: 'Notenwart' };
+      body += `<p class="buch-nebensatz">Orchester: ${dat.parts.map(p => `${kindLabels[p.kind] || ''} &#8222;${escapeHtml(p.name)}&#8220;`).join(' · ')}</p>`;
+    }
+    if (dat.needsNote) body += `<p class="buch-nebensatz">${buchText(dat.needsNote)}</p>`;
+  } else if (e.type === 'body') {
+    label = 'Körper';
+    const typesText = Array.isArray(dat.types) ? dat.types.join(', ') : (dat.type || '');
+    body = `<p>${escapeHtml(dat.zone)} — ${escapeHtml(typesText)} (${dat.intensity}/10)</p>`;
+    if (dat.sleepQuality) {
+      const sl = { tief_erholt: 'Tief und erholt', gut_zu_kurz: 'Gut, aber zu kurz', unruhig: 'Unruhig', gruebeln: 'Schwer — Grübeln', unbekannt: 'Nicht bewusst wahrgenommen' };
+      body += `<p class="buch-nebensatz">Schlaf: ${escapeHtml(sl[dat.sleepQuality] || dat.sleepQuality)}</p>`;
+    }
+    if (dat.note) body += `<p class="buch-nebensatz">${buchText(dat.note)}</p>`;
+  } else if (e.type === 'activity') {
+    label = 'Aktivität';
+    body = `<p>${escapeHtml(dat.name)}${dat.duration ? ' — ' + escapeHtml(dat.duration) : (dat.min ? ` — ${dat.min} min` : '')}</p>`;
+    if (dat.note) body += `<p class="buch-nebensatz">${buchText(dat.note)}</p>`;
+  } else if (e.type === 'gratitude') {
+    label = 'Dankbarkeit';
+    body = `<p class="buch-zitat">&#8222;${buchText(dat.text)}&#8220;</p>`;
+  } else if (e.type === 'today') {
+    label = 'Vorhaben';
+    body = `<p>${dat.done ? '✓' : '○'} ${buchText(dat.text)}</p>`;
+  } else if (e.type === 'begegnung') {
+    label = 'Begegnung';
+    body = `<p>Mit <em>${escapeHtml(dat.menschName || 'jemandem')}</em>${dat.art ? ' · ' + escapeHtml(dat.art) : ''}${dat.ort ? ' · ' + escapeHtml(dat.ort) : ''}</p>`;
+    if (dat.notiz) body += `<p class="buch-zitat">&#8222;${buchText(dat.notiz)}&#8220;</p>`;
+    if (dat.stimmung) body += `<p class="buch-nebensatz">Stimmung: ${escapeHtml(dat.stimmung)}</p>`;
+    if (dat.befinden) body += `<p class="buch-nebensatz">Ihr/ihm ging es: ${escapeHtml(dat.befinden)}</p>`;
+    if (dat.mediaId) {
+      body += `<div class="buch-bild"><img data-media-id="${escapeHtml(dat.mediaId)}" data-caption="${escapeHtml(dat.mediaCaption || '')}" alt="">${dat.mediaCaption ? `<div class="buch-bildtext">${escapeHtml(dat.mediaCaption)}</div>` : ''}</div>`;
+    }
+  } else if (e.type === 'morning') {
+    label = 'Morgenstunde';
+    const mq = ['Haltung für den Tag', 'Kleiner Schritt'];
+    (dat.answers || []).forEach((a, i) => { body += frage(mq[i] || '', a); });
+  } else if (e.type === 'evening') {
+    label = 'Abendstunde';
+    const eq = ['Was war heute', 'Dankbar für', 'Mitnehmen / Loslassen'];
+    (dat.answers || []).forEach((a, i) => { body += frage(eq[i] || '', a); });
+  } else if (e.type === 'gedanken') {
+    label = 'Ein Gedanke, untersucht';
+    const gq = ['Situation', 'Gedanke', 'Wirkung', 'Andere Lesart', 'Und jetzt'];
+    (dat.answers || []).forEach((a, i) => { body += frage(gq[i] || '', a); });
+  } else if (e.type === 'moment') {
+    label = 'Ein Moment mit mir';
+    if (dat.question) body += `<p class="buch-nebensatz">${escapeHtml(dat.question)}</p>`;
+    body += `<p class="buch-zitat">&#8222;${buchText(dat.text)}&#8220;</p>`;
+  } else if (e.type === 'story') {
+    label = 'Gedanke zu einer Geschichte';
+    if (dat.storySource) body += `<p class="buch-nebensatz">zu ${escapeHtml(dat.storySource.split(',')[0])}</p>`;
+    body += `<p class="buch-zitat">&#8222;${buchText(dat.comment || '')}&#8220;</p>`;
+  } else if (e.type === 'fund') {
+    label = 'Fund';
+    body = `<p class="buch-zitat">&#8222;${buchText(dat.text)}&#8220;</p>`;
+    const meta = [];
+    if (dat.source) meta.push(escapeHtml(dat.source));
+    if (dat.place) meta.push(escapeHtml(dat.place));
+    if (dat.category) meta.push(escapeHtml(dat.category));
+    if (meta.length) body += `<p class="buch-nebensatz">${meta.join(' · ')}</p>`;
+    if (dat.note) body += `<p class="buch-nebensatz">${buchText(dat.note)}</p>`;
+    if (dat.mediaId) {
+      body += `<div class="buch-bild"><img data-media-id="${escapeHtml(dat.mediaId)}" data-caption="${escapeHtml(dat.text || '')}" alt=""></div>`;
+    }
+  } else if (e.type === 'schreiben') {
+    label = 'Freies Schreiben';
+    body = `<p>${buchText(dat.text)}</p>`;
+  } else if (e.type === 'tripEntry') {
+    const trip = (typeof getTripById === 'function') ? getTripById(dat.tripId) : null;
+    label = trip && trip.name ? `Reise · ${trip.name}` : 'Reise-Tageseintrag';
+    (dat.blocks || []).forEach(b => {
+      if (b.type === 'text' && b.content) {
+        body += `<p>${buchText(b.content)}</p>`;
+      } else if (b.type === 'image' && b.mediaId) {
+        body += `<div class="buch-bild"><img data-media-id="${escapeHtml(b.mediaId)}" data-caption="${escapeHtml(b.caption || '')}" alt="">${b.caption ? `<div class="buch-bildtext">${escapeHtml(b.caption)}</div>` : ''}</div>`;
+      }
+    });
+  } else if (e.type === 'weekly') {
+    label = 'Eine Stunde zu zweit';
+    const qs = dat.questions || [];
+    (dat.answers || []).forEach((a, i) => {
+      const q = qs[i];
+      body += frage(q && q.title ? q.title : `Frage ${i + 1}`, a);
+    });
+    if (!dat.completed) body += `<p class="buch-nebensatz">Nicht zu Ende geführt — auch das gehört dazu.</p>`;
+  } else {
+    label = 'Eintrag';
+    body = `<p class="buch-nebensatz">${escapeHtml(JSON.stringify(dat)).slice(0, 200)}</p>`;
+  }
+
+  return `<div class="buch-eintrag">
+    <div class="buch-label">${escapeHtml(label)} · ${t}</div>
+    <div class="buch-text">${body}</div>
+  </div>`;
+}
+
+/* ===== Register: nach Monaten springen ===== */
+
+function openBuchRegister() {
+  if (!buchPages.length) return;
+  // Datumsfeld: Grenzen und Vorbelegung mit der aktuellen Seite
+  const dateInput = document.getElementById('buch-goto-date');
+  if (dateInput) {
+    dateInput.min = buchPages[0].dk;
+    dateInput.max = buchPages[buchPages.length - 1].dk;
+    dateInput.value = buchPages[buchIndex] ? buchPages[buchIndex].dk : '';
+  }
+  const list = document.getElementById('buch-register-list');
+  const months = {};
+  buchPages.forEach((p, i) => {
+    const mk = p.dk.substring(0, 7);
+    if (!months[mk]) {
+      months[mk] = { firstIndex: i, count: 0, label: p.date.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }) };
+    }
+    months[mk].count++;
+  });
+  list.innerHTML = '';
+  Object.keys(months).sort().forEach(mk => {
+    const m = months[mk];
+    const btn = document.createElement('button');
+    btn.className = 'buch-register-row';
+    btn.innerHTML = `<span>${escapeHtml(m.label)}</span><span class="buch-register-count">${m.count} ${m.count === 1 ? 'Seite' : 'Seiten'}</span>`;
+    btn.onclick = () => { buchIndex = m.firstIndex; closeBuchRegister(); renderBuchPage(null); };
+    list.appendChild(btn);
+  });
+  document.getElementById('buch-register').style.display = '';
+}
+
+function closeBuchRegister() {
+  const reg = document.getElementById('buch-register');
+  if (reg) reg.style.display = 'none';
+}
+
+/* Zu einem Datum springen: exakte Seite, sonst die nächste danach,
+   hinter dem Ende die letzte. */
+function buchGotoDate() {
+  const dateInput = document.getElementById('buch-goto-date');
+  const dk = dateInput ? dateInput.value : '';
+  if (!dk || !buchPages.length) return;
+  let idx = buchPages.findIndex(p => p.dk === dk);
+  if (idx < 0) idx = buchPages.findIndex(p => p.dk > dk);
+  if (idx < 0) idx = buchPages.length - 1;
+  buchIndex = idx;
+  closeBuchRegister();
+  renderBuchPage(null);
+  if (buchPages[idx].dk !== dk) {
+    showToast('Für diesen Tag gibt es keine Seite — hier ist die nächste.');
+  }
+}
+
+/* ===== Blättern per Wisch ===== */
+(function initBuchSwipe() {
+  const wrap = document.getElementById('buch-page-wrap');
+  if (!wrap) return;
+  let sx = 0, sy = 0, tracking = false;
+  wrap.addEventListener('touchstart', ev => {
+    if (ev.touches.length !== 1) { tracking = false; return; }
+    sx = ev.touches[0].clientX;
+    sy = ev.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+  wrap.addEventListener('touchend', ev => {
+    if (!tracking) return;
+    tracking = false;
+    const dx = ev.changedTouches[0].clientX - sx;
+    const dy = ev.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6) {
+      if (dx < 0) buchNext(); else buchPrev();
+    }
+  }, { passive: true });
+})();
+
+
 // Theme anwenden
 if (state.theme && state.theme !== 'terracotta') {
   document.documentElement.setAttribute('data-theme', state.theme);
