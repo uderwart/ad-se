@@ -22982,7 +22982,8 @@ function buchZeit(ts) {
 /* Ein Eintrag als Buchabsatz */
 function buchEntryHtml(e) {
   const dat = e.data;
-  const t = buchZeit(e.ts);
+  // Nur Tageszeit bekannt: Tageszeit statt Scheingenauigkeit zeigen
+  const t = (e.data && e.data.timeApprox && e.data.dayPart) ? e.data.dayPart : buchZeit(e.ts);
   let label = '';
   let body = '';
 
@@ -23253,6 +23254,7 @@ async function importEintraegeFromData(data) {
 
       if (e.typ === 'schreiben') {
         const s = { id, ts, dayPart, text };
+        if (e.zeitUngefaehr) s.timeApprox = true;
         if (mediaId) { s.mediaId = mediaId; s.mediaCaption = (e.bild.unterschrift || '').trim() || null; }
         state.schreibseiten.push(s);
         if (mediaId) await addImageRef(mediaId, 'schreib:' + id);
@@ -23268,7 +23270,8 @@ async function importEintraegeFromData(data) {
           category: kategorie,
           feelings: null,
           ts, dayPart,
-          mediaId: mediaId || null
+          mediaId: mediaId || null,
+          ...(e.zeitUngefaehr ? { timeApprox: true } : {})
         });
         if (mediaId) await addImageRef(mediaId, 'fund:' + id);
       }
