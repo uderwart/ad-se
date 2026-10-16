@@ -7046,6 +7046,13 @@ textarea, input {
     <button class="btn secondary full" style="margin-top:8px;" onclick="triggerImportAllData()">Daten importieren</button>
     <input type="file" id="import-all-file" accept=".json,application/json,.zip,application/zip"
       style="display:none;" onchange="handleImportAllData(event)">
+    <button class="btn secondary full" style="margin-top:8px;" onclick="document.getElementById('import-eintraege-file').click()">Einträge einlesen</button>
+    <input type="file" id="import-eintraege-file" accept=".json,application/json"
+      style="display:none;" onchange="handleImportEintraege(event)">
+    <p class="muted-note" style="margin-top:8px;font-size:0.78rem;line-height:1.5;">
+      Für einzelne Einträge aus einer Eintrags-Datei (z. B. eingesprochen und vorbereitet).
+      Sie werden <em>ergänzt</em> — nichts Bestehendes wird ersetzt, doppelte Einträge werden übersprungen.
+    </p>
     <p class="muted-note" style="margin-top:12px;font-size:0.78rem;line-height:1.5;">
       Die Datei enthält <em>alles</em> — Gefühle, Körper, Aktivitäten, Dankbarkeit,
       Vorhaben, Momente, Wochengespräche, Abendstunden, Identität und Partner.
@@ -17449,6 +17456,11 @@ function editSchreibseite(id) {
 function deleteSchreibseite(id) {
   if (!id) return;
   askConfirm('Diese Seite wirklich löschen?', () => {
+    const weg = (state.schreibseiten || []).find(x => x.id === id);
+    if (weg && weg.mediaId) {
+      removeImageRef(weg.mediaId, 'schreib:' + id).catch(() => {});
+      invalidateImageCache(weg.mediaId);
+    }
     state.schreibseiten = (state.schreibseiten || []).filter(x => x.id !== id);
     saveState();
     resetSchreibComposer();
@@ -17473,8 +17485,10 @@ function renderSchreibList() {
     return `<div class="gedanken-entry" style="cursor:pointer;" onclick="editSchreibseite('${s.id}')">
       <div class="gedanken-entry-date">${meta}</div>
       <div class="gedanken-entry-row" style="font-family:'EB Garamond',serif;font-size:1.05rem;line-height:1.6;white-space:pre-wrap;">${escapeHtml(s.text)}</div>
+      ${s.mediaId ? `<div class="buch-bild" style="margin:10px 0 2px;"><img data-media-id="${escapeHtml(s.mediaId)}" data-caption="${escapeHtml(s.mediaCaption || '')}" alt="" style="max-height:260px;">${s.mediaCaption ? `<div class="buch-bildtext">${escapeHtml(s.mediaCaption)}</div>` : ''}</div>` : ''}
     </div>`;
   }).join('');
+  hydrateBuchImages(wrap);
 }
 
 let fundeView = 'recent';  // 'recent' | 'category' | 'random'
@@ -22580,6 +22594,8 @@ async function putImageRaw(id, blob, meta) {
 }
 
 function importAllFromData(data, meta) {
+  // Eintrags-Datei darf nie den Bestand ersetzen — umleiten auf Ergänzen
+  if (data?.kind === 'adse-eintraege') { importEintraegeFromData(data); return; }
   // meta: { restoredImages?: number } — optional, vom ZIP-Pfad gesetzt
   // Akzeptiere: adse-full-backup ODER adse-weekly-archive (fallback zu Sitzungs-Import) ODER roher State
   if (data?.kind === 'adse-weekly-archive' || data?.kind === 'adse-weekly-session') {
@@ -22942,7 +22958,7 @@ async function hydrateBuchImages(container) {
       if (url) {
         img.src = url;
         img.style.cursor = 'pointer';
-        img.onclick = () => openLightbox(img.dataset.mediaId, img.dataset.caption || '');
+        img.onclick = (ev) => { ev.stopPropagation(); openLightbox(img.dataset.mediaId, img.dataset.caption || ''); };
       } else if (img.parentElement) img.parentElement.style.display = 'none';
     } catch (e) {
       if (img.parentElement) img.parentElement.style.display = 'none';
@@ -23031,7 +23047,7 @@ function buchEntryHtml(e) {
     if (dat.storySource) body += `<p class="buch-nebensatz">zu ${escapeHtml(dat.storySource.split(',')[0])}</p>`;
     body += `<p class="buch-zitat">&#8222;${buchText(dat.comment || '')}&#8220;</p>`;
   } else if (e.type === 'fund') {
-    label = 'Fund';
+    label = 'Moment';
     body = `<p class="buch-zitat">&#8222;${buchText(dat.text)}&#8220;</p>`;
     const meta = [];
     if (dat.source) meta.push(escapeHtml(dat.source));
@@ -23045,6 +23061,9 @@ function buchEntryHtml(e) {
   } else if (e.type === 'schreiben') {
     label = 'Freies Schreiben';
     body = `<p>${buchText(dat.text)}</p>`;
+    if (dat.mediaId) {
+      body += `<div class="buch-bild"><img data-media-id="${escapeHtml(dat.mediaId)}" data-caption="${escapeHtml(dat.mediaCaption || '')}" alt="">${dat.mediaCaption ? `<div class="buch-bildtext">${escapeHtml(dat.mediaCaption)}</div>` : ''}</div>`;
+    }
   } else if (e.type === 'tripEntry') {
     const trip = (typeof getTripById === 'function') ? getTripById(dat.tripId) : null;
     label = trip && trip.name ? `Reise · ${trip.name}` : 'Reise-Tageseintrag';
@@ -23150,6 +23169,120 @@ function buchGotoDate() {
   }, { passive: true });
 })();
 
+
+
+/* ===== Einträge einlesen — Ergänzen statt Ersetzen (Oktober 2026) =====
+   Dateiformat:
+   { "kind": "adse-eintraege", "version": 1, "eintraege": [
+       { "id": "ein-…", "typ": "schreiben" | "moment",
+         "ts": "2026-10-16T08:30:00",            // Ortszeit
+         "text": "…",
+         "quelle", "ort", "kategorie", "notiz",  // nur Moment, alle optional
+         "bild": { "mime": "image/jpeg", "daten": "<base64>", "unterschrift": "…" } } ] }
+   Doppelte Kennungen werden übersprungen. */
+
+function handleImportEintraege(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(reader.result); }
+    catch (e) { showToast('Die Datei ist keine gültige Eintrags-Datei.'); return; }
+    importEintraegeFromData(data);
+  };
+  reader.onerror = () => showToast('Die Datei konnte nicht gelesen werden.');
+  reader.readAsText(file);
+}
+
+function eintragBase64ToBlob(b64, mime) {
+  const clean = String(b64 || '').replace(/^data:[^,]*,/, '').replace(/\s/g, '');
+  const bin = atob(clean);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime || 'image/jpeg' });
+}
+
+async function eintragBildAblegen(bild) {
+  if (!bild || !bild.daten) return null;
+  const raw = eintragBase64ToBlob(bild.daten, bild.mime);
+  let blob = raw, width = 0, height = 0;
+  try {
+    const c = await compressImage(raw);
+    blob = c.blob; width = c.width; height = c.height;
+  } catch (e) {
+    if (raw.size > 3 * 1024 * 1024) return null; // unlesbar und zu groß: lieber ohne Bild
+  }
+  if (!(await hasEnoughStorageFor(blob.size))) return null;
+  return await addImage(blob, { width, height, refs: [] });
+}
+
+async function importEintraegeFromData(data) {
+  if (!data || data.kind !== 'adse-eintraege' || !Array.isArray(data.eintraege)) {
+    showToast('Das ist keine Eintrags-Datei.');
+    return;
+  }
+  if (!Array.isArray(state.schreibseiten)) state.schreibseiten = [];
+  if (!Array.isArray(state.funde)) state.funde = [];
+  if (!Array.isArray(state.fundeCategories)) state.fundeCategories = [];
+
+  let neu = 0, doppelt = 0, fehler = 0, ohneBild = 0;
+
+  for (const e of data.eintraege) {
+    try {
+      const id = String(e.id || '').trim();
+      const text = String(e.text || '').trim();
+      const d = new Date(e.ts);
+      if (!id || !text || isNaN(d) || (e.typ !== 'schreiben' && e.typ !== 'moment')) { fehler++; continue; }
+
+      const vorhanden = state.schreibseiten.some(s => s.id === id) || state.funde.some(f => f.id === id);
+      if (vorhanden) { doppelt++; continue; }
+
+      let mediaId = null;
+      if (e.bild && e.bild.daten) {
+        try { mediaId = await eintragBildAblegen(e.bild); } catch (err) { mediaId = null; }
+        if (!mediaId) ohneBild++;
+      }
+      const ts = d.toISOString();
+      const dayPart = e.tageszeit || dayPartFromHour(d.getHours());
+
+      if (e.typ === 'schreiben') {
+        const s = { id, ts, dayPart, text };
+        if (mediaId) { s.mediaId = mediaId; s.mediaCaption = (e.bild.unterschrift || '').trim() || null; }
+        state.schreibseiten.push(s);
+        if (mediaId) await addImageRef(mediaId, 'schreib:' + id);
+      } else {
+        let kategorie = String(e.kategorie || '').trim() || 'Sonstiges';
+        const treffer = state.fundeCategories.find(c => c.toLowerCase() === kategorie.toLowerCase());
+        if (treffer) kategorie = treffer; else state.fundeCategories.push(kategorie);
+        state.funde.push({
+          id, text,
+          source: (e.quelle || '').trim() || null,
+          place: (e.ort || '').trim() || null,
+          note: (e.notiz || '').trim() || null,
+          category: kategorie,
+          feelings: null,
+          ts, dayPart,
+          mediaId: mediaId || null
+        });
+        if (mediaId) await addImageRef(mediaId, 'fund:' + id);
+      }
+      neu++;
+    } catch (err) {
+      fehler++;
+    }
+  }
+
+  saveState();
+  const teile = [];
+  teile.push(neu === 1 ? '1 Eintrag eingelesen' : `${neu} Einträge eingelesen`);
+  if (doppelt) teile.push(`${doppelt} schon vorhanden`);
+  if (fehler) teile.push(`${fehler} unlesbar`);
+  if (ohneBild) teile.push(`${ohneBild} ohne Foto`);
+  showToast(teile.join(' · ') + '.');
+  return { neu, doppelt, fehler, ohneBild };
+}
 
 // Theme anwenden
 if (state.theme && state.theme !== 'terracotta') {
