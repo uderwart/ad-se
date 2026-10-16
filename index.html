@@ -6358,6 +6358,8 @@ textarea, input {
     <div class="greeting-sub">Was dich berührt hat — Worte, Klänge, Bilder, Begegnungen.</div>
   </div>
 
+  <button class="btn secondary small" onclick="document.getElementById('import-eintraege-file').click()" style="margin:-4px 0 14px;font-size:0.82rem;">↓ Eintrag einlesen</button>
+
   <div style="position:relative;margin-bottom:14px;">
     <input type="text" id="funde-search" placeholder="Suchen…"
       oninput="renderFunde()"
@@ -6472,6 +6474,8 @@ textarea, input {
     <h1>Schreiben</h1>
     <div class="greeting-sub">Einfach schreiben. Ohne Frage, ohne Einordnen.</div>
   </div>
+
+  <button class="btn secondary small" onclick="document.getElementById('import-eintraege-file').click()" style="margin:-4px 0 14px;font-size:0.82rem;">↓ Eintrag einlesen</button>
 
   <textarea id="schreib-text" rows="6" placeholder="…" onfocus="schreibFocus()"
     style="width:100%;padding:16px;border:1.5px solid var(--border);border-radius:12px;font-family:'EB Garamond',serif;font-style:italic;font-size:1.12rem;line-height:1.6;resize:none;background:var(--bg);color:var(--ink);outline:none;box-sizing:border-box;scroll-margin-top:12px;"></textarea>
@@ -23281,6 +23285,11 @@ async function importEintraegeFromData(data) {
   if (fehler) teile.push(`${fehler} unlesbar`);
   if (ohneBild) teile.push(`${ohneBild} ohne Foto`);
   showToast(teile.join(' · ') + '.');
+  // Offene Liste sofort aktualisieren
+  try {
+    if (document.getElementById('section-funde')?.classList.contains('visible')) renderFunde();
+    if (document.getElementById('section-schreiben')?.classList.contains('visible')) renderSchreibList();
+  } catch (e) {}
   return { neu, doppelt, fehler, ohneBild };
 }
 
